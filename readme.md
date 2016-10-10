@@ -17,3 +17,8 @@ It use Secondary Command Buffer to perform the draw.
 
 It is the same triangle.
 However it use a vertex buffer and a "good" memory management with the "DeviceAllocator" class
+
+## Triangle With Uniform Buffer
+
+This part had a little change. I removed the "not copyable" things from a lot of classes.
+The PipelineLayoutTriangle manages how to bind the uniform buffer to the pipeline.
