@@ -10,10 +10,7 @@ void swap(SwapchainKHR &s1, SwapchainKHR &s2) {
     swap(s1.mImageCount, s2.mImageCount);
     swap(s1.mImages, s2.mImages);
     swap(s1.mImageView, s2.mImageView);
-    swap(s1.mMode, s2.mMode);
-    swap(s1.mPhysicalDevice, s2.mPhysicalDevice);
     swap(s1.mRenderPass, s2.mRenderPass);
-    swap(s1.mSurfaceKHR, s2.mSurfaceKHR);
     swap(s1.mWidth, s2.mWidth);
     swap(s1.m_swapchainKHR, s2.m_swapchainKHR);
 }
@@ -33,10 +30,7 @@ SwapchainKHR::SwapchainKHR(const SwapchainKHR &swapchainKHR) :
     mImageCount = swapchainKHR.mImageCount;
     mImages = swapchainKHR.mImages;
     mImageView = swapchainKHR.mImageView;
-    mMode = swapchainKHR.mMode;
-    mPhysicalDevice = swapchainKHR.mPhysicalDevice;
     mRenderPass = swapchainKHR.mRenderPass;
-    mSurfaceKHR = swapchainKHR.mSurfaceKHR;
     mWidth = swapchainKHR.mWidth;
 }
 
@@ -45,98 +39,101 @@ SwapchainKHR &SwapchainKHR::operator =(SwapchainKHR swapchainKHR) {
     return *this;
 }
 
-SwapchainKHR::SwapchainKHR(Device &device, vk::SurfaceKHR surfaceKHR, AbstractRenderPass &renderPass) :
+SwapchainKHR::SwapchainKHR(Device &device, vk::SurfaceKHR surfaceKHR, RenderPass &renderPass,
+                           SwapchainKHR oldSwapchainKHR) :
     VkResource(device),
-    mPhysicalDevice(device.getPhysicalDevice()),
-    mSurfaceKHR(surfaceKHR),
-    mRenderPass(renderPass),
-    mMode(vk::PresentModeKHR::eFifo) {
-    std::vector<vk::SurfaceFormatKHR> formats(mPhysicalDevice.getSurfaceFormatsKHR(surfaceKHR));
+    mImages(std::make_shared<std::vector<vk::Image>>()),
+    mFrameBuffer(std::make_shared<std::vector<FrameBuffer>>()),
+    mImageView(std::make_shared<std::vector<ImageView>>()),
+    mImageCount(std::make_shared<uint32_t>(0)),
+    mRenderPass(std::make_shared<RenderPass>(renderPass)),
+    mFormat(std::make_shared<vk::SurfaceFormatKHR>()),
+    mWidth(std::make_shared<uint32_t>(0)),
+    mHeight(std::make_shared<uint32_t>(0)) {
+    std::vector<vk::SurfaceFormatKHR> formats(device.getPhysicalDevice().getSurfaceFormatsKHR(surfaceKHR));
 
     for(auto &fmt : formats) {
         if(fmt.format == vk::Format::eB8G8R8A8Unorm ||
            fmt.format == vk::Format::eUndefined) {
-            mFormat = vk::SurfaceFormatKHR(vk::Format::eB8G8R8A8Unorm);
+            *mFormat = vk::SurfaceFormatKHR(vk::Format::eB8G8R8A8Unorm);
             break;
         }
     }
 
-    std::vector<vk::PresentModeKHR> modes(mPhysicalDevice.getSurfacePresentModesKHR(surfaceKHR));
+    std::vector<vk::PresentModeKHR> modes(device.getPhysicalDevice().getSurfacePresentModesKHR(surfaceKHR));
 
+    vk::PresentModeKHR mode = vk::PresentModeKHR::eFifo;
     for(auto &m : modes)
         if(m == vk::PresentModeKHR::eMailbox)
-            mMode = vk::PresentModeKHR::eMailbox;
+            mode = vk::PresentModeKHR::eMailbox;
 
     m_swapchainKHR = VK_NULL_HANDLE;
-    createSwapchainKHR();
+
+    m_swapchainKHR = mDevice.createSwapchainKHR(buildCreateInfos(device.getPhysicalDevice(),
+                                                    surfaceKHR, mode, oldSwapchainKHR));
+    *mImages = mDevice.getSwapchainImagesKHR(*this);
+    createImageViews();
+    createFrameBuffers();
 }
 
 
 FrameBuffer const &SwapchainKHR::getFrameBuffers(uint32_t index) const {
-    return mFrameBuffer[index];
+    return (*mFrameBuffer)[index];
 }
 
 unsigned SwapchainKHR::getImageCount() const {
-    return mImageCount;
+    return *mImageCount;
 }
 
 unsigned SwapchainKHR::getWidth() const {
-    return mWidth;
+    return *mWidth;
 }
 
 unsigned SwapchainKHR::getHeight() const {
-    return mHeight;
+    return *mHeight;
 }
 
 void SwapchainKHR::createImageViews() {
-    mImageView.clear();
+    mImageView->clear();
 
-    for(vk::Image image : mImages) {
+    for(vk::Image image : *mImages) {
         vk::ImageViewCreateInfo info(vk::ImageViewCreateFlags(),
                                      image, vk::ImageViewType::e2D,
-                                     mFormat.format, vk::ComponentMapping(),
+                                     mFormat->format, vk::ComponentMapping(),
                                      vk::ImageSubresourceRange(vk::ImageAspectFlagBits::eColor, 0, 1, 0, 1));
-        mImageView.emplace_back(mDevice, info);
+        mImageView->emplace_back(mDevice, info);
     }
 }
 
 void SwapchainKHR::createFrameBuffers() {
-    mFrameBuffer.clear();
-    for(auto &imageView : mImageView) {
+    mFrameBuffer->clear();
+    for(auto &imageView : *mImageView) {
         vk::FramebufferCreateInfo fb(vk::FramebufferCreateFlags(),
-                                     mRenderPass, 1, &imageView,
-                                     mWidth, mHeight, 1);
+                                     *mRenderPass, 1, &imageView,
+                                     *mWidth, *mHeight, 1);
 
-        mFrameBuffer.emplace_back(mDevice, fb);
+        mFrameBuffer->emplace_back(mDevice, fb);
     }
 }
 
-vk::SwapchainCreateInfoKHR SwapchainKHR::buildCreateInfos() {
-    vk::SurfaceCapabilitiesKHR capabilities = mPhysicalDevice.getSurfaceCapabilitiesKHR(mSurfaceKHR);
+vk::SwapchainCreateInfoKHR SwapchainKHR::buildCreateInfos(vk::PhysicalDevice physicalDevice,
+                                                          vk::SurfaceKHR surfaceKHR, vk::PresentModeKHR mode,
+                                                          const SwapchainKHR &oldSwapchainKHR) {
+    vk::SurfaceCapabilitiesKHR capabilities = physicalDevice.getSurfaceCapabilitiesKHR(surfaceKHR);
     vk::Extent2D extent(capabilities.currentExtent);
-    mWidth = extent.width;
-    mHeight = extent.height;
+    *mWidth = extent.width;
+    *mHeight = extent.height;
 
-    mImageCount = std::min(capabilities.minImageCount + 1, capabilities.maxImageCount);
+    *mImageCount = std::min(capabilities.minImageCount + 1, capabilities.maxImageCount);
 
-    vk::SwapchainCreateInfoKHR info(vk::SwapchainCreateFlagsKHR(), mSurfaceKHR, mImageCount,
-                                    mFormat.format, mFormat.colorSpace, extent, 1,
+    vk::SwapchainCreateInfoKHR info(vk::SwapchainCreateFlagsKHR(), surfaceKHR, *mImageCount,
+                                    mFormat->format, mFormat->colorSpace, extent, 1,
                                     vk::ImageUsageFlagBits::eColorAttachment, vk::SharingMode::eExclusive,
                                     0, nullptr, capabilities.currentTransform,
                                     vk::CompositeAlphaFlagBitsKHR::eOpaque,
-                                    mMode, true, m_swapchainKHR);
+                                    mode, true, oldSwapchainKHR);
 
     return info;
-}
-
-void SwapchainKHR::createSwapchainKHR() {
-    auto result = mDevice.createSwapchainKHR(buildCreateInfos());
-    if(m_swapchainKHR != VK_NULL_HANDLE)
-        mDevice.destroySwapchainKHR(m_swapchainKHR);
-    m_swapchainKHR = result;
-    mImages = mDevice.getSwapchainImagesKHR(*this);
-    createImageViews();
-    createFrameBuffers();
 }
 
 SwapchainKHR::~SwapchainKHR() {

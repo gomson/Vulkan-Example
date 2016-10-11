@@ -33,12 +33,12 @@ public:
 
 private:
     std::shared_ptr<AbstractAllocator> mAllocator;
-    vk::DeviceSize mSize;
-    vk::BufferUsageFlags mUsage;
-    vk::MemoryRequirements mRequirements;
-    vk::PhysicalDeviceMemoryProperties mProperties;
-    Block mBlock;
-    void *mPtr;
+    std::shared_ptr<vk::DeviceSize> mSize = std::make_shared<vk::DeviceSize>();
+    std::shared_ptr<vk::BufferUsageFlags> mUsage = std::make_shared<vk::BufferUsageFlags>();
+    std::shared_ptr<vk::MemoryRequirements> mRequirements = std::make_shared<vk::MemoryRequirements>();
+    std::shared_ptr<vk::PhysicalDeviceMemoryProperties> mProperties = std::make_shared<vk::PhysicalDeviceMemoryProperties>();
+    std::shared_ptr<Block> mBlock = std::make_shared<Block>();
+    std::shared_ptr<void *> mPtr = std::make_shared<void *>();
 
     void createBuffer();
     void allocate(bool shouldBeDeviceLocal);
@@ -49,10 +49,11 @@ template<typename T>
 Buffer::Buffer(Device &device, vk::BufferUsageFlags usage,
                vk::ArrayProxy<T> const &data,
                std::shared_ptr<AbstractAllocator> allocator) :
-    VkResource(device), mAllocator(allocator), mSize(sizeof(T) * data.size()),
-    mUsage(usage),
-    mProperties(device.getPhysicalDevice().getMemoryProperties()) {
+    VkResource(device), mAllocator(allocator),
+    mSize(std::make_shared<vk::DeviceSize>(sizeof(T) * data.size())),
+    mUsage(std::make_shared<vk::BufferUsageFlags>(usage)),
+    mProperties(std::make_shared<vk::PhysicalDeviceMemoryProperties>(device.getPhysicalDevice().getMemoryProperties())) {
     createBuffer();
     allocate(false);
-    memcpy(mPtr, data.data(), mSize);
+    memcpy(*mPtr, data.data(), *mSize);
 }

@@ -46,10 +46,6 @@ void BufferImageTransferer::transfer(Buffer const &src, Buffer &dst,
 }
 
 void BufferImageTransferer::flush() {
-    static std::vector<vk::Fence> fences;
-    fences.clear();
-    for(auto &fence : mFences)
-        fences.emplace_back(fence);
     mIndex = 0;
-    mDevice.waitForFences(fences, true, UINT64_MAX);
+    mDevice.waitForFences(std::vector<vk::Fence>(mFences.begin(), mFences.end()), true, UINT64_MAX);
 }

@@ -12,10 +12,7 @@ SOURCES += main.cpp \
     VkTools/System/swapchain.cpp \
     VkTools/System/imageview.cpp \
     VkTools/System/shadermodule.cpp \
-    VkTools/Pipeline/abstractpipeline.cpp \
     VkTools/System/framebuffer.cpp \
-    VkTools/Pipeline/abstractrenderpass.cpp \
-    VkTools/Pipeline/abstractpipelinelayout.cpp \
     vulkan/vkresource.cpp \
     VkTools/System/semaphore.cpp \
     VkTools/System/fence.cpp \
@@ -26,7 +23,10 @@ SOURCES += main.cpp \
     VkTools/Memory/block.cpp \
     VkTools/Memory/deviceallocator.cpp \
     VkTools/Memory/bufferimagetransferer.cpp \
-    VkTools/System/descriptorpool.cpp
+    VkTools/System/descriptorpool.cpp \
+    VkTools/Pipeline/pipeline.cpp \
+    VkTools/Pipeline/renderpass.cpp \
+    VkTools/Pipeline/pipelinelayout.cpp
 
 HEADERS += \
     VkTools/System/window.hpp \
@@ -37,10 +37,7 @@ HEADERS += \
     VkTools/System/imageview.hpp \
     VkTools/System/shadermodule.hpp \
     VkTools/Pipeline/abstractpipelineshaderstage.hpp \
-    VkTools/Pipeline/abstractpipeline.hpp \
     VkTools/System/framebuffer.hpp \
-    VkTools/Pipeline/abstractrenderpass.hpp \
-    VkTools/Pipeline/abstractpipelinelayout.hpp \
     vulkan/vkresource.hpp \
     VkTools/System/semaphore.hpp \
     VkTools/System/fence.hpp \
@@ -52,4 +49,7 @@ HEADERS += \
     VkTools/Memory/block.hpp \
     VkTools/Memory/deviceallocator.hpp \
     VkTools/Memory/bufferimagetransferer.hpp \
-    VkTools/System/descriptorpool.hpp
+    VkTools/System/descriptorpool.hpp \
+    VkTools/Pipeline/renderpass.hpp \
+    VkTools/Pipeline/pipelinelayout.hpp \
+    VkTools/Pipeline/pipeline.hpp

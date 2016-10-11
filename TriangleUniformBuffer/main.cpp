@@ -11,10 +11,10 @@
 #include "VkTools/System/fence.hpp"
 #include "VkTools/System/descriptorpool.hpp"
 
-#include "VkTools/Pipeline/abstractpipeline.hpp"
-#include "VkTools/Pipeline/abstractrenderpass.hpp"
-#include "VkTools/Pipeline/abstractpipelinelayout.hpp"
-#include "VkTools/Pipeline/abstractrenderpass.hpp"
+#include "VkTools/Pipeline/pipeline.hpp"
+#include "VkTools/Pipeline/renderpass.hpp"
+#include "VkTools/Pipeline/pipelinelayout.hpp"
+#include "VkTools/Pipeline/renderpass.hpp"
 
 #include "VkTools/Memory/bufferimagetransferer.hpp"
 #include "VkTools/Memory/deviceallocator.hpp"
@@ -23,11 +23,11 @@ struct UniformColor {
     glm::vec4 color;
 };
 
-class PipelineLayoutTriangle : public AbstractPipelineLayout {
+class PipelineLayoutTriangle : public PipelineLayout {
 public:
     PipelineLayoutTriangle(Device &device, DescriptorPool descriptorPool,
                            Buffer buffer) :
-        AbstractPipelineLayout(device) {
+        PipelineLayout(device) {
         // One binding : an uniform buffer
         vk::DescriptorSetLayoutBinding uboLayoutBinding(0,
                                                         vk::DescriptorType::eUniformBuffer,
@@ -38,23 +38,23 @@ public:
                     vk::DescriptorSetLayoutCreateFlags(),
                     1, &uboLayoutBinding);
 
-        mDescriptorSetLayouts.emplace_back(device.createDescriptorSetLayout(setLayout));
+        mDescriptorSetLayouts->emplace_back(device.createDescriptorSetLayout(setLayout));
 
         vk::PipelineLayoutCreateInfo ci(vk::PipelineLayoutCreateFlags(),
-                                        mDescriptorSetLayouts.size(),
-                                        mDescriptorSetLayouts.data(), 0, nullptr);
+                                        mDescriptorSetLayouts->size(),
+                                        mDescriptorSetLayouts->data(), 0, nullptr);
 
         m_pipelineLayout = device.createPipelineLayout(ci);
 
         vk::DescriptorSetAllocateInfo allocateInfo(descriptorPool,
-                                                   mDescriptorSetLayouts.size(),
-                                                   mDescriptorSetLayouts.data());
+                                                   mDescriptorSetLayouts->size(),
+                                                   mDescriptorSetLayouts->data());
 
-        mDescriptorSet = device.allocateDescriptorSets(allocateInfo);
+        *mDescriptorSets = device.allocateDescriptorSets(allocateInfo);
 
         vk::DescriptorBufferInfo bufferInfo(buffer, 0, buffer.getSize());
         vk::WriteDescriptorSet descriptorWrite(
-                    mDescriptorSet[0], 0, 0, 1,
+                    (*mDescriptorSets)[0], 0, 0, 1,
                     vk::DescriptorType::eUniformBuffer,
                     nullptr, &bufferInfo, nullptr);
 
@@ -65,11 +65,11 @@ private:
 };
 
 // Represents the pipeline for draw a triangle
-class PipelineTriangle : public AbstractPipeline {
+class PipelineTriangle : public Pipeline {
 public:
-    PipelineTriangle(Device &device, AbstractRenderPass &renderpass,
-                     std::shared_ptr<AbstractPipelineLayout> pipelineLayout) :
-        AbstractPipeline(device, pipelineLayout) {
+    PipelineTriangle(Device &device, RenderPass &renderpass,
+                     PipelineLayout pipelineLayout) :
+        Pipeline(device, pipelineLayout) {
         mShaders.emplace_back(std::make_unique<ShaderModule>(device, "../Shaders/triangle_vert.spv"));
         mShaders.emplace_back(std::make_unique<ShaderModule>(device, "../Shaders/triangle_frag.spv"));
 
@@ -144,10 +144,10 @@ private:
 };
 
 // A renderPass for our triangle
-class RenderPassTriangle : public AbstractRenderPass {
+class RenderPassTriangle : public RenderPass {
 public:
     RenderPassTriangle(Device &device) :
-        AbstractRenderPass(device) {
+        RenderPass(device) {
         /* 1 coolor buffer with B8G8R8A8 way
          * we clear at the beginning and we save at the end
          * no stencil
@@ -196,9 +196,9 @@ public:
 
 // This function create a secondary buffer that performs draw
 void buildDrawCommandBuffer(vk::CommandBuffer &drawBuffer,
-                            AbstractPipeline &pipeline,
+                            Pipeline &pipeline,
                             SwapchainKHR swapchainKHR,
-                            AbstractRenderPass &renderPass,
+                            RenderPass &renderPass,
                             uint32_t imageIndex,
                             Buffer buffer) {
     // subpass 0 at that frameBuffer
@@ -213,8 +213,8 @@ void buildDrawCommandBuffer(vk::CommandBuffer &drawBuffer,
 
     drawBuffer.bindPipeline(vk::PipelineBindPoint::eGraphics, pipeline);
     drawBuffer.bindDescriptorSets(vk::PipelineBindPoint::eGraphics,
-                                  *pipeline.getLayout(),
-                                  0, pipeline.getLayout()->getDescriptorSet(), {});
+                                  pipeline.getLayout(),
+                                  0, pipeline.getLayout().getDescriptorSets(), {});
     drawBuffer.setScissor(0, {scissor});
     drawBuffer.setViewport(0, {viewPort});
     drawBuffer.bindVertexBuffers(0, {buffer}, {0});
@@ -223,7 +223,7 @@ void buildDrawCommandBuffer(vk::CommandBuffer &drawBuffer,
 }
 
 // The primary command buffer which is recorded at each frame
-void buildPrimaryCommandBuffers(AbstractRenderPass &renderPass,
+void buildPrimaryCommandBuffers(RenderPass &renderPass,
                                 vk::CommandBuffer &primaryBuffer,
                                 SwapchainKHR swapchainKHR,
                                 vk::CommandBuffer &drawBuffer,
@@ -299,7 +299,7 @@ int main(int argc, char *argv[])
 
     DescriptorPool descriptorPool = createDescriptorPool(device);
 
-    std::shared_ptr<PipelineLayoutTriangle> pipelineLayout = std::make_shared<PipelineLayoutTriangle>(device, descriptorPool, uniformBuffer);
+    PipelineLayoutTriangle pipelineLayout = PipelineLayoutTriangle(device, descriptorPool, uniformBuffer);
     PipelineTriangle pipeline(device, renderPass, pipelineLayout);
 
     /* 2 pools,
@@ -322,7 +322,7 @@ int main(int argc, char *argv[])
             Then, we build again drawBuffer */
         if(window.isResized()) {
             device.waitIdle();
-            swapchainKHR.createSwapchainKHR();
+            swapchainKHR = SwapchainKHR(device, instance.getSurfaceKHR(), renderPass, swapchainKHR);
 
             drawBufferPool.reset(false);
 

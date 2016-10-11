@@ -40,6 +40,11 @@ Instance::Instance(GLFWwindow *window, bool debug) : mDebug(debug) {
                 mLayers.push_back(lp.layerName);
                 std::cout << "    " << lp.layerName << " :" << std::endl;
             }
+
+/*            else if(!strcmp(lp.layerName, "VK_LAYER_RENDERDOC_Capture")) {
+                mLayers.push_back(lp.layerName);
+                std::cout << "    " << lp.layerName << " :" << std::endl;
+            }*/
         }
 
         mExtensions.push_back(VK_EXT_DEBUG_REPORT_EXTENSION_NAME);
