@@ -7,7 +7,7 @@ void swap(FrameBuffer &f1, FrameBuffer &f2) {
 }
 
 FrameBuffer::FrameBuffer(FrameBuffer &&frameBuffer) :
-    VkResource(std::move(frameBuffer)),
+    VkResource(frameBuffer),
     vk::Framebuffer(frameBuffer) {
     swap(*this, frameBuffer);
 }
@@ -23,7 +23,7 @@ FrameBuffer &FrameBuffer::operator =(FrameBuffer frameBuffer) {
     return *this;
 }
 
-FrameBuffer::FrameBuffer(vk::Device &device, vk::FramebufferCreateInfo const &createInfo) :
+FrameBuffer::FrameBuffer(Device &device, vk::FramebufferCreateInfo const &createInfo) :
     VkResource(device) {
     m_framebuffer = device.createFramebuffer(createInfo);
 

@@ -5,7 +5,7 @@
 class ShaderModule : public VkResource, public vk::ShaderModule
 {
 public:
-    ShaderModule(vk::Device &device, std::string const &path);
+    ShaderModule(Device &device, std::string const &path);
 
     friend void swap(ShaderModule &s1, ShaderModule &s2);
     ShaderModule(ShaderModule &&shaderModule);

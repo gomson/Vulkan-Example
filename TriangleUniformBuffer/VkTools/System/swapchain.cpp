@@ -16,7 +16,7 @@ void swap(SwapchainKHR &s1, SwapchainKHR &s2) {
 }
 
 SwapchainKHR::SwapchainKHR(SwapchainKHR &&swapchainKHR) :
-    VkResource(std::move(swapchainKHR)),
+    VkResource(swapchainKHR),
     vk::SwapchainKHR(swapchainKHR) {
     swap(*this, swapchainKHR);
 }
@@ -40,7 +40,7 @@ SwapchainKHR &SwapchainKHR::operator =(SwapchainKHR swapchainKHR) {
 }
 
 SwapchainKHR::SwapchainKHR(Device &device, vk::SurfaceKHR surfaceKHR, RenderPass &renderPass,
-                           SwapchainKHR oldSwapchainKHR) :
+                           vk::SwapchainKHR oldSwapchainKHR) :
     VkResource(device),
     mImages(std::make_shared<std::vector<vk::Image>>()),
     mFrameBuffer(std::make_shared<std::vector<FrameBuffer>>()),
@@ -69,8 +69,7 @@ SwapchainKHR::SwapchainKHR(Device &device, vk::SurfaceKHR surfaceKHR, RenderPass
 
     m_swapchainKHR = VK_NULL_HANDLE;
 
-    m_swapchainKHR = mDevice.createSwapchainKHR(buildCreateInfos(device.getPhysicalDevice(),
-                                                    surfaceKHR, mode, oldSwapchainKHR));
+    m_swapchainKHR = mDevice.createSwapchainKHR(buildCreateInfos(surfaceKHR, mode, oldSwapchainKHR));
     *mImages = mDevice.getSwapchainImagesKHR(*this);
     createImageViews();
     createFrameBuffers();
@@ -116,10 +115,9 @@ void SwapchainKHR::createFrameBuffers() {
     }
 }
 
-vk::SwapchainCreateInfoKHR SwapchainKHR::buildCreateInfos(vk::PhysicalDevice physicalDevice,
-                                                          vk::SurfaceKHR surfaceKHR, vk::PresentModeKHR mode,
-                                                          const SwapchainKHR &oldSwapchainKHR) {
-    vk::SurfaceCapabilitiesKHR capabilities = physicalDevice.getSurfaceCapabilitiesKHR(surfaceKHR);
+vk::SwapchainCreateInfoKHR SwapchainKHR::buildCreateInfos(vk::SurfaceKHR surfaceKHR, vk::PresentModeKHR mode,
+                                                          vk::SwapchainKHR oldSwapchainKHR) {
+    vk::SurfaceCapabilitiesKHR capabilities = mDevice.getPhysicalDevice().getSurfaceCapabilitiesKHR(surfaceKHR);
     vk::Extent2D extent(capabilities.currentExtent);
     *mWidth = extent.width;
     *mHeight = extent.height;

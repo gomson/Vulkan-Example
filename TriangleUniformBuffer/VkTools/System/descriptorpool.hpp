@@ -4,7 +4,7 @@
 class DescriptorPool : public VkResource, public vk::DescriptorPool
 {
 public:
-    DescriptorPool(vk::Device device, uint32_t maxSet,
+    DescriptorPool(Device &device, uint32_t maxSet,
                    const vk::ArrayProxy<vk::DescriptorPoolSize> &poolSizes);
 
     friend void swap(DescriptorPool &p1, DescriptorPool &p2);

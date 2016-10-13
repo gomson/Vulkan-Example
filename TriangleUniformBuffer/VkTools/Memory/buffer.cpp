@@ -15,7 +15,7 @@ void swap(Buffer &b1, Buffer &b2) {
 }
 
 Buffer::Buffer(Buffer &&buffer) :
-    VkResource(std::move(buffer)),
+    VkResource(buffer),
     vk::Buffer(buffer) {
     swap(*this, buffer);
 }

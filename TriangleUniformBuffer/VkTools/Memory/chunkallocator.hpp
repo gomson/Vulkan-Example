@@ -4,12 +4,12 @@
 class ChunkAllocator : private NotCopyable
 {
 public:
-    ChunkAllocator(vk::Device &device, vk::DeviceSize size);
+    ChunkAllocator(Device &device, vk::DeviceSize size);
 
     // if size > mSize, allocate to the next power of 2
     std::unique_ptr<Chunk> allocate(vk::DeviceSize size, int memoryTypeIndex);
 
 private:
-    vk::Device mDevice;
+    Device mDevice;
     vk::DeviceSize mSize;
 };

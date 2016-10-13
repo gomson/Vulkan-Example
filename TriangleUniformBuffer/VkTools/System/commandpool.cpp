@@ -7,7 +7,7 @@ void swap(CommandPool &p1, CommandPool &p2) {
 }
 
 CommandPool::CommandPool(CommandPool &&commandPool) :
-    VkResource(std::move(commandPool)),
+    VkResource(commandPool),
     vk::CommandPool(commandPool) {
     swap(*this, commandPool);
 }
@@ -23,7 +23,7 @@ CommandPool &CommandPool::operator=(CommandPool commandPool) {
     return *this;
 }
 
-CommandPool::CommandPool(vk::Device &device, bool transient, bool resetableBuffer,
+CommandPool::CommandPool(Device &device, bool transient, bool resetableBuffer,
                          uint32_t queueFamillyIndex) :
     VkResource(device) {
     vk::CommandPoolCreateInfo info(vk::CommandPoolCreateFlags(), queueFamillyIndex);

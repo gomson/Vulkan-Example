@@ -8,7 +8,7 @@ void swap(ShaderModule &s1, ShaderModule &s2) {
 }
 
 ShaderModule::ShaderModule(ShaderModule &&shaderModule) :
-    VkResource(std::move(shaderModule)),
+    VkResource(shaderModule),
     vk::ShaderModule(shaderModule) {
     swap(*this, shaderModule);
 }
@@ -37,7 +37,7 @@ static std::vector<char> readFile(const std::string &filename) {
     return buffer;
 }
 
-ShaderModule::ShaderModule(vk::Device &device, const std::string &path) :
+ShaderModule::ShaderModule(Device &device, const std::string &path) :
     VkResource(device) {
     auto code(readFile(path));
     vk::ShaderModuleCreateInfo ci(vk::ShaderModuleCreateFlags(),

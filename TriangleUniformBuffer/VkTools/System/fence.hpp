@@ -4,13 +4,12 @@
 class Fence : public VkResource, public vk::Fence
 {
 public:
-    Fence() = default;
     /**
      * @brief Fence
      * @param device
      * @param signaled : Is fence signaled at creation
      */
-    Fence(vk::Device &device, bool signaled);
+    Fence(Device &device, bool signaled);
 
     friend void swap(Fence &f1, Fence &f2);
     Fence(Fence &&fence);

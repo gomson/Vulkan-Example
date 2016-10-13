@@ -5,8 +5,6 @@
 class Buffer : public VkResource, public vk::Buffer
 {
 public:
-    Buffer() = default;
-
     // On non device local
     Buffer(Device &device, vk::BufferUsageFlags usage, vk::DeviceSize size,
            void *data,

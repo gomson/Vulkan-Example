@@ -7,7 +7,7 @@ void swap(Semaphore &s1, Semaphore &s2) {
 }
 
 Semaphore::Semaphore(Semaphore &&semaphore) :
-    VkResource(std::move(semaphore)),
+    VkResource(semaphore),
     vk::Semaphore(semaphore) {
     swap(*this, semaphore);
 }
@@ -23,7 +23,7 @@ Semaphore &Semaphore::operator =(Semaphore semaphore) {
     return *this;
 }
 
-Semaphore::Semaphore(vk::Device const &device) :
+Semaphore::Semaphore(Device &device) :
     VkResource(device){
     vk::SemaphoreCreateInfo info;
     m_semaphore = device.createSemaphore(info);

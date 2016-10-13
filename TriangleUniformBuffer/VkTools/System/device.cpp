@@ -1,10 +1,36 @@
 #include <cassert>
 #include "device.hpp"
+#include <iostream>
 
-Device::Device(Instance &instance) {
-    std::vector<vk::PhysicalDevice> physicalDevices = instance.enumeratePhysicalDevices();
-    mPhysicalDevice = physicalDevices[0];
-    std::vector<vk::QueueFamilyProperties> queueProperties = mPhysicalDevice.getQueueFamilyProperties();
+void swap(Device &d1, Device &d2) {
+    using std::swap;
+    swap(static_cast<Counter&>(d1), static_cast<Counter&>(d2));
+    swap(d1.mIndexFamillyQueue, d2.mIndexFamillyQueue);
+    swap(d1.mPhysicalDevice, d2.mPhysicalDevice);
+    swap(d1.m_device, d2.m_device);
+}
+
+Device::Device(Device &&device) :
+    Counter(device),
+    vk::Device(device) {
+    swap(*this, device);
+}
+
+Device::Device(Device const &device) :
+    Counter(device),
+    vk::Device(device) {
+    mIndexFamillyQueue = device.mIndexFamillyQueue;
+    mPhysicalDevice = device.mPhysicalDevice;
+}
+
+Device &Device::operator=(Device device) {
+    swap(*this, device);
+    return *this;
+}
+
+Device::Device(Instance &instance) :
+    mPhysicalDevice(std::make_shared<vk::PhysicalDevice>(instance.enumeratePhysicalDevices()[0])) {
+    std::vector<vk::QueueFamilyProperties> queueProperties = mPhysicalDevice->getQueueFamilyProperties();
 
     auto flags = vk::QueueFlagBits::eCompute | vk::QueueFlagBits::eGraphics | vk::QueueFlagBits::eTransfer;
 
@@ -12,10 +38,10 @@ Device::Device(Instance &instance) {
     for(vk::QueueFamilyProperties qp : queueProperties) {
         if((qp.queueFlags & flags) == flags)
             break;
-        ++mIndexFamillyQueue;
+        ++(*mIndexFamillyQueue);
     }
 
-    assert(mPhysicalDevice.getSurfaceSupportKHR(mIndexFamillyQueue, instance.getSurfaceKHR()));
+    assert(mPhysicalDevice->getSurfaceSupportKHR(*mIndexFamillyQueue, instance.getSurfaceKHR()));
 
     float queuePriority = 1.0f;
     vk::DeviceQueueCreateInfo queueCreateInfo(vk::DeviceQueueCreateFlags(),
@@ -26,37 +52,38 @@ Device::Device(Instance &instance) {
                                           1, &queueCreateInfo, 0, nullptr,
                                           1, &extensions[0], nullptr);
 
-    m_device = mPhysicalDevice.createDevice(deviceCreateInfo);
+    m_device = mPhysicalDevice->createDevice(deviceCreateInfo);
 }
 
 vk::Queue Device::getGraphicQueue() {
-    return getQueue(mIndexFamillyQueue, 0);
+    return getQueue(*mIndexFamillyQueue, 0);
 }
 
 vk::Queue Device::getTransferQueue() {
-    return getQueue(mIndexFamillyQueue, 0);
+    return getQueue(*mIndexFamillyQueue, 0);
 }
 
 vk::Queue Device::getComputeQueue() {
-    return getQueue(mIndexFamillyQueue, 0);
+    return getQueue(*mIndexFamillyQueue, 0);
 }
 
 vk::PhysicalDevice Device::getPhysicalDevice() const {
-    return mPhysicalDevice;
+    return *mPhysicalDevice;
 }
 
 uint32_t Device::getIndexFamillyQueue() const {
-    return mIndexFamillyQueue;
+    return *mIndexFamillyQueue;
 }
 
 uint32_t Device::getIndexTransferQueue() const {
-    return mIndexFamillyQueue;
+    return *mIndexFamillyQueue;
 }
 
 uint32_t Device::getIndexComputeQueue() const {
-    return mIndexFamillyQueue;
+    return *mIndexFamillyQueue;
 }
 
 Device::~Device() {
-    destroy();
+    if(mCount != nullptr && --(*mCount) == 0)
+        destroy();
 }

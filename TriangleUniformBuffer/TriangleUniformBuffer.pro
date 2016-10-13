@@ -5,6 +5,8 @@ CONFIG -= qt
 
 LIBS += -lglfw -lvulkan
 
+QMAKE_CXXFLAGS += -Wdeprecated
+
 SOURCES += main.cpp \
     VkTools/System/window.cpp \
     VkTools/System/instance.cpp \
@@ -26,7 +28,8 @@ SOURCES += main.cpp \
     VkTools/System/descriptorpool.cpp \
     VkTools/Pipeline/pipeline.cpp \
     VkTools/Pipeline/renderpass.cpp \
-    VkTools/Pipeline/pipelinelayout.cpp
+    VkTools/Pipeline/pipelinelayout.cpp \
+    vulkan/counter.cpp
 
 HEADERS += \
     VkTools/System/window.hpp \
@@ -52,4 +55,5 @@ HEADERS += \
     VkTools/System/descriptorpool.hpp \
     VkTools/Pipeline/renderpass.hpp \
     VkTools/Pipeline/pipelinelayout.hpp \
-    VkTools/Pipeline/pipeline.hpp
+    VkTools/Pipeline/pipeline.hpp \
+    vulkan/counter.hpp

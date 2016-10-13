@@ -9,7 +9,7 @@ void swap(PipelineLayout &p1, PipelineLayout &p2) {
 }
 
 PipelineLayout::PipelineLayout(PipelineLayout &&pipelineLayout) :
-    VkResource(std::move(pipelineLayout)),
+    VkResource(pipelineLayout),
     vk::PipelineLayout(pipelineLayout) {
     swap(*this, pipelineLayout);
 }

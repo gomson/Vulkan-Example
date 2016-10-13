@@ -7,7 +7,7 @@ void swap(RenderPass &r1, RenderPass &r2) {
 }
 
 RenderPass::RenderPass(RenderPass &&renderPass) :
-    VkResource(std::move(renderPass)),
+    VkResource(renderPass),
     vk::RenderPass(renderPass) {
     swap(*this, renderPass);
 }

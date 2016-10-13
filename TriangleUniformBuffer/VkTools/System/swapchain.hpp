@@ -8,9 +8,8 @@
 class SwapchainKHR : public VkResource, public vk::SwapchainKHR
 {
 public:
-    SwapchainKHR() = default;
     SwapchainKHR(Device &device, vk::SurfaceKHR surface, RenderPass &renderpass,
-                 SwapchainKHR oldSwapchainKHR = SwapchainKHR());
+                 vk::SwapchainKHR oldSwapchainKHR = VK_NULL_HANDLE);
 
     friend void swap(SwapchainKHR &s1, SwapchainKHR &s2);
     SwapchainKHR(SwapchainKHR &&swapchainKHR);
@@ -37,7 +36,6 @@ private:
 
     void createImageViews();
     void createFrameBuffers();
-    vk::SwapchainCreateInfoKHR buildCreateInfos(vk::PhysicalDevice physicalDevice,
-                                                vk::SurfaceKHR surfaceKHR, vk::PresentModeKHR mode,
-                                                SwapchainKHR const &oldSwapchainKHR);
+    vk::SwapchainCreateInfoKHR buildCreateInfos(vk::SurfaceKHR surfaceKHR, vk::PresentModeKHR mode,
+                                                vk::SwapchainKHR oldSwapchainKHR);
 };

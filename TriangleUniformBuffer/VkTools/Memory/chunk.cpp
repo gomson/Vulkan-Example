@@ -1,6 +1,6 @@
 #include "chunk.hpp"
 
-Chunk::Chunk(vk::Device device, vk::DeviceSize size, int memoryTypeIndex) :
+Chunk::Chunk(Device &device, vk::DeviceSize size, int memoryTypeIndex) :
     mDevice(device),
     mSize(size),
     mMemoryTypeIndex(memoryTypeIndex) {

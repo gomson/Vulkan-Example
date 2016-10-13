@@ -8,7 +8,7 @@ void swap(Pipeline &p1, Pipeline &p2) {
 }
 
 Pipeline::Pipeline(Pipeline &&pipeline) :
-    VkResource(std::move(pipeline)),
+    VkResource(pipeline),
     vk::Pipeline(pipeline) {
     swap(*this, pipeline);
 }

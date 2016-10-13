@@ -4,7 +4,7 @@
 class Semaphore : public VkResource, public vk::Semaphore
 {
 public:
-    Semaphore(vk::Device const &device);
+    Semaphore(Device &device);
 
     friend void swap(Semaphore &s1, Semaphore &s2);
     Semaphore(Semaphore &&semaphore);

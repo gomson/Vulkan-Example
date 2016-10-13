@@ -1,9 +1,16 @@
 #pragma once
+#include "vulkan/counter.hpp"
 #include "instance.hpp"
 
-class Device : public vk::Device, private NotCopyable
+class Device : public Counter, public vk::Device
 {
 public:
+    friend void swap(Device &d1, Device &d2);
+    Device() = default;
+    Device(Device &&device);
+    Device(const Device &device);
+    Device &operator=(Device device);
+
     Device(Instance &instance);
 
     vk::PhysicalDevice getPhysicalDevice() const;
@@ -19,6 +26,6 @@ public:
     ~Device();
 
 private:
-    vk::PhysicalDevice mPhysicalDevice;
-    uint32_t mIndexFamillyQueue = 0;
+    std::shared_ptr<vk::PhysicalDevice> mPhysicalDevice;
+    std::shared_ptr<uint32_t> mIndexFamillyQueue = std::make_shared<uint32_t>(0);
 };

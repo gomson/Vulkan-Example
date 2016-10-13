@@ -1,19 +1,16 @@
 #pragma once
-#include "vulkan.hpp"
+#include "counter.hpp"
+#include "VkTools/System/device.hpp"
 
-class VkResource
+class VkResource : public Counter
 {
-protected:
+public:
     VkResource() = default;
-    VkResource(vk::Device device);
-    
-    friend void swap(VkResource &value1, VkResource &value2);
-    VkResource(VkResource const &resource);
-    VkResource(VkResource &&resource);
-
-    virtual ~VkResource() = 0;
+    VkResource(Device device);
+    VkResource(VkResource &&vkResource) = default;
+    VkResource(VkResource const &vkResource) = default;
+    VkResource &operator=(VkResource vkResource);
 
 protected:
-    vk::Device mDevice;
-    std::shared_ptr<uint32_t> mCount = nullptr;
+    Device mDevice;
 };

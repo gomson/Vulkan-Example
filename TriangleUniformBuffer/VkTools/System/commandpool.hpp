@@ -11,7 +11,7 @@ public:
      * @param resetableBuffer : Are command buffer invidually resetable
      * @param queueFamillyIndex
      */
-    CommandPool(vk::Device &device, bool transient, bool resetableBuffer,
+    CommandPool(Device &device, bool transient, bool resetableBuffer,
                 uint32_t queueFamillyIndex);
     
     friend void swap(CommandPool &p1, CommandPool &p2);

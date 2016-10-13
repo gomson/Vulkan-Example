@@ -5,13 +5,13 @@
 class DeviceAllocator : public AbstractAllocator
 {
 public:
-    DeviceAllocator(vk::Device device, vk::DeviceSize size);
+    DeviceAllocator(Device device, vk::DeviceSize size);
 
     Block allocate(vk::DeviceSize size, int memoryTypeIndex);
     void deallocate(Block &block);
 
 private:
-    vk::Device mDevice;
+    Device mDevice;
     ChunkAllocator mChunkAllocator;
     std::vector<std::shared_ptr<Chunk>> mChunks;
 };

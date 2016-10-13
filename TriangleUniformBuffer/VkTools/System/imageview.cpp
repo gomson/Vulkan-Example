@@ -7,7 +7,7 @@ void swap(ImageView &i1, ImageView &i2) {
 }
 
 ImageView::ImageView(ImageView &&imageView) :
-    VkResource(std::move(imageView)),
+    VkResource(imageView),
     vk::ImageView(imageView) {
     swap(*this, imageView);
 }
@@ -23,7 +23,7 @@ ImageView &ImageView::operator=(ImageView imageView) {
     return *this;
 }
 
-ImageView::ImageView(vk::Device &device, const vk::ImageViewCreateInfo &info) :
+ImageView::ImageView(Device &device, const vk::ImageViewCreateInfo &info) :
     VkResource(device)
 {
     m_imageView = device.createImageView(info);

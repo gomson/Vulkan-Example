@@ -86,14 +86,9 @@ public:
                                            *mShaders[1], "main",
                                            nullptr);
 
-        // VertexShader with only one entry
-        vk::VertexInputBindingDescription bindingDescription(0, sizeof(glm::vec2), vk::VertexInputRate::eVertex);
-        vk::VertexInputAttributeDescription attributeDescription(0, 0, vk::Format::eR32G32Sfloat);
-
         // Vertices are specified into the shaders
-        vk::PipelineVertexInputStateCreateInfo vertexInputInfo(vk::PipelineVertexInputStateCreateFlags(),
-                                                               1, &bindingDescription,
-                                                               1, &attributeDescription);
+        vk::PipelineVertexInputStateCreateInfo vertexInputInfo(vk::PipelineVertexInputStateCreateFlags(), 0,
+                                                               nullptr, 0, nullptr);
 
         // We want to draw triangles by list
         vk::PipelineInputAssemblyStateCreateInfo inputAssembly(vk::PipelineInputAssemblyStateCreateFlags(),
@@ -199,8 +194,7 @@ void buildDrawCommandBuffer(vk::CommandBuffer &drawBuffer,
                             Pipeline &pipeline,
                             SwapchainKHR swapchainKHR,
                             RenderPass &renderPass,
-                            uint32_t imageIndex,
-                            Buffer buffer) {
+                            uint32_t imageIndex) {
     // subpass 0 at that frameBuffer
     vk::CommandBufferInheritanceInfo inheritanceInfo(renderPass,
                                                      0,
@@ -217,7 +211,6 @@ void buildDrawCommandBuffer(vk::CommandBuffer &drawBuffer,
                                   0, pipeline.getLayout().getDescriptorSets(), {});
     drawBuffer.setScissor(0, {scissor});
     drawBuffer.setViewport(0, {viewPort});
-    drawBuffer.bindVertexBuffers(0, {buffer}, {0});
     drawBuffer.draw(3, 1, 0, 0); // One triangle
     drawBuffer.end();
 }
@@ -225,9 +218,9 @@ void buildDrawCommandBuffer(vk::CommandBuffer &drawBuffer,
 // The primary command buffer which is recorded at each frame
 void buildPrimaryCommandBuffers(RenderPass &renderPass,
                                 vk::CommandBuffer &primaryBuffer,
-                                SwapchainKHR swapchainKHR,
+                                SwapchainKHR &swapchainKHR,
                                 vk::CommandBuffer &drawBuffer,
-                                uint32_t imageIndex) {
+                                uint32_t &imageIndex) {
     vk::CommandBufferBeginInfo beginInfo(vk::CommandBufferUsageFlagBits::eOneTimeSubmit, nullptr);
     primaryBuffer.begin(beginInfo);
 
@@ -248,27 +241,22 @@ void buildPrimaryCommandBuffers(RenderPass &renderPass,
     primaryBuffer.end();
 }
 
-void createBuffers(Device &device,
-                   Buffer &vertexBuffer,
-                   Buffer &uniformBuffer,
-                   BufferImageTransferer &bufferImageTransfer,
+Buffer createBuffers(Device &device,
+                   BufferImageTransferer bufferImageTransfer,
                    std::shared_ptr<AbstractAllocator> allocator) {
-    std::vector<glm::vec2> triangle({glm::vec2(0.0, -0.5), glm::vec2(0.5, 0.5), glm::vec2(-0.5, 0.5)});
     glm::vec4 color = glm::vec4(1.0, 0.0, 1.0, 1.0);
-    vk::BufferUsageFlags bufferUsage = vk::BufferUsageFlagBits::eVertexBuffer | vk::BufferUsageFlagBits::eUniformBuffer;
+    vk::BufferUsageFlags bufferUsage = vk::BufferUsageFlagBits::eUniformBuffer;
 
     vk::BufferUsageFlags stagingUsage = bufferUsage | vk::BufferUsageFlagBits::eTransferSrc;
     vk::BufferUsageFlags gpuUsage = bufferUsage | vk::BufferUsageFlagBits::eTransferDst;
 
-    vertexBuffer = Buffer(device, gpuUsage, triangle.size() * sizeof(glm::vec2), allocator);
-    Buffer cpuVertexBuffer(device, stagingUsage, vk::ArrayProxy<glm::vec2>(triangle), allocator);
-
-    uniformBuffer = Buffer(device, gpuUsage, sizeof color, allocator);
+    Buffer uniformBuffer(device, gpuUsage, sizeof color, allocator);
     Buffer cpuUniformBuffer(device, stagingUsage, sizeof color, &color, allocator);
 
-    bufferImageTransfer.transfer(cpuVertexBuffer, vertexBuffer, 0, 0, vertexBuffer.getSize()); // We transfer the stagingBuffer to gpuBuffer
     bufferImageTransfer.transfer(cpuUniformBuffer, uniformBuffer, 0, 0, uniformBuffer.getSize());
     bufferImageTransfer.flush(); // We wait for all transfer be finished
+
+    return uniformBuffer;
 }
 
 auto createDescriptorPool(Device &device) {
@@ -277,7 +265,7 @@ auto createDescriptorPool(Device &device) {
     return DescriptorPool(device, 1, vk::ArrayProxy<vk::DescriptorPoolSize>(size));
 }
 
-int main(int argc, char *argv[])
+int main()
 {
     Window window(1024, 768);
     Instance instance(window, true);
@@ -291,11 +279,8 @@ int main(int argc, char *argv[])
     RenderPassTriangle renderPass(device);
     SwapchainKHR swapchainKHR(device, instance.getSurfaceKHR(), renderPass);
 
-    Buffer gpuBuffer;
-    Buffer uniformBuffer;
-
-    createBuffers(device, gpuBuffer, uniformBuffer,
-                  bufferImageTransfer, deviceAllocator);
+    Buffer uniformBuffer = createBuffers(device, bufferImageTransfer,
+                                         deviceAllocator);
 
     DescriptorPool descriptorPool = createDescriptorPool(device);
 
@@ -327,7 +312,9 @@ int main(int argc, char *argv[])
             drawBufferPool.reset(false);
 
             for(auto i = 0u; i < swapchainKHR.getImageCount(); ++i)
-                buildDrawCommandBuffer(drawBuffers[i], pipeline, swapchainKHR, renderPass, i, gpuBuffer);
+                buildDrawCommandBuffer(drawBuffers[i], pipeline, swapchainKHR, renderPass, i);
+            auto a = std::move(swapchainKHR);
+            swapchainKHR = std::move(a);
         }
 
         // We get the next index and ask for signaling the imageAvailableSemaphore
@@ -350,7 +337,6 @@ int main(int argc, char *argv[])
         vk::PipelineStageFlags sf[] = {vk::PipelineStageFlagBits::eColorAttachmentOutput};
         vk::SubmitInfo si(1, &imageAvailableSemaphore, sf, 1, &primaryCommandBuffers[index],
                           1, &imageRenderFinishedSemaphore);
-
 
         queue.submit(si, fences[index]);
 

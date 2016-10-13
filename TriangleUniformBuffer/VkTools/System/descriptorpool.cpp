@@ -7,7 +7,7 @@ void swap(DescriptorPool &p1, DescriptorPool &p2) {
 }
 
 DescriptorPool::DescriptorPool(DescriptorPool &&descriptorPool) :
-    VkResource(std::move(descriptorPool)),
+    VkResource(descriptorPool),
     vk::DescriptorPool(descriptorPool) {
     swap(*this, descriptorPool);
 }
@@ -23,7 +23,7 @@ DescriptorPool &DescriptorPool::operator=(DescriptorPool descriptorPool) {
     return *this;
 }
 
-DescriptorPool::DescriptorPool(vk::Device device, uint32_t maxSet,
+DescriptorPool::DescriptorPool(Device &device, uint32_t maxSet,
                                const vk::ArrayProxy<vk::DescriptorPoolSize> &poolSizes) :
     VkResource(device)
 {

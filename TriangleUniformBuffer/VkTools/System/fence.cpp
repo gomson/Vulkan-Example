@@ -7,7 +7,7 @@ void swap(Fence &f1, Fence &f2) {
 }
 
 Fence::Fence(Fence &&fence) :
-    VkResource(std::move(fence)),
+    VkResource(fence),
     vk::Fence(fence) {
     swap(*this, fence);
 }
@@ -23,7 +23,7 @@ Fence &Fence::operator =(Fence fence) {
     return *this;
 }
 
-Fence::Fence(vk::Device &device, bool signaled) :
+Fence::Fence(Device &device, bool signaled) :
     VkResource(device) {
     vk::FenceCreateInfo info;
 
