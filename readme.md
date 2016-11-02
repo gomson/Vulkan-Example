@@ -31,3 +31,4 @@ This part show how to display one texture without mipmapping
 
 This part show how to build mipmap from one image.
 It uses vkCmdBlitImage, barrier transition, there is not a lot of code which differs from Texture, but you need to understand barrier more clearly than in Texture example
+The code is within the bufferImageTransferer class.
