@@ -22,3 +22,12 @@ However it use a vertex buffer and a "good" memory management with the "DeviceAl
 
 This part had a little change. I removed the "not copyable" things from a lot of classes.
 The PipelineLayoutTriangle manages how to bind the uniform buffer to the pipeline.
+
+## Texture
+
+This part show how to display one texture without mipmapping
+
+## Mipmap
+
+This part show how to build mipmap from one image.
+It uses vkCmdBlitImage, barrier transition, there is not a lot of code which differs from Texture, but you need to understand barrier more clearly than in Texture example
