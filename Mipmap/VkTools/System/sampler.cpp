@@ -23,7 +23,7 @@ Sampler &Sampler::operator =(Sampler sampler) {
     return *this;
 }
 
-Sampler::Sampler(Device &device) :
+Sampler::Sampler(Device &device, float maxMipMap) :
     VkResource(device) {
     vk::SamplerCreateInfo info(vk::SamplerCreateFlags(),
                                vk::Filter::eNearest,
@@ -34,7 +34,7 @@ Sampler::Sampler(Device &device) :
                                vk::SamplerAddressMode::eRepeat,
                                0, false, 0, false,
                                vk::CompareOp::eNever,
-                               0, 0, vk::BorderColor::eFloatOpaqueWhite,
+                               0, maxMipMap, vk::BorderColor::eFloatOpaqueWhite,
                                false);
     m_sampler = device.createSampler(info);
 }

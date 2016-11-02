@@ -164,15 +164,18 @@ void Image::createImageFromPath(const std::string &path, Image &image, ImageView
                                    vk::ImageLayout::ePreinitialized,
                                    vk::ImageLayout::eUndefined,
                                    vk::ImageLayout::eShaderReadOnlyOptimal,
-                                   vk::ImageLayout::eShaderReadOnlyOptimal,
-                                   vk::ImageSubresourceRange(vk::ImageAspectFlagBits::eColor, 0, VK_REMAINING_MIP_LEVELS, 0, VK_REMAINING_ARRAY_LAYERS),
-                                   vk::ImageSubresourceRange(vk::ImageAspectFlagBits::eColor, 0, VK_REMAINING_MIP_LEVELS, 0, VK_REMAINING_ARRAY_LAYERS),
+                                   vk::ImageLayout::eTransferSrcOptimal,
+                                   vk::ImageSubresourceRange(vk::ImageAspectFlagBits::eColor, 0, 1, 0, 1),
+                                   vk::ImageSubresourceRange(vk::ImageAspectFlagBits::eColor, 0, 1, 0, 1),
                                    vk::ImageSubresourceLayers(vk::ImageAspectFlagBits::eColor, 0, 0, 1),
                                    vk::ImageSubresourceLayers(vk::ImageAspectFlagBits::eColor, 0, 0, 1),
                                    vk::Offset3D(0, 0, 0), vk::Offset3D(0, 0, 0),
                                    image.getSize());
 
     imageView = ImageView(allocator->getDevice(), image.getImageViewCreateInfo(vk::ImageAspectFlagBits::eColor, false, false));
+    bufferImageTransferer.flush();
+
+    bufferImageTransferer.buildMipMap(image);
     bufferImageTransferer.flush();
 }
 

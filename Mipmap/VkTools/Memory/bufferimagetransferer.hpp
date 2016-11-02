@@ -28,6 +28,8 @@ public:
                   vk::Offset3D srcOffset, vk::Offset3D dstOffset,
                   vk::Extent3D extent);
 
+    void buildMipMap(Image &src);
+
     void flush();
 
 private:

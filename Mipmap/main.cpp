@@ -28,7 +28,7 @@ public:
     PipelineLayoutTriangle(Device &device, DescriptorPool descriptorPool,
                            ImageView image, Sampler sampler) :
         PipelineLayout(device) {
-        // One binding : an uniform buffer
+        // One binding : a sampler
         vk::DescriptorSetLayoutBinding textureLayoutBinding(0,
                                                             vk::DescriptorType::eCombinedImageSampler,
                                                             1,
@@ -75,7 +75,7 @@ public:
 
         std::vector<vk::PipelineShaderStageCreateInfo> stageShaderCreateInfo;
 
-        // Shader to draw a triangle
+        // Shader to draw a quad
         stageShaderCreateInfo.emplace_back(vk::PipelineShaderStageCreateFlags(),
                                            vk::ShaderStageFlagBits::eVertex,
                                            *mShaders[0], "main",
@@ -263,11 +263,10 @@ int main()
 
     DescriptorPool descriptorPool = createDescriptorPool(device);
 
-    Sampler sampler(device);
     Image image; ImageView imageView;
 
     Image::createImageFromPath("../texture.jpg", image, imageView, bufferImageTransfer, deviceAllocator);
-
+    Sampler sampler(device, image.getMipLevels());
     PipelineLayoutTriangle pipelineLayout = PipelineLayoutTriangle(device, descriptorPool, imageView, sampler);
     PipelineTriangle pipeline(device, renderPass, pipelineLayout);
 

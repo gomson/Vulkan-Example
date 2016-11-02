@@ -42,14 +42,14 @@ const unsigned char *ImageLoader::getPixel() const {
 }
 
 vk::ImageCreateInfo ImageLoader::getImageGPUCreateInfo() const {
-    uint32_t mipLevels = log2(std::max(getWidth(), getHeight())) + 1;
+    uint32_t mipLevels = floor(log2(std::max(getWidth(), getHeight()))) + 1;
 
     vk::ImageCreateInfo info(vk::ImageCreateFlags(),
                              vk::ImageType::e2D, getFormat(),
                              vk::Extent3D(getWidth(), getHeight(), 1),
                              mipLevels, 1, vk::SampleCountFlagBits::e1,
                              vk::ImageTiling::eOptimal,
-                             vk::ImageUsageFlagBits::eSampled | vk::ImageUsageFlagBits::eTransferDst,
+                             vk::ImageUsageFlagBits::eSampled | vk::ImageUsageFlagBits::eTransferDst | vk::ImageUsageFlagBits::eTransferSrc,
                              vk::SharingMode::eExclusive, 0, nullptr,
                              vk::ImageLayout::eUndefined);
 
