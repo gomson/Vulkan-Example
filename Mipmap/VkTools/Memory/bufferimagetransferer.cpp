@@ -89,7 +89,7 @@ void BufferImageTransferer::transfer(const Image &src, Image &dst,
         {transitionImage(src, vk::ImageLayout::eTransferSrcOptimal, newSrcLayout, srcImageSubResourceRange),
          transitionImage(dst, vk::ImageLayout::eTransferDstOptimal, newDstLayout, dstImageSubResourceRange)};
 
-    cmd.pipelineBarrier(vk::PipelineStageFlagBits::eTransfer,
+    cmd.pipelineBarrier(vk::PipelineStageFlagBits::eTopOfPipe,
                         vk::PipelineStageFlagBits::eTopOfPipe,
                         vk::DependencyFlagBits::eByRegion,
                         vk::ArrayProxy<const vk::MemoryBarrier>(nullptr),
@@ -147,7 +147,7 @@ void BufferImageTransferer::buildMipMap(Image &src) {
                       src, vk::ImageLayout::eTransferDstOptimal, blit,
                       vk::Filter::eLinear);
 
-        cmd.pipelineBarrier(vk::PipelineStageFlagBits::eTransfer,
+        cmd.pipelineBarrier(vk::PipelineStageFlagBits::eTopOfPipe,
                             vk::PipelineStageFlagBits::eTopOfPipe,
                             vk::DependencyFlagBits::eByRegion,
                             vk::ArrayProxy<const vk::MemoryBarrier>(nullptr),
