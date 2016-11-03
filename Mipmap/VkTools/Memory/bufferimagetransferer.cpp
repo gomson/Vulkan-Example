@@ -136,8 +136,9 @@ void BufferImageTransferer::buildMipMap(Image &src) {
         // transferDst go to transferSrc because this mipmap will be the source for the next iteration (the next level)
         vk::ImageMemoryBarrier preBlit = transitionImage(src, vk::ImageLayout::eUndefined, vk::ImageLayout::eTransferDstOptimal, range);
         vk::ImageMemoryBarrier postBlit = transitionImage(src, vk::ImageLayout::eTransferDstOptimal, vk::ImageLayout::eTransferSrcOptimal, range);
+        // This barrier does not should be a blocking one and do only the transition to dstOptimal
         cmd.pipelineBarrier(vk::PipelineStageFlagBits::eTopOfPipe,
-                            vk::PipelineStageFlagBits::eTopOfPipe,
+                            vk::PipelineStageFlagBits::eTransfer,
                             vk::DependencyFlagBits::eByRegion,
                             vk::ArrayProxy<const vk::MemoryBarrier>(nullptr),
                             vk::ArrayProxy<const vk::BufferMemoryBarrier>(nullptr),
@@ -147,7 +148,8 @@ void BufferImageTransferer::buildMipMap(Image &src) {
                       src, vk::ImageLayout::eTransferDstOptimal, blit,
                       vk::Filter::eLinear);
 
-        cmd.pipelineBarrier(vk::PipelineStageFlagBits::eTopOfPipe,
+        // This barrier ensure the transfer is finished and transition the image to srcOptimal
+        cmd.pipelineBarrier(vk::PipelineStageFlagBits::eTransfer,
                             vk::PipelineStageFlagBits::eTopOfPipe,
                             vk::DependencyFlagBits::eByRegion,
                             vk::ArrayProxy<const vk::MemoryBarrier>(nullptr),
@@ -163,7 +165,7 @@ void BufferImageTransferer::buildMipMap(Image &src) {
                                                         vk::ImageLayout::eShaderReadOnlyOptimal,
                                                         range);
 
-    cmd.pipelineBarrier(vk::PipelineStageFlagBits::eTopOfPipe,
+    cmd.pipelineBarrier(vk::PipelineStageFlagBits::eTransfer,
                         vk::PipelineStageFlagBits::eTopOfPipe,
                         vk::DependencyFlagBits::eByRegion,
                         nullptr, nullptr, transition);
