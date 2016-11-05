@@ -72,8 +72,8 @@ void BufferImageTransferer::transfer(const Image &src, Image &dst,
         {transitionImage(src, oldSrcLayout, vk::ImageLayout::eTransferSrcOptimal, srcImageSubResourceRange),
          transitionImage(dst, oldDstLayout, vk::ImageLayout::eTransferDstOptimal, dstImageSubResourceRange)};
 
-    cmd.pipelineBarrier(vk::PipelineStageFlagBits::eTopOfPipe,
-                        vk::PipelineStageFlagBits::eTopOfPipe,
+    cmd.pipelineBarrier(vk::PipelineStageFlagBits::eAllCommands,
+                        vk::PipelineStageFlagBits::eTransfer,
                         vk::DependencyFlagBits::eByRegion,
                         vk::ArrayProxy<const vk::MemoryBarrier>(nullptr),
                         vk::ArrayProxy<const vk::BufferMemoryBarrier>(nullptr),
@@ -89,8 +89,8 @@ void BufferImageTransferer::transfer(const Image &src, Image &dst,
         {transitionImage(src, vk::ImageLayout::eTransferSrcOptimal, newSrcLayout, srcImageSubResourceRange),
          transitionImage(dst, vk::ImageLayout::eTransferDstOptimal, newDstLayout, dstImageSubResourceRange)};
 
-    cmd.pipelineBarrier(vk::PipelineStageFlagBits::eTopOfPipe,
-                        vk::PipelineStageFlagBits::eTopOfPipe,
+    cmd.pipelineBarrier(vk::PipelineStageFlagBits::eTransfer,
+                        vk::PipelineStageFlagBits::eTransfer,
                         vk::DependencyFlagBits::eByRegion,
                         vk::ArrayProxy<const vk::MemoryBarrier>(nullptr),
                         vk::ArrayProxy<const vk::BufferMemoryBarrier>(nullptr),
@@ -150,7 +150,7 @@ void BufferImageTransferer::buildMipMap(Image &src) {
 
         // This barrier ensure the transfer is finished and transition the image to srcOptimal
         cmd.pipelineBarrier(vk::PipelineStageFlagBits::eTransfer,
-                            vk::PipelineStageFlagBits::eTopOfPipe,
+                            vk::PipelineStageFlagBits::eTransfer,
                             vk::DependencyFlagBits::eByRegion,
                             vk::ArrayProxy<const vk::MemoryBarrier>(nullptr),
                             vk::ArrayProxy<const vk::BufferMemoryBarrier>(nullptr),
@@ -166,7 +166,7 @@ void BufferImageTransferer::buildMipMap(Image &src) {
                                                         range);
 
     cmd.pipelineBarrier(vk::PipelineStageFlagBits::eTransfer,
-                        vk::PipelineStageFlagBits::eTopOfPipe,
+                        vk::PipelineStageFlagBits::eTransfer,
                         vk::DependencyFlagBits::eByRegion,
                         nullptr, nullptr, transition);
 
