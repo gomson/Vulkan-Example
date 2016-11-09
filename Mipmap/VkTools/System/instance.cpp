@@ -17,7 +17,7 @@ static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(VkDebugReportFlagsEXT,
     return VK_FALSE;
 }
 
-Instance::Instance(GLFWwindow *window, bool debug) : mDebug(debug) {
+Instance::Instance(GLFWwindow *window, bool debug) {
     vk::ApplicationInfo applicationInfo;
 
     applicationInfo.setPApplicationName("VkTools").setPEngineName("Lava");

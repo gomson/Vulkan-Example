@@ -173,8 +173,6 @@ void Image::createImageFromPath(const std::string &path, Image &image, ImageView
                                    image.getSize());
 
     imageView = ImageView(allocator->getDevice(), image.getImageViewCreateInfo(vk::ImageAspectFlagBits::eColor, false, false));
-    bufferImageTransferer.flush();
-
     bufferImageTransferer.buildMipMap(image);
     bufferImageTransferer.flush();
 }

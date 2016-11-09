@@ -1,5 +1,6 @@
 #include <iostream>
 #include <memory>
+#include <utility>
 
 #include "VkTools/System/window.hpp"
 #include "VkTools/System/instance.hpp"
@@ -115,7 +116,7 @@ public:
         cb.setAttachmentCount(1).setPAttachments(&cba);
 
         // We want to use dynamic viewport if we want to resize the window
-        std::array<vk::DynamicState, 2> dynamicStateVp{vk::DynamicState::eViewport, vk::DynamicState::eScissor};
+        std::array<vk::DynamicState, 2> dynamicStateVp{{vk::DynamicState::eViewport, vk::DynamicState::eScissor}};
 
         vk::PipelineDynamicStateCreateInfo dynamicState(vk::PipelineDynamicStateCreateFlags(),
                                                         2, dynamicStateVp.data());
@@ -163,7 +164,7 @@ public:
         std::vector<vk::SubpassDependency> dependencies;
 
         dependencies.emplace_back(VK_SUBPASS_EXTERNAL, 0,
-                                  vk::PipelineStageFlagBits::eBottomOfPipe,
+                                  vk::PipelineStageFlagBits::eColorAttachmentOutput,
                                   vk::PipelineStageFlagBits::eColorAttachmentOutput, // we want to write at this stage
                                   vk::AccessFlagBits::eMemoryRead,
                                   vk::AccessFlagBits::eColorAttachmentWrite, // We only want to write
@@ -171,9 +172,9 @@ public:
 
         dependencies.emplace_back(0, VK_SUBPASS_EXTERNAL,
                                   vk::PipelineStageFlagBits::eColorAttachmentOutput,
-                                  vk::PipelineStageFlagBits::eBottomOfPipe, // Need to wait this stage before the presentation
+                                  vk::PipelineStageFlagBits::eBottomOfPipe, // does not need to wait anything inside the queue
                                   vk::AccessFlagBits::eColorAttachmentWrite,
-                                  vk::AccessFlagBits::eMemoryRead, // Presentation only need to read
+                                  vk::AccessFlags(), // Memory access is allowed through semaphore
                                   vk::DependencyFlagBits::eByRegion);
 
         // This subpass is a graphic one

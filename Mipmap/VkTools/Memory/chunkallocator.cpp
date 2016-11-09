@@ -1,5 +1,6 @@
-#include "chunkallocator.hpp"
 #include <ctgmath>
+#include <utility>
+#include "chunkallocator.hpp"
 
 vk::DeviceSize nextPowerOfTwo(vk::DeviceSize size) {
     vk::DeviceSize power = (vk::DeviceSize)std::log2l(size) + 1;

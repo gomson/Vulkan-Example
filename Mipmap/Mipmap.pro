@@ -5,8 +5,6 @@ CONFIG -= qt
 
 LIBS += -lglfw -lvulkan -lSDL2_image -lSDL2
 
-QMAKE_CXXFLAGS += -Wdeprecated
-
 SOURCES += main.cpp \
     VkTools/System/window.cpp \
     VkTools/System/instance.cpp \

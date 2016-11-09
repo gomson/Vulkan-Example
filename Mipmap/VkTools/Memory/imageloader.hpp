@@ -20,7 +20,5 @@ public:
 
 private:
     SDL_Surface *mImage;
-    vk::Format mFormat;
-
     vk::Format getFormat() const;
 };

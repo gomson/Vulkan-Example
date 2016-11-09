@@ -72,7 +72,7 @@ void BufferImageTransferer::transfer(const Image &src, Image &dst,
         {transitionImage(src, oldSrcLayout, vk::ImageLayout::eTransferSrcOptimal, srcImageSubResourceRange),
          transitionImage(dst, oldDstLayout, vk::ImageLayout::eTransferDstOptimal, dstImageSubResourceRange)};
 
-    cmd.pipelineBarrier(vk::PipelineStageFlagBits::eAllCommands,
+    cmd.pipelineBarrier(vk::PipelineStageFlagBits::eAllCommands | vk::PipelineStageFlagBits::eHost,
                         vk::PipelineStageFlagBits::eTransfer,
                         vk::DependencyFlagBits::eByRegion,
                         vk::ArrayProxy<const vk::MemoryBarrier>(nullptr),
@@ -112,7 +112,7 @@ void BufferImageTransferer::buildMipMap(Image &src) {
     cmd.begin(beginInfo);
 
     // For each mipmap level, we blit the prior one to it
-    for(int i = 1; i < src.getMipLevels(); ++i) {
+    for(uint32_t i = 1; i < src.getMipLevels(); ++i) {
         vk::ImageBlit blit;
         blit.srcSubresource.aspectMask = vk::ImageAspectFlagBits::eColor;
         blit.srcSubresource.baseArrayLayer = 0;
