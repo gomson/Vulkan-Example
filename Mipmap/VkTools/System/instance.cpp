@@ -17,7 +17,7 @@ static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(VkDebugReportFlagsEXT,
     return VK_FALSE;
 }
 
-Instance::Instance(GLFWwindow *window, bool debug) {
+Instance::Instance(GLFWwindow *window, bool debug) : mWindow(window) {
     vk::ApplicationInfo applicationInfo;
 
     applicationInfo.setPApplicationName("VkTools").setPEngineName("Lava");
@@ -66,9 +66,7 @@ Instance::Instance(GLFWwindow *window, bool debug) {
         func(m_instance, &debugInfo.operator const VkDebugReportCallbackCreateInfoEXT &(), nullptr, &mCallback);
     }
 
-    VkSurfaceKHR surface;
-    assert(glfwCreateWindowSurface(m_instance, window, nullptr, &surface) == VK_SUCCESS);
-    mSurfaceKHR = surface;
+    createSurfaceKHR();
 
     if(numberInstances++ == 0)
         IMG_Init(IMG_INIT_JPG | IMG_INIT_PNG | IMG_INIT_TIF | IMG_INIT_WEBP);
@@ -80,6 +78,14 @@ vk::SurfaceKHR Instance::getSurfaceKHR() {
 
 std::vector<char const*> const &Instance::getExtensions() const {
     return mExtensions;
+}
+
+void Instance::createSurfaceKHR() {
+    if(mSurfaceKHR != vk::SurfaceKHR())
+        destroySurfaceKHR(mSurfaceKHR);
+    VkSurfaceKHR surface;
+    assert(glfwCreateWindowSurface(m_instance, mWindow, nullptr, &surface) == VK_SUCCESS);
+    mSurfaceKHR = surface;
 }
 
 Instance::~Instance() {

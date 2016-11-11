@@ -30,6 +30,16 @@ bool Window::isResized() {
     return result;
 }
 
+bool Window::isSurfaceKHROutOfDate() {
+    auto result = mIsSurfaceKHROutOfDate;
+    mIsSurfaceKHROutOfDate = false;
+    return result;
+}
+
+void Window::surfaceIsLost() {
+    mIsSurfaceKHROutOfDate = true;
+}
+
 Window::operator GLFWwindow *() {
     return mWindow;
 }

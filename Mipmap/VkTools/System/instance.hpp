@@ -8,13 +8,14 @@ class Instance : public vk::Instance, private NotCopyable
 public:
     Instance(GLFWwindow *win, bool debug);
 
+    void createSurfaceKHR();
     vk::SurfaceKHR getSurfaceKHR();
-
     std::vector<char const *> const &getExtensions() const;
 
     ~Instance();
 
 private:
+    GLFWwindow *mWindow;
     VkDebugReportCallbackEXT mCallback = VK_NULL_HANDLE;
     std::vector<char const *> mExtensions;
     std::vector<char const *> mLayers;

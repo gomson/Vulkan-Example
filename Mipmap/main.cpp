@@ -299,6 +299,10 @@ int main()
             Then, we build again drawBuffer */
         if(window.isResized()) {
             device.waitIdle();
+
+            if(window.isSurfaceKHROutOfDate())
+                instance.createSurfaceKHR();
+
             swapchainKHR = SwapchainKHR(device, instance.getSurfaceKHR(), renderPass, swapchainKHR);
 
             drawBufferPool.reset(false);
@@ -310,7 +314,14 @@ int main()
         }
 
         // We get the next index and ask for signaling the imageAvailableSemaphore
-        auto index = device.acquireNextImageKHR(swapchainKHR, UINT64_MAX, imageAvailableSemaphore, vk::Fence()).value;
+        auto indexResult = device.acquireNextImageKHR(swapchainKHR, UINT64_MAX, imageAvailableSemaphore, vk::Fence());
+
+        if(indexResult.result == vk::Result::eErrorSurfaceLostKHR) {
+            window.surfaceIsLost();
+            continue;
+        }
+
+        auto index = indexResult.value;
 
         // We wait and reset the current fence
         fences[index].wait();

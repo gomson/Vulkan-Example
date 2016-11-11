@@ -14,6 +14,9 @@ public:
 
     bool isClosed() const;
     bool isResized();
+    bool isSurfaceKHROutOfDate();
+
+    void surfaceIsLost();
 
     ~Window();
 
@@ -22,6 +25,7 @@ private:
     unsigned mWidth;
     unsigned mHeight;
     bool mIsResized = true;
+    bool mIsSurfaceKHROutOfDate = true;
 
     static void onWindowResized(GLFWwindow *window, int width, int height);
 };
