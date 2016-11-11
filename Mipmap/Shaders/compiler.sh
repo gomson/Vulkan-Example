@@ -1,4 +1,4 @@
-glslangValidator -V mipmap.vert
-glslangValidator -V mipmap.frag
-mv vert.spv mipmap_vert.spv
-mv frag.spv mipmap_frag.spv
+glslangValidator -V shader.vert
+glslangValidator -V shader.frag
+mv vert.spv shader_vert.spv
+mv frag.spv shader_frag.spv

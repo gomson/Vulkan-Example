@@ -71,8 +71,8 @@ public:
     PipelineTriangle(Device &device, RenderPass &renderpass,
                      PipelineLayout pipelineLayout) :
         Pipeline(device, pipelineLayout) {
-        mShaders.emplace_back(std::make_unique<ShaderModule>(device, "../Shaders/mipmap_vert.spv"));
-        mShaders.emplace_back(std::make_unique<ShaderModule>(device, "../Shaders/mipmap_frag.spv"));
+        mShaders.emplace_back(std::make_unique<ShaderModule>(device, "../Shaders/shader_vert.spv"));
+        mShaders.emplace_back(std::make_unique<ShaderModule>(device, "../Shaders/shader_frag.spv"));
 
         std::vector<vk::PipelineShaderStageCreateInfo> stageShaderCreateInfo;
 

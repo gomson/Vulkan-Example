@@ -70,8 +70,8 @@ public:
     PipelineTriangle(Device &device, RenderPass &renderpass,
                      PipelineLayout pipelineLayout) :
         Pipeline(device, pipelineLayout) {
-        mShaders.emplace_back(std::make_unique<ShaderModule>(device, "../Shaders/texture_vert.spv"));
-        mShaders.emplace_back(std::make_unique<ShaderModule>(device, "../Shaders/texture_frag.spv"));
+        mShaders.emplace_back(std::make_unique<ShaderModule>(device, "../Shaders/shader_vert.spv"));
+        mShaders.emplace_back(std::make_unique<ShaderModule>(device, "../Shaders/shader_frag.spv"));
 
         std::vector<vk::PipelineShaderStageCreateInfo> stageShaderCreateInfo;
 
@@ -263,7 +263,7 @@ int main()
 
     DescriptorPool descriptorPool = createDescriptorPool(device);
 
-    Sampler sampler(device);
+    Sampler sampler(device, 1.0);
     Image image; ImageView imageView;
 
     Image::createImageFromPath("../texture.jpg", image, imageView, bufferImageTransfer, deviceAllocator);
@@ -282,7 +282,10 @@ int main()
 
     Semaphore imageAvailableSemaphore(device);
     Semaphore imageRenderFinishedSemaphore(device);
-    Fence fences[] = {Fence(device, true), Fence(device, true), Fence(device, true)};
+    std::vector<Fence> fences;
+
+    for(int i = 0; i < swapchainKHR.getImageCount(); ++i)
+        fences.push_back(Fence(device, true));
 
     while(!window.isClosed()) {
         glfwPollEvents();
@@ -291,6 +294,9 @@ int main()
             Then, we build again drawBuffer */
         if(window.isResized()) {
             device.waitIdle();
+            if(window.isSurfaceKHROutOfDate())
+                instance.createSurfaceKHR();
+
             swapchainKHR = SwapchainKHR(device, instance.getSurfaceKHR(), renderPass, swapchainKHR);
 
             drawBufferPool.reset(false);
@@ -302,7 +308,13 @@ int main()
         }
 
         // We get the next index and ask for signaling the imageAvailableSemaphore
-        auto index = device.acquireNextImageKHR(swapchainKHR, UINT64_MAX, imageAvailableSemaphore, vk::Fence()).value;
+        uint32_t index;
+        auto result = device.acquireNextImageKHR(swapchainKHR, UINT64_MAX, imageAvailableSemaphore, vk::Fence(), &index);
+
+        if(result == vk::Result::eErrorOutOfDateKHR) {
+            window.surfaceIsOutOfDate();
+            continue;
+        }
 
         // We wait and reset the current fence
         fences[index].wait();

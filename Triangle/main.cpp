@@ -14,15 +14,15 @@
 #include "VkTools/System/commandpool.hpp"
 #include "VkTools/System/semaphore.hpp"
 #include "VkTools/System/fence.hpp"
-#include "VkTools/Pipeline/abstractpipeline.hpp"
-#include "VkTools/Pipeline/abstractrenderpass.hpp"
-#include "VkTools/Pipeline/abstractpipelinelayout.hpp"
-#include "VkTools/Pipeline/abstractrenderpass.hpp"
+#include "VkTools/Pipeline/pipeline.hpp"
+#include "VkTools/Pipeline/renderpass.hpp"
+#include "VkTools/Pipeline/pipelinelayout.hpp"
+#include "VkTools/Pipeline/renderpass.hpp"
 
-class PipelineLayoutTriangle : public AbstractPipelineLayout {
+class PipelineLayoutTriangle : public PipelineLayout {
 public:
     PipelineLayoutTriangle(Device &device) :
-        AbstractPipelineLayout(device) {
+        PipelineLayout(device) {
         vk::PipelineLayoutCreateInfo ci(vk::PipelineLayoutCreateFlags(),
                                         0, nullptr, 0, nullptr);
 
@@ -31,12 +31,12 @@ public:
 };
 
 // Represents the pipeline for draw a triangle
-class PipelineTriangle : public AbstractPipeline {
+class PipelineTriangle : public Pipeline {
 public:
-    PipelineTriangle(Device &device, AbstractRenderPass &renderpass) :
-        AbstractPipeline(device), mPL(device) {
-        mShaders.emplace_back(std::make_unique<ShaderModule>(device, "../Shaders/triangle_vert.spv"));
-        mShaders.emplace_back(std::make_unique<ShaderModule>(device, "../Shaders/triangle_frag.spv"));
+    PipelineTriangle(Device &device, PipelineLayout &pipelineLayout, RenderPass &renderpass) :
+        Pipeline(device, pipelineLayout) {
+        mShaders.emplace_back(std::make_unique<ShaderModule>(device, "../Shaders/shader_vert.spv"));
+        mShaders.emplace_back(std::make_unique<ShaderModule>(device, "../Shaders/shader_frag.spv"));
 
         std::vector<vk::PipelineShaderStageCreateInfo> stageShaderCreateInfo;
 
@@ -92,7 +92,7 @@ public:
                                           2, stageShaderCreateInfo.data(),
                                           &vertexInputInfo,
                                           &inputAssembly, nullptr, &viewportInfo, &rasterizer,
-                                          &ms, nullptr, &cb, &dynamicState, mPL,
+                                          &ms, nullptr, &cb, &dynamicState, pipelineLayout,
                                           renderpass, 0);
         m_pipeline = device.createGraphicsPipeline(vk::PipelineCache(), ci);
     }
@@ -100,14 +100,13 @@ public:
 
 private:
     std::vector<std::unique_ptr<ShaderModule>> mShaders;
-    PipelineLayoutTriangle mPL;
 };
 
 // A renderPass for our triangle
-class RenderPassTriangle : public AbstractRenderPass {
+class RenderPassTriangle : public RenderPass {
 public:
     RenderPassTriangle(Device &device) :
-        AbstractRenderPass(device) {
+        RenderPass(device) {
         /* 1 coolor buffer with B8G8R8A8 way
          * we clear at the beginning and we save at the end
          * no stencil
@@ -156,9 +155,9 @@ public:
 
 // This function create a secondary buffer that performs draw
 void buildDrawCommandBuffer(vk::CommandBuffer &drawBuffer,
-                            AbstractPipeline &pipeline,
+                            Pipeline &pipeline,
                             SwapchainKHR &swapchainKHR,
-                            AbstractRenderPass &renderPass,
+                            RenderPass &renderPass,
                             uint32_t imageIndex) {
     // subpass 0 at that frameBuffer
     vk::CommandBufferInheritanceInfo inheritanceInfo(renderPass,
@@ -178,7 +177,7 @@ void buildDrawCommandBuffer(vk::CommandBuffer &drawBuffer,
 }
 
 // The primary command buffer which is recorded at each frame
-void buildPrimaryCommandBuffers(AbstractRenderPass &renderPass,
+void buildPrimaryCommandBuffers(RenderPass &renderPass,
                                 vk::CommandBuffer &primaryBuffer,
                                 SwapchainKHR &swapchainKHR,
                                 vk::CommandBuffer &drawBuffer,
@@ -209,12 +208,13 @@ int main(int argc, char *argv[])
     Instance instance(window, true);
     Device device(instance);
 
-    vk::Queue queue(device.getQueue());
+    vk::Queue queue(device.getGraphicQueue());
 
     RenderPassTriangle renderPass(device);
     SwapchainKHR swapchainKHR(device, instance.getSurfaceKHR(), renderPass);
 
-    PipelineTriangle pipeline(device, renderPass);
+    PipelineLayoutTriangle pipelineLayout(device);
+    PipelineTriangle pipeline(device, pipelineLayout, renderPass);
 
     /* 2 pools,
      * 	one for primaryBuffer which is a transient one : short lived commandBuffer
@@ -233,11 +233,10 @@ int main(int argc, char *argv[])
 
     Semaphore imageAvailableSemaphore(device);
     Semaphore imageRenderFinishedSemaphore(device);
-    std::unique_ptr<Fence> fences[3];
+    std::vector<Fence> fences;
 
-    // We create fences in signaled state
-    for(auto &fence : fences)
-        fence = std::make_unique<Fence>(device, true);
+    for(int i = 0; i < swapchainKHR.getImageCount(); ++i)
+        fences.push_back(Fence(device, true));
 
     while(!window.isClosed()) {
         glfwPollEvents();
@@ -246,20 +245,32 @@ int main(int argc, char *argv[])
             Then, we build again drawBuffer */
         if(window.isResized()) {
             device.waitIdle();
-            swapchainKHR.createSwapchainKHR();
+
+            if(window.isSurfaceKHROutOfDate())
+                instance.createSurfaceKHR();
+
+            swapchainKHR = SwapchainKHR(device, instance.getSurfaceKHR(), renderPass, swapchainKHR);
 
             drawBufferPool.reset(false);
 
             for(auto i = 0u; i < swapchainKHR.getImageCount(); ++i)
                 buildDrawCommandBuffer(drawBuffers[i], pipeline, swapchainKHR, renderPass, i);
+            auto a = std::move(swapchainKHR);
+            swapchainKHR = std::move(a);
         }
 
         // We get the next index and ask for signaling the imageAvailableSemaphore
-        auto index = device.acquireNextImageKHR(swapchainKHR, UINT64_MAX, imageAvailableSemaphore, vk::Fence()).value;
+        uint32_t index;
+        vk::Result result = device.acquireNextImageKHR(swapchainKHR, UINT64_MAX, imageAvailableSemaphore, vk::Fence(), &index);
+
+        if(result == vk::Result::eErrorOutOfDateKHR) {
+            window.surfaceIsOutOfDate();
+            continue;
+        }
 
         // We wait and reset the current fence
-        fences[index]->wait();
-        fences[index]->reset();
+        fences[index].wait();
+        fences[index].reset();
 
         // We build the primaryCommandBuffer : the reset is implicit
         buildPrimaryCommandBuffers(renderPass,
@@ -276,7 +287,7 @@ int main(int argc, char *argv[])
                           1, &imageRenderFinishedSemaphore);
 
 
-        queue.submit(si, *fences[index]);
+        queue.submit(si, fences[index]);
 
         // When the imageRenderFinishedSemaphore is signaled we present the swapchain
         vk::PresentInfoKHR present(1, &imageRenderFinishedSemaphore, 1, &swapchainKHR, &index, nullptr);
