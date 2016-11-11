@@ -71,6 +71,7 @@ SwapchainKHR::SwapchainKHR(Device &device, vk::SurfaceKHR surfaceKHR, RenderPass
 
     m_swapchainKHR = mDevice.createSwapchainKHR(buildCreateInfos(surfaceKHR, mode, oldSwapchainKHR));
     *mImages = mDevice.getSwapchainImagesKHR(*this);
+    *mImageCount = mImages->size();
     createImageViews();
     createFrameBuffers();
 }
@@ -122,9 +123,9 @@ vk::SwapchainCreateInfoKHR SwapchainKHR::buildCreateInfos(vk::SurfaceKHR surface
     *mWidth = extent.width;
     *mHeight = extent.height;
 
-    *mImageCount = std::min(capabilities.minImageCount + 1, capabilities.maxImageCount);
+    auto minImageCount = std::min(capabilities.minImageCount + 1, capabilities.maxImageCount);
 
-    vk::SwapchainCreateInfoKHR info(vk::SwapchainCreateFlagsKHR(), surfaceKHR, *mImageCount,
+    vk::SwapchainCreateInfoKHR info(vk::SwapchainCreateFlagsKHR(), surfaceKHR, minImageCount,
                                     mFormat->format, mFormat->colorSpace, extent, 1,
                                     vk::ImageUsageFlagBits::eColorAttachment, vk::SharingMode::eExclusive,
                                     0, nullptr, capabilities.currentTransform,
