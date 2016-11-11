@@ -287,7 +287,10 @@ int main()
 
     Semaphore imageAvailableSemaphore(device);
     Semaphore imageRenderFinishedSemaphore(device);
-    Fence fences[] = {Fence(device, true), Fence(device, true), Fence(device, true)};
+    std::vector<Fence> fences;
+
+    for(int i = 0; i < swapchainKHR.getImageCount(); ++i)
+        fences.push_back(Fence(device, true));
 
     while(!window.isClosed()) {
         glfwPollEvents();
