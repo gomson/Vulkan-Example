@@ -163,19 +163,24 @@ public:
         // Two dependencies one for before the subpass and one for after
         std::vector<vk::SubpassDependency> dependencies;
 
+        // This dependency is not useful because cache invalidation is done by semaphore
+        /*
         dependencies.emplace_back(VK_SUBPASS_EXTERNAL, 0,
                                   vk::PipelineStageFlagBits::eColorAttachmentOutput,
                                   vk::PipelineStageFlagBits::eColorAttachmentOutput, // we want to write at this stage
-                                  vk::AccessFlagBits::eMemoryRead,
+                                  vk::AccessFlags(), // eColorAttachmentOutput make write that are erased
                                   vk::AccessFlagBits::eColorAttachmentWrite, // We only want to write
-                                  vk::DependencyFlagBits::eByRegion);
+                                  vk::DependencyFlagBits::eByRegion);*/
 
+        // This dependecy is not useful since semaphore wait and flush / invalidate caches
+        /*
         dependencies.emplace_back(0, VK_SUBPASS_EXTERNAL,
                                   vk::PipelineStageFlagBits::eColorAttachmentOutput,
                                   vk::PipelineStageFlagBits::eBottomOfPipe, // does not need to wait anything inside the queue
                                   vk::AccessFlagBits::eColorAttachmentWrite,
                                   vk::AccessFlags(), // Memory access is allowed through semaphore
-                                  vk::DependencyFlagBits::eByRegion);
+                                  vk::DependencyFlagBits::eByRegion);                          
+        */
 
         // This subpass is a graphic one
         vk::SubpassDescription subPass(vk::SubpassDescriptionFlags(),

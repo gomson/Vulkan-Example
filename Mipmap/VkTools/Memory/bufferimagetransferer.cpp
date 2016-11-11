@@ -72,11 +72,10 @@ void BufferImageTransferer::transfer(const Image &src, Image &dst,
         {transitionImage(src, oldSrcLayout, vk::ImageLayout::eTransferSrcOptimal, srcImageSubResourceRange),
          transitionImage(dst, oldDstLayout, vk::ImageLayout::eTransferDstOptimal, dstImageSubResourceRange)};
 
-    cmd.pipelineBarrier(vk::PipelineStageFlagBits::eAllCommands | vk::PipelineStageFlagBits::eHost,
+    cmd.pipelineBarrier(vk::PipelineStageFlagBits::eAllCommands, // host stage is implicitly done by buffersubmission
                         vk::PipelineStageFlagBits::eTransfer,
-                        vk::DependencyFlagBits::eByRegion,
-                        vk::ArrayProxy<const vk::MemoryBarrier>(nullptr),
-                        vk::ArrayProxy<const vk::BufferMemoryBarrier>(nullptr),
+                        vk::DependencyFlags(),
+                        nullptr, nullptr,
                         preBarrier);
 
     cmd.copyImage(src, vk::ImageLayout::eTransferSrcOptimal,
@@ -91,9 +90,8 @@ void BufferImageTransferer::transfer(const Image &src, Image &dst,
 
     cmd.pipelineBarrier(vk::PipelineStageFlagBits::eTransfer,
                         vk::PipelineStageFlagBits::eTransfer,
-                        vk::DependencyFlagBits::eByRegion,
-                        vk::ArrayProxy<const vk::MemoryBarrier>(nullptr),
-                        vk::ArrayProxy<const vk::BufferMemoryBarrier>(nullptr),
+                        vk::DependencyFlags(),
+                        nullptr, nullptr,
                         postBarrier);
 
     cmd.end();
@@ -136,12 +134,12 @@ void BufferImageTransferer::buildMipMap(Image &src) {
         // transferDst go to transferSrc because this mipmap will be the source for the next iteration (the next level)
         vk::ImageMemoryBarrier preBlit = transitionImage(src, vk::ImageLayout::eUndefined, vk::ImageLayout::eTransferDstOptimal, range);
         vk::ImageMemoryBarrier postBlit = transitionImage(src, vk::ImageLayout::eTransferDstOptimal, vk::ImageLayout::eTransferSrcOptimal, range);
-        // This barrier does not should be a blocking one and do only the transition to dstOptimal
+
+        // perform only the transition : does not need to block
         cmd.pipelineBarrier(vk::PipelineStageFlagBits::eTopOfPipe,
                             vk::PipelineStageFlagBits::eTransfer,
-                            vk::DependencyFlagBits::eByRegion,
-                            vk::ArrayProxy<const vk::MemoryBarrier>(nullptr),
-                            vk::ArrayProxy<const vk::BufferMemoryBarrier>(nullptr),
+                            vk::DependencyFlags(),
+                            nullptr, nullptr,
                             preBlit);
 
         cmd.blitImage(src, vk::ImageLayout::eTransferSrcOptimal,
@@ -151,9 +149,8 @@ void BufferImageTransferer::buildMipMap(Image &src) {
         // This barrier ensure the transfer is finished and transition the image to srcOptimal
         cmd.pipelineBarrier(vk::PipelineStageFlagBits::eTransfer,
                             vk::PipelineStageFlagBits::eTransfer,
-                            vk::DependencyFlagBits::eByRegion,
-                            vk::ArrayProxy<const vk::MemoryBarrier>(nullptr),
-                            vk::ArrayProxy<const vk::BufferMemoryBarrier>(nullptr),
+                            vk::DependencyFlags(),
+                            nullptr, nullptr,
                             postBlit);
     }
 
@@ -166,8 +163,8 @@ void BufferImageTransferer::buildMipMap(Image &src) {
                                                         range);
 
     cmd.pipelineBarrier(vk::PipelineStageFlagBits::eTransfer,
-                        vk::PipelineStageFlagBits::eTransfer,
-                        vk::DependencyFlagBits::eByRegion,
+                        vk::PipelineStageFlagBits::eAllGraphics,
+                        vk::DependencyFlags(),
                         nullptr, nullptr, transition);
 
     cmd.end();
@@ -192,9 +189,8 @@ BufferImageTransferer::transitionImage(Image image,
     if(oldLayout == vk::ImageLayout::eUndefined)
         src = vk::AccessFlags();
 
-    // If it was preinitialized: the host write on it
-    else if(oldLayout == vk::ImageLayout::ePreinitialized)
-        src = vk::AccessFlagBits::eHostWrite;
+    // If it was preinitialized: the host write on it and the memory barrier is implicit
+    else if(oldLayout == vk::ImageLayout::ePreinitialized);
 
     // If it was in transferDst, we wait for transferWrite
     else if(oldLayout == vk::ImageLayout::eTransferDstOptimal)
@@ -222,6 +218,6 @@ BufferImageTransferer::transitionImage(Image image,
     else
         assert(!"This newLayout is not managed");
 
-    return vk::ImageMemoryBarrier(src, dst, oldLayout, newLayout, 0, 0,
+    return vk::ImageMemoryBarrier(src, dst, oldLayout, newLayout, VK_QUEUE_FAMILY_IGNORED, VK_QUEUE_FAMILY_IGNORED,
                                   image, imageSubResourceRange);
 }
