@@ -163,7 +163,7 @@ void BufferImageTransferer::buildMipMap(Image &src) {
                                                         range);
 
     cmd.pipelineBarrier(vk::PipelineStageFlagBits::eTransfer,
-                        vk::PipelineStageFlagBits::eAllGraphics,
+                        vk::PipelineStageFlagBits::eAllCommands,
                         vk::DependencyFlags(),
                         nullptr, nullptr, transition);
 
@@ -197,8 +197,7 @@ BufferImageTransferer::transitionImage(Image image,
         src = vk::AccessFlagBits::eTransferWrite;
 
     // If it was in transferSrc, we wait for transferRead
-    else if(oldLayout == vk::ImageLayout::eTransferSrcOptimal)
-        src = vk::AccessFlagBits::eTransferRead;
+    else if(oldLayout == vk::ImageLayout::eTransferSrcOptimal);
 
     else
         assert(!"This oldLayout is not managed");
