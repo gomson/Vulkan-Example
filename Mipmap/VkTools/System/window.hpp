@@ -16,7 +16,7 @@ public:
     bool isResized();
     bool isSurfaceKHROutOfDate();
 
-    void surfaceIsLost();
+    void surfaceIsOutOfDate();
 
     ~Window();
 

@@ -36,7 +36,7 @@ bool Window::isSurfaceKHROutOfDate() {
     return result;
 }
 
-void Window::surfaceIsLost() {
+void Window::surfaceIsOutOfDate() {
     mIsSurfaceKHROutOfDate = true;
 }
 

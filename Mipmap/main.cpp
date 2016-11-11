@@ -314,14 +314,13 @@ int main()
         }
 
         // We get the next index and ask for signaling the imageAvailableSemaphore
-        auto indexResult = device.acquireNextImageKHR(swapchainKHR, UINT64_MAX, imageAvailableSemaphore, vk::Fence());
+        uint32_t index;
+        vk::Result result = device.acquireNextImageKHR(swapchainKHR, UINT64_MAX, imageAvailableSemaphore, vk::Fence(), &index);
 
-        if(indexResult.result == vk::Result::eErrorSurfaceLostKHR) {
-            window.surfaceIsLost();
+        if(result == vk::Result::eErrorOutOfDateKHR) {
+            window.surfaceIsOutOfDate();
             continue;
         }
-
-        auto index = indexResult.value;
 
         // We wait and reset the current fence
         fences[index].wait();
