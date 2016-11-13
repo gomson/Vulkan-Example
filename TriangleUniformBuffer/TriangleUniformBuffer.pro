@@ -11,7 +11,6 @@ QMAKE_CXXFLAGS += -Wdeprecated
 SOURCES += main.cpp \
     ../VkTools/Memory/block.cpp \
     ../VkTools/Memory/buffer.cpp \
-    ../VkTools/Memory/bufferimagetransferer.cpp \
     ../VkTools/Memory/chunk.cpp \
     ../VkTools/Memory/chunkallocator.cpp \
     ../VkTools/Memory/deviceallocator.cpp \
@@ -33,13 +32,15 @@ SOURCES += main.cpp \
     ../VkTools/System/swapchain.cpp \
     ../VkTools/System/window.cpp \
     ../vulkan/counter.cpp \
-    ../vulkan/vkresource.cpp
+    ../vulkan/vkresource.cpp \
+    ../VkTools/Memory/buffertransferer.cpp \
+    ../VkTools/Memory/imagetransferer.cpp \
+    ../VkTools/System/commandbuffersubmitter.cpp
 
 HEADERS += \
     ../VkTools/Memory/abstractallocator.hpp \
     ../VkTools/Memory/block.hpp \
     ../VkTools/Memory/buffer.hpp \
-    ../VkTools/Memory/bufferimagetransferer.hpp \
     ../VkTools/Memory/chunk.hpp \
     ../VkTools/Memory/chunkallocator.hpp \
     ../VkTools/Memory/deviceallocator.hpp \
@@ -62,4 +63,7 @@ HEADERS += \
     ../VkTools/System/window.hpp \
     ../vulkan/counter.hpp \
     ../vulkan/vkresource.hpp \
-    ../vulkan/vulkan.hpp
+    ../vulkan/vulkan.hpp \
+    ../VkTools/Memory/buffertransferer.hpp \
+    ../VkTools/Memory/imagetransferer.hpp \
+    ../VkTools/System/commandbuffersubmitter.hpp

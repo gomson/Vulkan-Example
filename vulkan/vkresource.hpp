@@ -6,13 +6,13 @@ class VkResource : public Counter
 {
 public:
     VkResource() = default;
-    VkResource(Device device);
+    VkResource(Device const &device);
     VkResource(VkResource &&vkResource) = default;
     VkResource(VkResource const &vkResource) = default;
-    VkResource &operator=(VkResource vkResource);
+    VkResource &operator=(VkResource const &vkResource) = default;
 
-    Device getDevice() const;
+    vk::Device getDevice() const;
 
 protected:
-    Device mDevice;
+    std::shared_ptr<Device> mDevice;
 };

@@ -16,7 +16,7 @@
 #include "VkTools/Pipeline/renderpass.hpp"
 
 #include "VkTools/Memory/buffer.hpp"
-#include "VkTools/Memory/bufferimagetransferer.hpp"
+#include "VkTools/Memory/buffertransferer.hpp"
 #include "VkTools/Memory/deviceallocator.hpp"
 
 class PipelineLayoutTriangle : public PipelineLayout {
@@ -239,17 +239,15 @@ int main(int argc, char *argv[])
     std::shared_ptr<DeviceAllocator> deviceAllocator(std::make_shared<DeviceAllocator>(device, 1 << 24));
 
     std::vector<glm::vec2> triangle({glm::vec2(0.0, -0.5), glm::vec2(0.5, 0.5), glm::vec2(-0.5, 0.5)});
-    vk::BufferUsageFlags bufferUsage = vk::BufferUsageFlagBits::eVertexBuffer;
+    vk::BufferUsageFlags gpuUsage = vk::BufferUsageFlagBits::eVertexBuffer | vk::BufferUsageFlagBits::eTransferDst;
 
-    vk::BufferUsageFlags stagingUsage = bufferUsage | vk::BufferUsageFlagBits::eTransferSrc;
-    vk::BufferUsageFlags gpuUsage = bufferUsage | vk::BufferUsageFlagBits::eTransferDst;
+    CommandBufferSubmitter commandBufferSubmitter(device, 1);
+    BufferTransferer bufferTransfer(device, 1, 1 << 20, deviceAllocator, commandBufferSubmitter);
+    Buffer vbo(device, gpuUsage, triangle.size() * sizeof(glm::vec2), deviceAllocator, true);
 
-    BufferImageTransferer bufferImageTransfer(device, 100);
-    Buffer gpuBuffer(device, gpuUsage, triangle.size() * sizeof(glm::vec2), deviceAllocator);
-    Buffer cpuBuffer(device, stagingUsage, vk::ArrayProxy<glm::vec2>(triangle), deviceAllocator);
-
-    bufferImageTransfer.transfer(cpuBuffer, gpuBuffer, 0, 0, gpuBuffer.getSize()); // We transfer the stagingBuffer to gpuBuffer
-    bufferImageTransfer.flush(); // We wait for all transfer be finished
+    bufferTransfer.transfer(vbo, 0, sizeof(glm::vec2) * triangle.size(), triangle.data());
+    commandBufferSubmitter.submit();
+    commandBufferSubmitter.wait();
 
     std::vector<Fence> fences;
 
@@ -272,7 +270,7 @@ int main(int argc, char *argv[])
             drawBufferPool.reset(false);
 
             for(auto i = 0u; i < swapchainKHR.getImageCount(); ++i)
-                buildDrawCommandBuffer(drawBuffers[i], pipeline, swapchainKHR, renderPass, i, gpuBuffer);
+                buildDrawCommandBuffer(drawBuffers[i], pipeline, swapchainKHR, renderPass, i, vbo);
             auto a = std::move(swapchainKHR);
             swapchainKHR = std::move(a);
         }

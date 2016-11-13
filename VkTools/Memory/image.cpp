@@ -1,48 +1,7 @@
 #include "image.hpp"
 #include "../System/imageview.hpp"
 #include "../Memory/imageloader.hpp"
-#include "../Memory/bufferimagetransferer.hpp"
-
-void swap(Image &i1, Image &i2) {
-    using std::swap;
-    swap(static_cast<VkResource&>(i1), static_cast<VkResource&>(i2));
-    swap(i1.mAllocator, i2.mAllocator);
-    swap(i1.mSize, i2.mSize);
-    swap(i1.mMipLevels, i2.mMipLevels);
-    swap(i1.mArrayLayers, i2.mArrayLayers);
-    swap(i1.mUsage, i2.mUsage);
-    swap(i1.mFormat, i2.mFormat);
-    swap(i1.mBlock, i2.mBlock);
-    swap(i1.mImageType, i2.mImageType);
-    swap(i1.mPtr, i2.mPtr);
-    swap(i1.m_image, i2.m_image);
-}
-
-Image::Image(Image &&image) :
-    VkResource(image),
-    vk::Image(image) {
-    swap(*this, image);
-}
-
-Image::Image(const Image &image) :
-    VkResource(image),
-    vk::Image(image),
-    mAllocator(image.mAllocator),
-    mSize(image.mSize),
-    mMipLevels(image.mMipLevels),
-    mArrayLayers(image.mArrayLayers),
-    mUsage(image.mUsage),
-    mFormat(image.mFormat),
-    mImageType(image.mImageType),
-    mBlock(image.mBlock),
-    mPtr(image.mPtr) {
-
-}
-
-Image &Image::operator =(Image image) {
-    swap(*this, image);
-    return *this;
-}
+#include "../Memory/imagetransferer.hpp"
 
 Image::Image(Device const &device, vk::ImageCreateInfo info, std::shared_ptr<AbstractAllocator> allocator) :
     VkResource(device),
@@ -76,7 +35,7 @@ void Image::pushData(const unsigned char *data, uint32_t rowPitch) {
     subResource.mipLevel = 0;
     subResource.arrayLayer = 0;
 
-    vk::SubresourceLayout layout = mDevice.getImageSubresourceLayout(m_image, subResource);
+    vk::SubresourceLayout layout = mDevice->getImageSubresourceLayout(m_image, subResource);
 
     for(uint32_t i = 0; i < mSize->height; ++i) {
         memcpy(ptr, data, rowPitch);
@@ -152,7 +111,7 @@ vk::ImageViewCreateInfo Image::getImageViewCreateInfo(vk::ImageAspectFlags aspec
 }
 
 void Image::createImageFromPath(const std::string &path, Image &image, ImageView &imageView,
-                                BufferImageTransferer &bufferImageTransferer,
+                                ImageTransferer &bufferImageTransferer,
                                 std::shared_ptr<AbstractAllocator> allocator) {
     ImageLoader loader(path);
     Image imageCPU(allocator->getDevice(), loader.getImageCreateInfo(), allocator);
@@ -174,12 +133,11 @@ void Image::createImageFromPath(const std::string &path, Image &image, ImageView
 
     imageView = ImageView(allocator->getDevice(), image.getImageViewCreateInfo(vk::ImageAspectFlagBits::eColor, false, false));
     bufferImageTransferer.buildMipMap(image);
-    bufferImageTransferer.flush();
 }
 
 Image::~Image() {
-    if((VkDevice)mDevice != VK_NULL_HANDLE && mCount != nullptr && --(*mCount) == 0) {
+    if(mDevice != nullptr && mCount != nullptr && --(*mCount) == 0) {
         mAllocator->deallocate(*mBlock);
-        mDevice.destroyImage(m_image);
+        mDevice->destroyImage(m_image);
     }
 }

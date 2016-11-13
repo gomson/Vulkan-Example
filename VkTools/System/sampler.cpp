@@ -1,28 +1,5 @@
 #include "sampler.hpp"
 
-void swap(Sampler &s1, Sampler &s2) {
-    using std::swap;
-    swap(static_cast<VkResource&>(s1), static_cast<VkResource&>(s2));
-    swap(s1.m_sampler, s2.m_sampler);
-}
-
-Sampler::Sampler(Sampler &&sampler) :
-    VkResource(sampler),
-    vk::Sampler(sampler) {
-    swap(*this, sampler);
-}
-
-Sampler::Sampler(Sampler const &sampler) :
-    VkResource(sampler),
-    vk::Sampler(sampler) {
-    m_sampler = sampler.m_sampler;
-}
-
-Sampler &Sampler::operator =(Sampler sampler) {
-    swap(*this, sampler);
-    return *this;
-}
-
 Sampler::Sampler(Device &device, float maxMipMap) :
     VkResource(device) {
     vk::SamplerCreateInfo info(vk::SamplerCreateFlags(),
@@ -46,6 +23,6 @@ Sampler::Sampler(Device &device, const vk::SamplerCreateInfo &info) :
 }
 
 Sampler::~Sampler() {
-    if(mCount != nullptr && --(*mCount) == 0)
-        mDevice.destroySampler(m_sampler);
+    if(mDevice != nullptr && mCount != nullptr && --(*mCount) == 0)
+        mDevice->destroySampler(m_sampler);
 }

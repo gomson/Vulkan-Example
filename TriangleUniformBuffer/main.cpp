@@ -16,7 +16,7 @@
 #include "VkTools/Pipeline/pipelinelayout.hpp"
 #include "VkTools/Pipeline/renderpass.hpp"
 
-#include "VkTools/Memory/bufferimagetransferer.hpp"
+#include "VkTools/Memory/buffertransferer.hpp"
 #include "VkTools/Memory/deviceallocator.hpp"
 
 struct UniformColor {
@@ -242,20 +242,12 @@ void buildPrimaryCommandBuffers(RenderPass &renderPass,
 }
 
 Buffer createBuffers(Device &device,
-                   BufferImageTransferer bufferImageTransfer,
-                   std::shared_ptr<AbstractAllocator> allocator) {
+                     BufferTransferer bufferTransfer,
+                     std::shared_ptr<AbstractAllocator> allocator) {
     glm::vec4 color = glm::vec4(1.0, 0.0, 1.0, 1.0);
-    vk::BufferUsageFlags bufferUsage = vk::BufferUsageFlagBits::eUniformBuffer;
-
-    vk::BufferUsageFlags stagingUsage = bufferUsage | vk::BufferUsageFlagBits::eTransferSrc;
-    vk::BufferUsageFlags gpuUsage = bufferUsage | vk::BufferUsageFlagBits::eTransferDst;
-
-    Buffer uniformBuffer(device, gpuUsage, sizeof color, allocator);
-    Buffer cpuUniformBuffer(device, stagingUsage, sizeof color, &color, allocator);
-
-    bufferImageTransfer.transfer(cpuUniformBuffer, uniformBuffer, 0, 0, uniformBuffer.getSize());
-    bufferImageTransfer.flush(); // We wait for all transfer be finished
-
+    vk::BufferUsageFlags gpuUsage = vk::BufferUsageFlagBits::eVertexBuffer | vk::BufferUsageFlagBits::eTransferDst;
+    Buffer uniformBuffer(device, gpuUsage, sizeof color, allocator, true);
+    bufferTransfer.transfer(uniformBuffer, 0, sizeof color, &color);
     return uniformBuffer;
 }
 
@@ -274,13 +266,16 @@ int main()
     vk::Queue queue(device.getGraphicQueue());
     // Custom allocator on heap device (host visible or device local)
     std::shared_ptr<DeviceAllocator> deviceAllocator(std::make_shared<DeviceAllocator>(device, 1 << 24));
-    BufferImageTransferer bufferImageTransfer(device, 100);
+    CommandBufferSubmitter commandBufferSubmitter(device, 1);
+    BufferTransferer bufferImageTransfer(device, 1, 1 << 20, deviceAllocator, commandBufferSubmitter);
 
     RenderPassTriangle renderPass(device);
     SwapchainKHR swapchainKHR(device, instance.getSurfaceKHR(), renderPass);
 
     Buffer uniformBuffer = createBuffers(device, bufferImageTransfer,
                                          deviceAllocator);
+    commandBufferSubmitter.submit();
+    commandBufferSubmitter.wait();
 
     DescriptorPool descriptorPool = createDescriptorPool(device);
 

@@ -1,5 +1,5 @@
 #include "framebuffer.hpp"
-
+/*
 void swap(FrameBuffer &f1, FrameBuffer &f2) {
     using std::swap;
     swap(static_cast<VkResource&>(f1), static_cast<VkResource&>(f2));
@@ -21,7 +21,7 @@ FrameBuffer::FrameBuffer(const FrameBuffer &frameBuffer) :
 FrameBuffer &FrameBuffer::operator =(FrameBuffer frameBuffer) {
     swap(*this, frameBuffer);
     return *this;
-}
+}*/
 
 FrameBuffer::FrameBuffer(Device &device, vk::FramebufferCreateInfo const &createInfo) :
     VkResource(device) {
@@ -31,5 +31,5 @@ FrameBuffer::FrameBuffer(Device &device, vk::FramebufferCreateInfo const &create
 
 FrameBuffer::~FrameBuffer() {
     if(mCount != nullptr && --(*mCount) == 0)
-        mDevice.destroyFramebuffer(m_framebuffer);
+        mDevice->destroyFramebuffer(m_framebuffer);
 }

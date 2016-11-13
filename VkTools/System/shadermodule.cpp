@@ -1,29 +1,6 @@
 #include <fstream>
 #include "shadermodule.hpp"
 
-void swap(ShaderModule &s1, ShaderModule &s2) {
-    using std::swap;
-    swap(static_cast<VkResource&>(s1), static_cast<VkResource&>(s2));
-    std::swap(s1.m_shaderModule, s2.m_shaderModule);
-}
-
-ShaderModule::ShaderModule(ShaderModule &&shaderModule) :
-    VkResource(shaderModule),
-    vk::ShaderModule(shaderModule) {
-    swap(*this, shaderModule);
-}
-
-ShaderModule::ShaderModule(const ShaderModule &shaderModule) :
-    VkResource(shaderModule),
-    vk::ShaderModule(shaderModule) {
-
-}
-
-ShaderModule &ShaderModule::operator =(ShaderModule shaderModule) {
-    swap(*this, shaderModule);
-    return *this;
-}
-
 static std::vector<char> readFile(const std::string &filename) {
     std::ifstream file(filename, std::ios_base::ate | std::ios_base::binary);
 
@@ -47,6 +24,6 @@ ShaderModule::ShaderModule(Device &device, const std::string &path) :
 }
 
 ShaderModule::~ShaderModule() {
-    if(mCount != nullptr && --(*mCount) == 0)
-        mDevice.destroyShaderModule(m_shaderModule);
+    if(mDevice !=nullptr && mCount != nullptr && --(*mCount) == 0)
+        mDevice->destroyShaderModule(m_shaderModule);
 }

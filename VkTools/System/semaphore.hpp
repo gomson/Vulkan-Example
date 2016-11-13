@@ -6,10 +6,9 @@ class Semaphore : public VkResource, public vk::Semaphore
 public:
     Semaphore(Device &device);
 
-    friend void swap(Semaphore &s1, Semaphore &s2);
-    Semaphore(Semaphore &&semaphore);
-    Semaphore(Semaphore const &semaphore);
-    Semaphore &operator=(Semaphore semaphore);
+    Semaphore(Semaphore &&semaphore) = default;
+    Semaphore(Semaphore const &semaphore) = default;
+    Semaphore &operator=(Semaphore const &semaphore) = default;
 
     ~Semaphore();
 };

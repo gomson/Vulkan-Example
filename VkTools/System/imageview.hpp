@@ -8,10 +8,9 @@ public:
     ImageView() = default;
     ImageView(const Device &device, vk::ImageViewCreateInfo const &info);
 
-    friend void swap(ImageView &i1, ImageView &i2);
-    ImageView(ImageView &&imageView);
-    ImageView(ImageView const &imageView);
-    ImageView &operator=(ImageView imageView);
+    ImageView(ImageView &&imageView) = default;
+    ImageView(ImageView const &imageView) = default;
+    ImageView &operator=(ImageView const &imageView) = default;
 
     ~ImageView();
 };

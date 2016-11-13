@@ -7,10 +7,9 @@ class FrameBuffer : public VkResource, public vk::Framebuffer
 public:
     FrameBuffer(Device &device, vk::FramebufferCreateInfo const &createInfo);
 
-    friend void swap(FrameBuffer &f1, FrameBuffer &b2);
-    FrameBuffer(FrameBuffer &&frameBuffer);
-    FrameBuffer(FrameBuffer const &frameBuffer);
-    FrameBuffer &operator=(FrameBuffer frameBuffer);
+    FrameBuffer(FrameBuffer &&frameBuffer) = default;
+    FrameBuffer(FrameBuffer const &frameBuffer) = default;
+    FrameBuffer &operator=(FrameBuffer const &frameBuffer) = default;
 
     ~FrameBuffer();
 };

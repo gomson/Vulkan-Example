@@ -17,7 +17,7 @@
 #include "VkTools/Pipeline/pipelinelayout.hpp"
 #include "VkTools/Pipeline/renderpass.hpp"
 
-#include "VkTools/Memory/bufferimagetransferer.hpp"
+#include "VkTools/Memory/imagetransferer.hpp"
 #include "VkTools/Memory/deviceallocator.hpp"
 
 #include "VkTools/Memory/image.hpp"
@@ -262,7 +262,8 @@ int main()
     vk::Queue queue(device.getGraphicQueue());
     // Custom allocator on heap device (host visible or device local)
     std::shared_ptr<DeviceAllocator> deviceAllocator(std::make_shared<DeviceAllocator>(device, 1 << 24));
-    BufferImageTransferer bufferImageTransfer(device, 100);
+    CommandBufferSubmitter commandBufferSubmitter(device, 1);
+    ImageTransferer imageTransfer(device, commandBufferSubmitter);
 
     RenderPassTriangle renderPass(device);
     SwapchainKHR swapchainKHR(device, instance.getSurfaceKHR(), renderPass);
@@ -271,7 +272,7 @@ int main()
 
     Image image; ImageView imageView;
 
-    Image::createImageFromPath("../texture.jpg", image, imageView, bufferImageTransfer, deviceAllocator);
+    Image::createImageFromPath("../texture.jpg", image, imageView, imageTransfer, deviceAllocator);
     Sampler sampler(device, image.getMipLevels());
     PipelineLayoutTriangle pipelineLayout = PipelineLayoutTriangle(device, descriptorPool, imageView, sampler);
     PipelineTriangle pipeline(device, renderPass, pipelineLayout);
@@ -291,6 +292,9 @@ int main()
 
     for(int i = 0; i < swapchainKHR.getImageCount(); ++i)
         fences.push_back(Fence(device, true));
+
+    commandBufferSubmitter.submit();
+    commandBufferSubmitter.wait();
 
     while(!window.isClosed()) {
         glfwPollEvents();

@@ -8,10 +8,9 @@ protected:
              PipelineLayout pipelineLayout);
 
 public:
-    friend void swap(Pipeline &p1, Pipeline &p2);
-    Pipeline(Pipeline &&pipeline);
-    Pipeline(Pipeline const &pipeline);
-    Pipeline &operator=(Pipeline pipeline);
+    Pipeline(Pipeline &&pipeline) = default;
+    Pipeline(Pipeline const &pipeline) = default;
+    Pipeline &operator=(Pipeline const &pipeline) = default;
 
     PipelineLayout getLayout();
     ~Pipeline();

@@ -5,11 +5,10 @@
 class Device : public Counter, public vk::Device
 {
 public:
-    friend void swap(Device &d1, Device &d2);
     Device() = default;
-    Device(Device &&device);
-    Device(const Device &device);
-    Device &operator=(Device device);
+    Device(Device &&device) = default;
+    Device(const Device &device) = default;
+    Device &operator=(Device const &device) = default;
 
     Device(Instance &instance);
 

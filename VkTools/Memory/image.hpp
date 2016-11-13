@@ -2,17 +2,16 @@
 #include "vulkan/vkresource.hpp"
 #include "abstractallocator.hpp"
 
-class BufferImageTransferer;
+class ImageTransferer;
 class ImageView;
 
 class Image : public VkResource, public vk::Image
 {
 public:
-    friend void swap(Image &i1, Image &i2);
     Image() = default;
-    Image(Image &&image);
-    Image(Image const &image);
-    Image &operator=(Image image);
+    Image(Image &&image) = default;
+    Image(Image const &image) = default;
+    Image &operator=(Image const &image) = default;
     Image(Device const &device, vk::ImageCreateInfo info, std::shared_ptr<AbstractAllocator> allocator);
 
     vk::Extent3D getSize() const;
@@ -27,7 +26,7 @@ public:
     vk::ImageViewCreateInfo getImageViewCreateInfo(vk::ImageAspectFlags aspect, bool arrayed, bool cube) const;
 
     static void createImageFromPath(std::string const &path, Image &image, ImageView &imageView,
-                                    BufferImageTransferer &bufferImageTransferer,
+                                    ImageTransferer &bufferImageTransferer,
                                     std::shared_ptr<AbstractAllocator> allocator );
 
     ~Image();

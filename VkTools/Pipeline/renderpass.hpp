@@ -8,10 +8,9 @@ protected:
     RenderPass(Device &device);
 
 public:
-    friend void swap(RenderPass &r1, RenderPass &r2);
-    RenderPass(RenderPass &&renderPass);
-    RenderPass(RenderPass const &renderPass);
-    RenderPass &operator=(RenderPass renderPass);
+    RenderPass(RenderPass &&renderPass) = default;
+    RenderPass(RenderPass const &renderPass) = default;
+    RenderPass &operator=(RenderPass const &renderPass) = default;
 
 public:
     ~RenderPass();

@@ -1,5 +1,5 @@
 #include "imageview.hpp"
-
+/*
 void swap(ImageView &i1, ImageView &i2) {
     using std::swap;
     swap(static_cast<VkResource&>(i1), static_cast<VkResource&>(i2));
@@ -21,7 +21,7 @@ ImageView::ImageView(const ImageView &imageView) :
 ImageView &ImageView::operator=(ImageView imageView) {
     swap(*this, imageView);
     return *this;
-}
+}*/
 
 ImageView::ImageView(Device const &device, const vk::ImageViewCreateInfo &info) :
     VkResource(device)
@@ -30,6 +30,6 @@ ImageView::ImageView(Device const &device, const vk::ImageViewCreateInfo &info) 
 }
 
 ImageView::~ImageView() {
-    if((VkDevice)mDevice != VK_NULL_HANDLE && mCount != nullptr && --(*mCount) == 0)
-        mDevice.destroyImageView(m_imageView);
+    if(mDevice != nullptr && mCount != nullptr && --(*mCount) == 0)
+        mDevice->destroyImageView(m_imageView);
 }

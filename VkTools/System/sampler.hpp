@@ -4,12 +4,11 @@
 class Sampler : public VkResource, public vk::Sampler
 {
 public:
-    friend void swap(Sampler &s1, Sampler &s2);
     Sampler(Device &device, float maxMipMap);
     Sampler(Device &device, vk::SamplerCreateInfo const &info);
-    Sampler(Sampler &&sampler);
-    Sampler(Sampler const &sampler);
-    Sampler &operator=(Sampler sampler);
+    Sampler(Sampler &&sampler) = default;
+    Sampler(Sampler const &sampler) = default;
+    Sampler &operator=(Sampler const &sampler) = default;
 
     ~Sampler();
 

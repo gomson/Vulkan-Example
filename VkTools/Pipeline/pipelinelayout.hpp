@@ -9,10 +9,9 @@ protected:
 
 public:
     PipelineLayout() = default;
-    friend void swap(PipelineLayout &p1, PipelineLayout &p2);
-    PipelineLayout(PipelineLayout &&pipelineLayout);
-    PipelineLayout(PipelineLayout const &pipelineLayout);
-    PipelineLayout &operator=(PipelineLayout pipelineLayout);
+    PipelineLayout(PipelineLayout &&pipelineLayout) = default;
+    PipelineLayout(PipelineLayout const &pipelineLayout) = default;
+    PipelineLayout &operator=(PipelineLayout const &pipelineLayout) = default;
 
     std::vector<vk::DescriptorSetLayout> getDescriptorSetLayouts() const;
     std::vector<vk::DescriptorSet> getDescriptorSets() const;

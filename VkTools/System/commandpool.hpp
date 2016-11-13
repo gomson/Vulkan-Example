@@ -14,10 +14,9 @@ public:
     CommandPool(Device &device, bool transient, bool resetableBuffer,
                 uint32_t queueFamillyIndex);
     
-    friend void swap(CommandPool &p1, CommandPool &p2);
-    CommandPool(CommandPool &&commandPool);
-    CommandPool(CommandPool const &commandPool);
-    CommandPool &operator=(CommandPool commandPool);
+    CommandPool(CommandPool &&commandPool) = default;
+    CommandPool(CommandPool const &commandPool) = default;
+    CommandPool &operator=(CommandPool const &commandPool) = default;
 
     std::vector<vk::CommandBuffer> allocate(vk::CommandBufferLevel level, uint32_t count);
     void reset(bool releaseResources);

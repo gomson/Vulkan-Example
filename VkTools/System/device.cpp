@@ -2,32 +2,6 @@
 #include "device.hpp"
 #include <iostream>
 
-void swap(Device &d1, Device &d2) {
-    using std::swap;
-    swap(static_cast<Counter&>(d1), static_cast<Counter&>(d2));
-    swap(d1.mIndexFamillyQueue, d2.mIndexFamillyQueue);
-    swap(d1.mPhysicalDevice, d2.mPhysicalDevice);
-    swap(d1.m_device, d2.m_device);
-}
-
-Device::Device(Device &&device) :
-    Counter(device),
-    vk::Device(device) {
-    swap(*this, device);
-}
-
-Device::Device(Device const &device) :
-    Counter(device),
-    vk::Device(device) {
-    mIndexFamillyQueue = device.mIndexFamillyQueue;
-    mPhysicalDevice = device.mPhysicalDevice;
-}
-
-Device &Device::operator=(Device device) {
-    swap(*this, device);
-    return *this;
-}
-
 Device::Device(Instance &instance) :
     mPhysicalDevice(std::make_shared<vk::PhysicalDevice>(instance.enumeratePhysicalDevices()[0])) {
     std::vector<vk::QueueFamilyProperties> queueProperties = mPhysicalDevice->getQueueFamilyProperties();

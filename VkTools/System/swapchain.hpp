@@ -11,10 +11,9 @@ public:
     SwapchainKHR(Device &device, vk::SurfaceKHR surface, RenderPass &renderpass,
                  vk::SwapchainKHR oldSwapchainKHR = VK_NULL_HANDLE);
 
-    friend void swap(SwapchainKHR &s1, SwapchainKHR &s2);
-    SwapchainKHR(SwapchainKHR &&swapchainKHR);
-    SwapchainKHR(SwapchainKHR const &swapchainKHR);
-    SwapchainKHR &operator=(SwapchainKHR swapchainKHR);
+    SwapchainKHR(SwapchainKHR &&swapchainKHR) = default;
+    SwapchainKHR(SwapchainKHR const &swapchainKHR) = default;
+    SwapchainKHR &operator=(SwapchainKHR const &swapchainKHR) = default;
 
     FrameBuffer const &getFrameBuffers(uint32_t index) const;
     unsigned getWidth() const;

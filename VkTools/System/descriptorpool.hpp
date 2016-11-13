@@ -7,10 +7,9 @@ public:
     DescriptorPool(Device &device, uint32_t maxSet,
                    const vk::ArrayProxy<vk::DescriptorPoolSize> &poolSizes);
 
-    friend void swap(DescriptorPool &p1, DescriptorPool &p2);
-    DescriptorPool(DescriptorPool &&descriptorPool);
-    DescriptorPool(DescriptorPool const &descriptorPool);
-    DescriptorPool &operator=(DescriptorPool descriptorPool);
+    DescriptorPool(DescriptorPool &&descriptorPool) = default;
+    DescriptorPool(DescriptorPool const &descriptorPool) = default;
+    DescriptorPool &operator=(DescriptorPool const &descriptorPool) = default;
 
     ~DescriptorPool();
 private:
