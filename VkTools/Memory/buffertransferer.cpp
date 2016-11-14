@@ -6,6 +6,7 @@ BufferTransferer::BufferTransferer(Device &device, uint32_t numberBuffers, vk::D
     mSizeTransfererBuffers(std::make_shared<uint32_t>(sizeTransfererBuffers)) {
     mCommandBufferSubmitter->addObserver(this);
     mTransfererBuffers->resize(numberBuffers);
+
     for(auto &buffer : *mTransfererBuffers)
         buffer = Buffer(device, vk::BufferUsageFlagBits::eTransferSrc, sizeTransfererBuffers, allocator, false);
 }

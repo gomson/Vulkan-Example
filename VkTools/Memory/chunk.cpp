@@ -12,6 +12,10 @@ Chunk::Chunk(Device &device, vk::DeviceSize size, int memoryTypeIndex) :
     block.size = size;
     mMemory = block.memory = device.allocateMemory(allocateInfo);
 
+    if((device.getPhysicalDevice().getMemoryProperties().memoryTypes[memoryTypeIndex].propertyFlags & vk::MemoryPropertyFlagBits::eHostVisible) == vk::MemoryPropertyFlagBits::eHostVisible) {
+        mPtr = block.ptr = device.mapMemory(mMemory, 0, VK_WHOLE_SIZE);
+    }
+
     mBlocks.emplace_back(block);
 }
 
@@ -30,20 +34,24 @@ void Chunk::deallocate(const Block &block) {
     blockIt->free = true;
 }
 
-bool Chunk::allocate(vk::DeviceSize size, Block &block) {
-    // for alignment
-    if(size % 256 != 0)
-        size = size + (256 - size % 256);
-
+bool Chunk::allocate(vk::DeviceSize size, vk::DeviceSize alignment, Block &block) {
     // if chunk is too small
     if(size > mSize)
         return false;
 
     for(uint32_t i = 0; i < mBlocks.size(); ++i) {
         if(mBlocks[i].free) {
-            // if match
-            if(mBlocks[i].size >= size) {
+            // Compute size after taking care about offsetAlignment
+            uint32_t newSize = mBlocks[i].size;
+
+            if(mBlocks[i].offset % alignment != 0)
+                newSize -= alignment - mBlocks[i].offset % alignment;
+
+            if(newSize >= size) {
                 // if perfect match
+                mBlocks[i].size = newSize;
+                if(mBlocks[i].offset % alignment != 0)
+                    mBlocks[i].offset += alignment - mBlocks[i].offset % alignment;
                 if(mBlocks[i].size == size) {
                     mBlocks[i].free = false;
                     block = mBlocks[i];
@@ -55,6 +63,8 @@ bool Chunk::allocate(vk::DeviceSize size, Block &block) {
                 nextBlock.offset = mBlocks[i].offset + size;
                 nextBlock.memory = mMemory;
                 nextBlock.size = mBlocks[i].size - size;
+                nextBlock.ptr = (char*)mBlocks[i].ptr + size;
+                mBlocks.emplace_back(nextBlock);
 
                 mBlocks[i].size = size;
                 mBlocks[i].free = false;

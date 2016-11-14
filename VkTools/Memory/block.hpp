@@ -16,7 +16,8 @@ struct Block {
     vk::DeviceMemory memory;
     vk::DeviceSize offset;
     vk::DeviceSize size;
-    bool free;
+    bool free = false;
+    void *ptr = nullptr;
 
     bool operator ==(Block const &block);
 };

@@ -59,13 +59,12 @@ void Buffer::createBuffer() {
 void Buffer::allocate(bool shouldBeDeviceLocal) {
     int memoryTypeIndex = findMemoryType(mRequirements->memoryTypeBits, *mProperties, shouldBeDeviceLocal);
 
-    *mBlock = mAllocator->allocate(mRequirements->size, memoryTypeIndex);
+    *mBlock = mAllocator->allocate(mRequirements->size, mRequirements->alignment, memoryTypeIndex);
     mDevice->bindBufferMemory(m_buffer, mBlock->memory, mBlock->offset);
 
     // if host_visible, we can map it
     if(!shouldBeDeviceLocal)
-        *mPtr = mDevice->mapMemory(mBlock->memory, mBlock->offset,
-                                  *mSize, vk::MemoryMapFlags());
+        *mPtr = mBlock->ptr;
 }
 
 Buffer::~Buffer() {

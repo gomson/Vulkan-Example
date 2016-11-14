@@ -18,6 +18,7 @@
 #include "VkTools/Pipeline/renderpass.hpp"
 
 #include "VkTools/Memory/imagetransferer.hpp"
+#include "VkTools/Memory/buffertransferer.hpp"
 #include "VkTools/Memory/deviceallocator.hpp"
 
 #include "VkTools/Memory/image.hpp"
@@ -88,8 +89,10 @@ public:
                                            nullptr);
 
         // Vertices are specified into the shaders
-        vk::PipelineVertexInputStateCreateInfo vertexInputInfo(vk::PipelineVertexInputStateCreateFlags(), 0,
-                                                               nullptr, 0, nullptr);
+        vk::VertexInputAttributeDescription attributeDescription(0, 0, vk::Format::eR32G32Sfloat, 0);
+        vk::VertexInputBindingDescription bindingDescription(0, sizeof(glm::vec2), vk::VertexInputRate::eVertex);
+        vk::PipelineVertexInputStateCreateInfo vertexInputInfo(vk::PipelineVertexInputStateCreateFlags(), 1,
+                                                               &bindingDescription, 1, &attributeDescription);
 
         // We want to draw triangles by list
         vk::PipelineInputAssemblyStateCreateInfo inputAssembly(vk::PipelineInputAssemblyStateCreateFlags(),
@@ -177,7 +180,8 @@ void buildDrawCommandBuffer(vk::CommandBuffer &drawBuffer,
                             Pipeline &pipeline,
                             SwapchainKHR swapchainKHR,
                             RenderPass &renderPass,
-                            uint32_t imageIndex) {
+                            uint32_t imageIndex,
+                            Buffer buffer) {
     // subpass 0 at that frameBuffer
     vk::CommandBufferInheritanceInfo inheritanceInfo(renderPass,
                                                      0,
@@ -194,6 +198,7 @@ void buildDrawCommandBuffer(vk::CommandBuffer &drawBuffer,
                                   0, pipeline.getLayout().getDescriptorSets(), {});
     drawBuffer.setScissor(0, {scissor});
     drawBuffer.setViewport(0, {viewPort});
+    drawBuffer.bindVertexBuffers(0, buffer, vk::DeviceSize(0));
     drawBuffer.draw(4, 1, 0, 0); // One triangle
     drawBuffer.end();
 }
@@ -238,16 +243,19 @@ int main()
 
     vk::Queue queue(device.getGraphicQueue());
     // Custom allocator on heap device (host visible or device local)
-    std::shared_ptr<DeviceAllocator> deviceAllocator(std::make_shared<DeviceAllocator>(device, 1 << 24));
-    CommandBufferSubmitter commandBufferSubmitter(device, 1);
-    ImageTransferer imageTransfer(device, commandBufferSubmitter);
-
+    std::shared_ptr<DeviceAllocator> deviceAllocator(std::make_shared<DeviceAllocator>(device, 1 << 25));
     RenderPassTriangle renderPass(device);
     SwapchainKHR swapchainKHR(device, instance.getSurfaceKHR(), renderPass);
 
     DescriptorPool descriptorPool = createDescriptorPool(device);
 
+    glm::vec2 quad[] = {glm::vec2(-1, -1), glm::vec2(1, -1), glm::vec2(-1, 1), glm::vec2(1, 1)};
+    CommandBufferSubmitter commandBufferSubmitter(device, 1);
     Image image; ImageView imageView;
+    Buffer buffer(device, vk::BufferUsageFlagBits::eVertexBuffer | vk::BufferUsageFlagBits::eTransferDst, sizeof quad, deviceAllocator, true);
+    ImageTransferer imageTransfer(device, commandBufferSubmitter);
+    BufferTransferer bufferTransferer(device, 10, 1 << 20, deviceAllocator, commandBufferSubmitter);
+    bufferTransferer.transfer(buffer, 0, sizeof quad, quad);
 
     Image::createImageFromPath("../texture.jpg", image, imageView, imageTransfer, deviceAllocator);
     Sampler sampler(device, image.getMipLevels());
@@ -288,7 +296,7 @@ int main()
             drawBufferPool.reset(false);
 
             for(auto i = 0u; i < swapchainKHR.getImageCount(); ++i)
-                buildDrawCommandBuffer(drawBuffers[i], pipeline, swapchainKHR, renderPass, i);
+                buildDrawCommandBuffer(drawBuffers[i], pipeline, swapchainKHR, renderPass, i, buffer);
             auto a = std::move(swapchainKHR);
             swapchainKHR = std::move(a);
         }

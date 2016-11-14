@@ -5,7 +5,7 @@ class Chunk : private NotCopyable {
 public:
     Chunk(Device &device, vk::DeviceSize size, int memoryTypeIndex);
 
-    bool allocate(vk::DeviceSize size, Block &block);
+    bool allocate(vk::DeviceSize size, vk::DeviceSize alignment, Block &block);
     bool isIn(Block const &block) const;
     void deallocate(Block const &block);
     int memoryTypeIndex() const;
@@ -18,4 +18,5 @@ protected:
     vk::DeviceSize mSize;
     int mMemoryTypeIndex;
     std::vector<Block> mBlocks;
+    void *mPtr = nullptr;
 };

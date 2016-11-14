@@ -17,10 +17,10 @@ Image::Image(Device const &device, vk::ImageCreateInfo info, std::shared_ptr<Abs
     vk::MemoryRequirements requirements = device.getImageMemoryRequirements(m_image);
     bool inGPU = info.tiling == vk::ImageTiling::eOptimal ? true : false;
     auto index = findMemoryType(requirements.memoryTypeBits, device.getPhysicalDevice().getMemoryProperties(), inGPU);
-    *mBlock = allocator->allocate(requirements.size, index);
+    *mBlock = allocator->allocate(requirements.size, requirements.alignment, index);
 
     if(inGPU == false)
-        *mPtr = device.mapMemory(mBlock->memory, 0, VK_WHOLE_SIZE, vk::MemoryMapFlags());
+        *mPtr = mBlock->ptr;
 
     device.bindImageMemory(m_image, mBlock->memory, mBlock->offset);
 }

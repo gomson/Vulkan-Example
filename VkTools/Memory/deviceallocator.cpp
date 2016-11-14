@@ -6,16 +6,16 @@ DeviceAllocator::DeviceAllocator(Device device, vk::DeviceSize size) :
 
 }
 
-Block DeviceAllocator::allocate(vk::DeviceSize size, int memoryTypeIndex) {
+Block DeviceAllocator::allocate(vk::DeviceSize size, vk::DeviceSize alignment, int memoryTypeIndex) {
     Block block;
     // We search a "good" chunk
     for(auto &chunk : mChunks)
         if(chunk->memoryTypeIndex() == memoryTypeIndex)
-            if(chunk->allocate(size, block))
+            if(chunk->allocate(size, alignment, block))
                 return block;
 
     mChunks.emplace_back(mChunkAllocator.allocate(size, memoryTypeIndex));
-    assert(mChunks.back()->allocate(size, block));
+    assert(mChunks.back()->allocate(size, alignment, block));
     return block;
 }
 
