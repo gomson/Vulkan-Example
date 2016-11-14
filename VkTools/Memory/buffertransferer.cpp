@@ -66,7 +66,12 @@ void BufferTransferer::transfer(Buffer const &src, Buffer &dst,
 }
 
 void BufferTransferer::transfer(Buffer &buffer, vk::DeviceSize offset, vk::DeviceSize size, void *data) {
-    assert(size <= *mSizeTransfererBuffers);
+    while(size > *mSizeTransfererBuffers) {
+        transfer(buffer, offset, *mSizeTransfererBuffers, data);
+        offset += *mSizeTransfererBuffers;
+        size -= *mSizeTransfererBuffers;
+        data = (char*)data + *mSizeTransfererBuffers;
+    }
     
     if(*mIndex == mTransfererBuffers->size()) {
         mCommandBufferSubmitter->submit();
