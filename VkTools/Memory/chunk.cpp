@@ -12,9 +12,8 @@ Chunk::Chunk(Device &device, vk::DeviceSize size, int memoryTypeIndex) :
     block.size = size;
     mMemory = block.memory = device.allocateMemory(allocateInfo);
 
-    if((device.getPhysicalDevice().getMemoryProperties().memoryTypes[memoryTypeIndex].propertyFlags & vk::MemoryPropertyFlagBits::eHostVisible) == vk::MemoryPropertyFlagBits::eHostVisible) {
-        mPtr = block.ptr = device.mapMemory(mMemory, 0, VK_WHOLE_SIZE);
-    }
+    if((device.getPhysicalDevice().getMemoryProperties().memoryTypes[memoryTypeIndex].propertyFlags & vk::MemoryPropertyFlagBits::eHostVisible) == vk::MemoryPropertyFlagBits::eHostVisible)
+        mPtr = device.mapMemory(mMemory, 0, VK_WHOLE_SIZE);
 
     mBlocks.emplace_back(block);
 }
@@ -41,17 +40,25 @@ bool Chunk::allocate(vk::DeviceSize size, vk::DeviceSize alignment, Block &block
 
     for(uint32_t i = 0; i < mBlocks.size(); ++i) {
         if(mBlocks[i].free) {
-            // Compute size after taking care about offsetAlignment
+            // Compute virtual size after taking care about offsetAlignment
             uint32_t newSize = mBlocks[i].size;
 
             if(mBlocks[i].offset % alignment != 0)
                 newSize -= alignment - mBlocks[i].offset % alignment;
 
+            // If match
             if(newSize >= size) {
-                // if perfect match
+
+                // We compute offset and size that care about alignment (for this Block)
                 mBlocks[i].size = newSize;
                 if(mBlocks[i].offset % alignment != 0)
                     mBlocks[i].offset += alignment - mBlocks[i].offset % alignment;
+
+                // Compute the ptr address
+                if(mPtr != nullptr)
+                    mBlocks[i].ptr = (char*)mPtr + mBlocks[i].offset;
+
+                // if perfect match
                 if(mBlocks[i].size == size) {
                     mBlocks[i].free = false;
                     block = mBlocks[i];
@@ -63,8 +70,7 @@ bool Chunk::allocate(vk::DeviceSize size, vk::DeviceSize alignment, Block &block
                 nextBlock.offset = mBlocks[i].offset + size;
                 nextBlock.memory = mMemory;
                 nextBlock.size = mBlocks[i].size - size;
-                nextBlock.ptr = (char*)mBlocks[i].ptr + size;
-                mBlocks.emplace_back(nextBlock);
+                mBlocks.emplace_back(nextBlock); // We add the newBlock
 
                 mBlocks[i].size = size;
                 mBlocks[i].free = false;

@@ -8,7 +8,7 @@ class AbstractAllocator : private NotCopyable
 {
 public:
     AbstractAllocator(Device const &device) :
-        mDevice(device) {
+        mDevice(std::make_shared<Device>(device)) {
 
     }
 
@@ -16,13 +16,13 @@ public:
     virtual void deallocate(Block &block) = 0;
 
     Device getDevice() const {
-        return mDevice;
+        return *mDevice;
     }
 
     virtual ~AbstractAllocator() = 0;
 
 protected:
-    Device mDevice;
+    std::shared_ptr<Device> mDevice;
 };
 
 inline AbstractAllocator::~AbstractAllocator() {

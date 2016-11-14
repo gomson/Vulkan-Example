@@ -17,7 +17,7 @@ struct Block {
     vk::DeviceSize offset;
     vk::DeviceSize size;
     bool free = false;
-    void *ptr = nullptr;
+    void *ptr = nullptr; // Useless if it is a GPU allocation
 
     bool operator ==(Block const &block);
 };

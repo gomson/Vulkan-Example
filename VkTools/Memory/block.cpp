@@ -38,7 +38,8 @@ bool Block::operator ==(Block const &block) {
     if(memory == block.memory &&
        offset == block.offset &&
        size == block.size &&
-       free == block.free)
+       free == block.free &&
+       ptr == block.ptr)
         return true;
     return false;
 }
