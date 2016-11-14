@@ -5,6 +5,6 @@ VkResource::VkResource(const Device &device) :
 
 }
 
-vk::Device VkResource::getDevice() const {
+Device VkResource::getDevice() const {
     return *mDevice;
 }

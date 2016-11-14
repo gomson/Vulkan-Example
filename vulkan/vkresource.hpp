@@ -12,7 +12,7 @@ public:
     VkResource &operator=(VkResource &&vkResource) = default;
     VkResource &operator=(VkResource const &vkResource) = default;
 
-    vk::Device getDevice() const;
+    Device getDevice() const;
 
 protected:
     std::shared_ptr<Device> mDevice;

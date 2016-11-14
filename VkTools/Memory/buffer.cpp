@@ -1,12 +1,13 @@
 #include "buffer.hpp"
 #include "chunkallocator.hpp"
 
-Buffer::Buffer(Device &device, vk::BufferUsageFlags usage, vk::DeviceSize size,
+Buffer::Buffer(const Device &device, vk::BufferUsageFlags usage, vk::DeviceSize size,
                std::shared_ptr<AbstractAllocator> allocator, bool shouldBeDeviceLocal) :
     VkResource(device), mAllocator(allocator),
     mSize(std::make_shared<vk::DeviceSize>(size)),
     mUsage(std::make_shared<vk::BufferUsageFlags>(usage)),
-    mProperties(std::make_shared<vk::PhysicalDeviceMemoryProperties>(device.getPhysicalDevice().getMemoryProperties())) {
+    mProperties(std::make_shared<vk::PhysicalDeviceMemoryProperties>(device.getPhysicalDevice().getMemoryProperties())),
+    mIsDeviceLocal(std::make_shared<bool>(shouldBeDeviceLocal)) {
     createBuffer();
     allocate(shouldBeDeviceLocal);
 }

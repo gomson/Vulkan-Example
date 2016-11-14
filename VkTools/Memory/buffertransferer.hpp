@@ -5,7 +5,7 @@
 class BufferTransferer : public ObserverCommandBufferSubmitter
 {
 public:
-    BufferTransferer(Device &device, uint32_t numberBuffers, vk::DeviceSize sizeTransfererBuffers,
+    BufferTransferer(Device const &device, uint32_t numberBuffers, vk::DeviceSize sizeTransfererBuffers,
                      std::shared_ptr<AbstractAllocator> allocator, CommandBufferSubmitter &commandBufferSubmitter);
 
     void transfer(const Buffer &src, Buffer &dst,

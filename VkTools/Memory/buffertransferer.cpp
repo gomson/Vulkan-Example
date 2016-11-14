@@ -1,6 +1,6 @@
 #include "buffertransferer.hpp"
 
-BufferTransferer::BufferTransferer(Device &device, uint32_t numberBuffers, vk::DeviceSize sizeTransfererBuffers,
+BufferTransferer::BufferTransferer(const Device &device, uint32_t numberBuffers, vk::DeviceSize sizeTransfererBuffers,
                                    std::shared_ptr<AbstractAllocator> allocator, CommandBufferSubmitter &commandBufferSubmitter) :
     mCommandBufferSubmitter(std::make_shared<CommandBufferSubmitter>(commandBufferSubmitter)),
     mSizeTransfererBuffers(std::make_shared<uint32_t>(sizeTransfererBuffers)) {
@@ -25,7 +25,18 @@ void BufferTransferer::transfer(Buffer const &src, Buffer &dst,
                 vk::BufferUsageFlagBits::eTransferDst);
 
     assert(src.getSize() >= (offsetSrc + size));
-    assert(dst.getSize() >= (offsetDst + size));
+
+    Buffer newBuffer; // usefull if realloc;
+    bool realloc = false;
+    if(dst.getSize() < (offsetDst + size)) {
+        newBuffer = Buffer(dst.getDevice(), dst.getUsage(), std::max(dst.getSize() * 2, offsetDst + size), dst.getAllocator(), dst.isDeviceLocal());
+
+        if(offsetDst > 0)
+            transfer(dst, newBuffer, 0, 0, offsetDst);
+
+        std::swap(dst, newBuffer);
+        realloc = true;
+    }
 
     // Prepare the region copied
     vk::BufferCopy region(offsetSrc, offsetDst, size);
@@ -47,6 +58,11 @@ void BufferTransferer::transfer(Buffer const &src, Buffer &dst,
                         nullptr);
     cmd.end();
 
+    // After it, newBuffer will be destroyed
+    if(realloc) {
+        mCommandBufferSubmitter->submit();
+        mCommandBufferSubmitter->wait();
+    }
 }
 
 void BufferTransferer::transfer(Buffer &buffer, vk::DeviceSize offset, vk::DeviceSize size, void *data) {

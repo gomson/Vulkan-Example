@@ -7,7 +7,7 @@ class Buffer : public VkResource, public vk::Buffer
 public:
     Buffer() = default;
 
-    Buffer(Device &device, vk::BufferUsageFlags usage, vk::DeviceSize size,
+    Buffer(Device const &device, vk::BufferUsageFlags usage, vk::DeviceSize size,
            std::shared_ptr<AbstractAllocator> allocator, bool shouldBeDeviceLocal);
 
     Buffer(Buffer &&buffer) = default;
@@ -29,7 +29,7 @@ private:
     std::shared_ptr<vk::MemoryRequirements> mRequirements = std::make_shared<vk::MemoryRequirements>();
     std::shared_ptr<vk::PhysicalDeviceMemoryProperties> mProperties = std::make_shared<vk::PhysicalDeviceMemoryProperties>();
     std::shared_ptr<Block> mBlock = std::make_shared<Block>();
-    std::shared_ptr<bool> mIsDeviceLocal = std::make_shared<bool>();
+    std::shared_ptr<bool> mIsDeviceLocal;
     std::shared_ptr<void *> mPtr = std::make_shared<void *>(nullptr);
 
     void createBuffer();

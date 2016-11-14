@@ -250,12 +250,15 @@ int main()
     DescriptorPool descriptorPool = createDescriptorPool(device);
 
     glm::vec2 quad[] = {glm::vec2(-1, -1), glm::vec2(1, -1), glm::vec2(-1, 1), glm::vec2(1, 1)};
-    CommandBufferSubmitter commandBufferSubmitter(device, 1);
+    CommandBufferSubmitter commandBufferSubmitter(device, 20);
     Image image; ImageView imageView;
-    Buffer buffer(device, vk::BufferUsageFlagBits::eVertexBuffer | vk::BufferUsageFlagBits::eTransferDst, sizeof quad, deviceAllocator, true);
+    Buffer buffer(device, vk::BufferUsageFlagBits::eVertexBuffer | vk::BufferUsageFlagBits::eTransferDst | vk::BufferUsageFlagBits::eTransferSrc, 1 * sizeof(glm::vec2), deviceAllocator, true);
     ImageTransferer imageTransfer(device, commandBufferSubmitter);
     BufferTransferer bufferTransferer(device, 10, 1 << 20, deviceAllocator, commandBufferSubmitter);
-    bufferTransferer.transfer(buffer, 0, sizeof quad, quad);
+    bufferTransferer.transfer(buffer, 0 * sizeof(glm::vec2), sizeof (glm::vec2), quad);
+    bufferTransferer.transfer(buffer, 1 * sizeof(glm::vec2), sizeof (glm::vec2), quad + 1);
+    bufferTransferer.transfer(buffer, 2 * sizeof(glm::vec2), sizeof (glm::vec2), quad + 2);
+    bufferTransferer.transfer(buffer, 3 * sizeof(glm::vec2), sizeof (glm::vec2), quad + 3);
 
     Image::createImageFromPath("../texture.jpg", image, imageView, imageTransfer, deviceAllocator);
     Sampler sampler(device, image.getMipLevels());
