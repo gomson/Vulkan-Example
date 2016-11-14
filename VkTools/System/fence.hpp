@@ -15,7 +15,7 @@ public:
 
     Fence(Fence &&fence) = default;
     Fence(Fence const &fence) = default;
-    Fence &operator=(Fence const &fence) = default;
+    Fence &operator=(Fence fence);
 
     void reset();
     void wait();

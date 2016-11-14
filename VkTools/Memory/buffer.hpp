@@ -12,7 +12,7 @@ public:
 
     Buffer(Buffer &&buffer) = default;
     Buffer(Buffer const &buffer) = default;
-    Buffer &operator=(Buffer const &buffer) = default;
+    Buffer &operator=(Buffer buffer);
 
     vk::DeviceSize getSize() const;
     vk::BufferUsageFlags getUsage() const;

@@ -11,7 +11,7 @@ public:
     Image() = default;
     Image(Image &&image) = default;
     Image(Image const &image) = default;
-    Image &operator=(Image const &image) = default;
+    Image &operator=(Image image);
     Image(Device const &device, vk::ImageCreateInfo info, std::shared_ptr<AbstractAllocator> allocator);
 
     vk::Extent3D getSize() const;

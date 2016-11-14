@@ -9,6 +9,7 @@ public:
     VkResource(Device const &device);
     VkResource(VkResource &&vkResource) = default;
     VkResource(VkResource const &vkResource) = default;
+    VkResource &operator=(VkResource &&vkResource) = default;
     VkResource &operator=(VkResource const &vkResource) = default;
 
     vk::Device getDevice() const;

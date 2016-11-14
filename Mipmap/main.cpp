@@ -160,36 +160,13 @@ public:
 
         vk::AttachmentReference colorAttachmentRef(0, vk::ImageLayout::eColorAttachmentOptimal);
 
-        // Two dependencies one for before the subpass and one for after
-        std::vector<vk::SubpassDependency> dependencies;
-
-        // This dependency is not useful because cache invalidation is done by semaphore
-        /*
-        dependencies.emplace_back(VK_SUBPASS_EXTERNAL, 0,
-                                  vk::PipelineStageFlagBits::eColorAttachmentOutput,
-                                  vk::PipelineStageFlagBits::eColorAttachmentOutput, // we want to write at this stage
-                                  vk::AccessFlags(), // eColorAttachmentOutput make write that are erased
-                                  vk::AccessFlagBits::eColorAttachmentWrite, // We only want to write
-                                  vk::DependencyFlagBits::eByRegion);*/
-
-        // This dependecy is not useful since semaphore wait and flush / invalidate caches
-        /*
-        dependencies.emplace_back(0, VK_SUBPASS_EXTERNAL,
-                                  vk::PipelineStageFlagBits::eColorAttachmentOutput,
-                                  vk::PipelineStageFlagBits::eBottomOfPipe, // does not need to wait anything inside the queue
-                                  vk::AccessFlagBits::eColorAttachmentWrite,
-                                  vk::AccessFlags(), // Memory access is allowed through semaphore
-                                  vk::DependencyFlagBits::eByRegion);                          
-        */
-
         // This subpass is a graphic one
         vk::SubpassDescription subPass(vk::SubpassDescriptionFlags(),
                                        vk::PipelineBindPoint::eGraphics, 0, nullptr,
                                        1, &colorAttachmentRef);
 
         vk::RenderPassCreateInfo renderpass(vk::RenderPassCreateFlags(),
-                                            1, &colorAttachment, 1, &subPass, dependencies.size(),
-                                            dependencies.data());
+                                            1, &colorAttachment, 1, &subPass, 0, nullptr);
 
         m_renderPass = device.createRenderPass(renderpass);
     }
@@ -293,9 +270,6 @@ int main()
     for(int i = 0; i < swapchainKHR.getImageCount(); ++i)
         fences.push_back(Fence(device, true));
 
-    commandBufferSubmitter.submit();
-    commandBufferSubmitter.wait();
-
     while(!window.isClosed()) {
         glfwPollEvents();
 
@@ -304,8 +278,10 @@ int main()
         if(window.isResized()) {
             device.waitIdle();
 
-            if(window.isSurfaceKHROutOfDate())
+            if(window.isSurfaceKHROutOfDate()) {
+                swapchainKHR = SwapchainKHR();
                 instance.createSurfaceKHR();
+            }
 
             swapchainKHR = SwapchainKHR(device, instance.getSurfaceKHR(), renderPass, swapchainKHR);
 

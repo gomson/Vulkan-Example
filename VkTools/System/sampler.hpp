@@ -8,7 +8,7 @@ public:
     Sampler(Device &device, vk::SamplerCreateInfo const &info);
     Sampler(Sampler &&sampler) = default;
     Sampler(Sampler const &sampler) = default;
-    Sampler &operator=(Sampler const &sampler) = default;
+    Sampler &operator=(Sampler sampler);
 
     ~Sampler();
 

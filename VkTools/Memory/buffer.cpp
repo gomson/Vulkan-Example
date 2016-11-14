@@ -11,6 +11,21 @@ Buffer::Buffer(Device &device, vk::BufferUsageFlags usage, vk::DeviceSize size,
     allocate(shouldBeDeviceLocal);
 }
 
+Buffer &Buffer::operator =(Buffer buffer) {
+    using std::swap;
+    swap(static_cast<VkResource&>(buffer), static_cast<VkResource&>(*this));
+    swap(static_cast<vk::Buffer&>(buffer), static_cast<vk::Buffer&>(*this));
+    swap(buffer.mAllocator, mAllocator);
+    swap(buffer.mBlock, mBlock);
+    swap(buffer.mIsDeviceLocal, mIsDeviceLocal);
+    swap(buffer.mProperties, mProperties);
+    swap(buffer.mPtr, mPtr);
+    swap(buffer.mRequirements, mRequirements);
+    swap(buffer.mSize, mSize);
+    swap(buffer.mUsage, mUsage);
+    return *this;
+}
+
 vk::DeviceSize Buffer::getSize() const {
     return *mSize;
 }

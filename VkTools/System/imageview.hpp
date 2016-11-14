@@ -10,7 +10,7 @@ public:
 
     ImageView(ImageView &&imageView) = default;
     ImageView(ImageView const &imageView) = default;
-    ImageView &operator=(ImageView const &imageView) = default;
+    ImageView &operator=(ImageView imageView);
 
     ~ImageView();
 };

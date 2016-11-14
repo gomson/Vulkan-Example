@@ -9,7 +9,7 @@ public:
 
     ShaderModule(ShaderModule &&shaderModule) = default;
     ShaderModule(ShaderModule const &shaderModule) = default;
-    ShaderModule &operator=(ShaderModule const &shaderModule) = default;
+    ShaderModule &operator=(ShaderModule shaderModule);
 
     ~ShaderModule();
 };

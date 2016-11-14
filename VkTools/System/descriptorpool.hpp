@@ -9,7 +9,7 @@ public:
 
     DescriptorPool(DescriptorPool &&descriptorPool) = default;
     DescriptorPool(DescriptorPool const &descriptorPool) = default;
-    DescriptorPool &operator=(DescriptorPool const &descriptorPool) = default;
+    DescriptorPool &operator=(DescriptorPool descriptorPool);
 
     ~DescriptorPool();
 private:

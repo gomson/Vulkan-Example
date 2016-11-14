@@ -16,7 +16,7 @@ public:
     
     CommandPool(CommandPool &&commandPool) = default;
     CommandPool(CommandPool const &commandPool) = default;
-    CommandPool &operator=(CommandPool const &commandPool) = default;
+    CommandPool &operator=(CommandPool commandPool);
 
     std::vector<vk::CommandBuffer> allocate(vk::CommandBufferLevel level, uint32_t count);
     void reset(bool releaseResources);

@@ -58,7 +58,7 @@ Instance::Instance(GLFWwindow *window, bool debug) : mWindow(window) {
     if(debug) {
         vk::DebugReportCallbackCreateInfoEXT debugInfo;
         debugInfo.setFlags(vk::DebugReportFlagBitsEXT::eDebug | /*vk::DebugReportFlagBitsEXT::eInformation | */
-                        //   vk::DebugReportFlagBitsEXT::eError |
+                           vk::DebugReportFlagBitsEXT::eError |
                            vk::DebugReportFlagBitsEXT::ePerformanceWarning |
                            vk::DebugReportFlagBitsEXT::eWarning).setPfnCallback(debugCallback);
 

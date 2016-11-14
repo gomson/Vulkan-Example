@@ -8,7 +8,7 @@ public:
     Device() = default;
     Device(Device &&device) = default;
     Device(const Device &device) = default;
-    Device &operator=(Device const &device) = default;
+    Device &operator=(Device device);
 
     Device(Instance &instance);
 

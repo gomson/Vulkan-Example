@@ -159,31 +159,13 @@ public:
 
         vk::AttachmentReference colorAttachmentRef(0, vk::ImageLayout::eColorAttachmentOptimal);
 
-        // Two dependencies one for before the subpass and one for after
-        std::vector<vk::SubpassDependency> dependencies;
-
-        dependencies.emplace_back(VK_SUBPASS_EXTERNAL, 0,
-                                  vk::PipelineStageFlagBits::eBottomOfPipe,
-                                  vk::PipelineStageFlagBits::eColorAttachmentOutput, // we want to write at this stage
-                                  vk::AccessFlagBits::eMemoryRead,
-                                  vk::AccessFlagBits::eColorAttachmentWrite, // We only want to write
-                                  vk::DependencyFlagBits::eByRegion);
-
-        dependencies.emplace_back(0, VK_SUBPASS_EXTERNAL,
-                                  vk::PipelineStageFlagBits::eColorAttachmentOutput,
-                                  vk::PipelineStageFlagBits::eBottomOfPipe, // Need to wait this stage before the presentation
-                                  vk::AccessFlagBits::eColorAttachmentWrite,
-                                  vk::AccessFlagBits::eMemoryRead, // Presentation only need to read
-                                  vk::DependencyFlagBits::eByRegion);
-
         // This subpass is a graphic one
         vk::SubpassDescription subPass(vk::SubpassDescriptionFlags(),
                                        vk::PipelineBindPoint::eGraphics, 0, nullptr,
                                        1, &colorAttachmentRef);
 
         vk::RenderPassCreateInfo renderpass(vk::RenderPassCreateFlags(),
-                                            1, &colorAttachment, 1, &subPass, dependencies.size(),
-                                            dependencies.data());
+                                            1, &colorAttachment, 1, &subPass, 0, nullptr);
 
         m_renderPass = device.createRenderPass(renderpass);
     }
@@ -245,7 +227,7 @@ Buffer createBuffers(Device &device,
                      BufferTransferer bufferTransfer,
                      std::shared_ptr<AbstractAllocator> allocator) {
     glm::vec4 color = glm::vec4(1.0, 0.0, 1.0, 1.0);
-    vk::BufferUsageFlags gpuUsage = vk::BufferUsageFlagBits::eVertexBuffer | vk::BufferUsageFlagBits::eTransferDst;
+    vk::BufferUsageFlags gpuUsage = vk::BufferUsageFlagBits::eUniformBuffer | vk::BufferUsageFlagBits::eTransferDst;
     Buffer uniformBuffer(device, gpuUsage, sizeof color, allocator, true);
     bufferTransfer.transfer(uniformBuffer, 0, sizeof color, &color);
     return uniformBuffer;
@@ -306,8 +288,10 @@ int main()
         if(window.isResized()) {
             device.waitIdle();
 
-            if(window.isSurfaceKHROutOfDate())
+            if(window.isSurfaceKHROutOfDate()) {
+                swapchainKHR = SwapchainKHR();
                 instance.createSurfaceKHR();
+            }
 
             swapchainKHR = SwapchainKHR(device, instance.getSurfaceKHR(), renderPass, swapchainKHR);
 

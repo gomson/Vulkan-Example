@@ -10,7 +10,7 @@ protected:
 public:
     RenderPass(RenderPass &&renderPass) = default;
     RenderPass(RenderPass const &renderPass) = default;
-    RenderPass &operator=(RenderPass const &renderPass) = default;
+    RenderPass &operator=(RenderPass renderPass);
 
 public:
     ~RenderPass();

@@ -8,12 +8,13 @@
 class SwapchainKHR : public VkResource, public vk::SwapchainKHR
 {
 public:
+    SwapchainKHR() = default;
     SwapchainKHR(Device &device, vk::SurfaceKHR surface, RenderPass &renderpass,
                  vk::SwapchainKHR oldSwapchainKHR = VK_NULL_HANDLE);
 
     SwapchainKHR(SwapchainKHR &&swapchainKHR) = default;
     SwapchainKHR(SwapchainKHR const &swapchainKHR) = default;
-    SwapchainKHR &operator=(SwapchainKHR const &swapchainKHR) = default;
+    SwapchainKHR &operator=(SwapchainKHR swapchainKHR);
 
     FrameBuffer const &getFrameBuffers(uint32_t index) const;
     unsigned getWidth() const;

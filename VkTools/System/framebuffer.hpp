@@ -9,7 +9,7 @@ public:
 
     FrameBuffer(FrameBuffer &&frameBuffer) = default;
     FrameBuffer(FrameBuffer const &frameBuffer) = default;
-    FrameBuffer &operator=(FrameBuffer const &frameBuffer) = default;
+    FrameBuffer &operator=(FrameBuffer frameBuffer);
 
     ~FrameBuffer();
 };

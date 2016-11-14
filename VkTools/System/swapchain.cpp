@@ -13,6 +13,7 @@ SwapchainKHR::SwapchainKHR(Device &device, vk::SurfaceKHR surfaceKHR, RenderPass
     mWidth(std::make_shared<uint32_t>(0)),
     mHeight(std::make_shared<uint32_t>(0)) {
     std::vector<vk::SurfaceFormatKHR> formats(device.getPhysicalDevice().getSurfaceFormatsKHR(surfaceKHR));
+    assert(device.getPhysicalDevice().getSurfaceSupportKHR(0, surfaceKHR) == VK_TRUE);
 
     for(auto &fmt : formats) {
         if(fmt.format == vk::Format::eB8G8R8A8Unorm ||
@@ -38,6 +39,20 @@ SwapchainKHR::SwapchainKHR(Device &device, vk::SurfaceKHR surfaceKHR, RenderPass
     createFrameBuffers();
 }
 
+SwapchainKHR &SwapchainKHR::operator =(SwapchainKHR swapchainKHR) {
+    using std::swap;
+    swap(static_cast<VkResource&>(swapchainKHR), static_cast<VkResource&>(*this));
+    swap(static_cast<vk::SwapchainKHR&>(swapchainKHR), static_cast<vk::SwapchainKHR&>(*this));
+    swap(swapchainKHR.mFormat, mFormat);
+    swap(swapchainKHR.mFrameBuffer, mFrameBuffer);
+    swap(swapchainKHR.mHeight, mHeight);
+    swap(swapchainKHR.mImageCount, mImageCount);
+    swap(swapchainKHR.mImages, mImages);
+    swap(swapchainKHR.mImageView, mImageView);
+    swap(swapchainKHR.mRenderPass, mRenderPass);
+    swap(swapchainKHR.mWidth, mWidth);
+    return *this;
+}
 
 FrameBuffer const &SwapchainKHR::getFrameBuffers(uint32_t index) const {
     return (*mFrameBuffer)[index];

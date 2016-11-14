@@ -10,7 +10,7 @@ protected:
 public:
     Pipeline(Pipeline &&pipeline) = default;
     Pipeline(Pipeline const &pipeline) = default;
-    Pipeline &operator=(Pipeline const &pipeline) = default;
+    Pipeline &operator=(Pipeline pipeline);
 
     PipelineLayout getLayout();
     ~Pipeline();

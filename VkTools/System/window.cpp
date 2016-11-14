@@ -20,8 +20,19 @@ unsigned Window::getHeight() const {
     return mHeight;
 }
 
-bool Window::isClosed() const {
+bool Window::isClosed() {
+    double currentTime = glfwGetTime();
+    ++mFrame;
+    if(currentTime - mLastFrame >= 1.0) {
+        mFps = mFrame;
+        mLastFrame += 1.0;
+        mFrame = 0;
+    }
     return glfwWindowShouldClose(mWindow);
+}
+
+uint32_t Window::getFps() const {
+    return mFps;
 }
 
 bool Window::isResized() {

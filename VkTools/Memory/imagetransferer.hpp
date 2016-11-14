@@ -23,6 +23,8 @@ public:
 
     void buildMipMap(Image &src);
 
+    std::shared_ptr<CommandBufferSubmitter> getCommandBufferSubmitter();
+
 private:
     std::shared_ptr<CommandBufferSubmitter> mCommandBufferSubmitter;
 

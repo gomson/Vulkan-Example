@@ -11,7 +11,7 @@ public:
     PipelineLayout() = default;
     PipelineLayout(PipelineLayout &&pipelineLayout) = default;
     PipelineLayout(PipelineLayout const &pipelineLayout) = default;
-    PipelineLayout &operator=(PipelineLayout const &pipelineLayout) = default;
+    PipelineLayout &operator=(PipelineLayout pipelineLayout);
 
     std::vector<vk::DescriptorSetLayout> getDescriptorSetLayouts() const;
     std::vector<vk::DescriptorSet> getDescriptorSets() const;

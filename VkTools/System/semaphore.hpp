@@ -8,7 +8,7 @@ public:
 
     Semaphore(Semaphore &&semaphore) = default;
     Semaphore(Semaphore const &semaphore) = default;
-    Semaphore &operator=(Semaphore const &semaphore) = default;
+    Semaphore &operator=(Semaphore semaphore);
 
     ~Semaphore();
 };

@@ -1,9 +1,12 @@
 #include "imagetransferer.hpp"
-#include <iostream>
 
 ImageTransferer::ImageTransferer(Device &device, CommandBufferSubmitter commandBufferSubmitter) :
     mCommandBufferSubmitter(std::make_shared<CommandBufferSubmitter>(commandBufferSubmitter)){
 
+}
+
+std::shared_ptr<CommandBufferSubmitter> ImageTransferer::getCommandBufferSubmitter() {
+    return mCommandBufferSubmitter;
 }
 
 void ImageTransferer::transfer(const Image &src, Image &dst,

@@ -12,11 +12,13 @@ public:
     unsigned getWidth() const;
     unsigned getHeight() const;
 
-    bool isClosed() const;
+    bool isClosed();
     bool isResized();
     bool isSurfaceKHROutOfDate();
 
     void surfaceIsOutOfDate();
+
+    uint32_t getFps() const;
 
     ~Window();
 
@@ -26,6 +28,9 @@ private:
     unsigned mHeight;
     bool mIsResized = true;
     bool mIsSurfaceKHROutOfDate = true;
+    double mLastFrame = glfwGetTime();
+    uint32_t mFps = 0;
+    uint32_t mFrame = 0;
 
     static void onWindowResized(GLFWwindow *window, int width, int height);
 };
