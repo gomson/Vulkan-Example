@@ -18,6 +18,7 @@ public:
     vk::CommandBuffer createCommandBuffer();
 
     void submit();
+    void submit(bool wait);
     void wait();
 
 protected:

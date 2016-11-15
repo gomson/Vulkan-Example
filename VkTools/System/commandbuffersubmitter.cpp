@@ -30,6 +30,16 @@ void CommandBufferSubmitter::submit() {
     mQueue->submit(info, *mFence);
 }
 
+void CommandBufferSubmitter::submit(bool wait) {
+    vk::SubmitInfo info;
+    info.setCommandBufferCount(*mIndex).setPCommandBuffers(mCommandBuffers->data());
+    mFence->reset();
+    mQueue->submit(info, *mFence);
+
+    if(wait)
+        this->wait();
+}
+
 void CommandBufferSubmitter::wait() {
     *mIndex = 0;
     mFence->wait();

@@ -149,8 +149,7 @@ void Image::createImageFromPath(const std::string &path, Image &image, ImageView
 
     imageView = ImageView(allocator->getDevice(), image.getImageViewCreateInfo(vk::ImageAspectFlagBits::eColor, false, false));
     imageTransferer.buildMipMap(image);
-    imageTransferer.getCommandBufferSubmitter()->submit();
-    imageTransferer.getCommandBufferSubmitter()->wait();
+    imageTransferer.getCommandBufferSubmitter()->submit(true);
 }
 
 Image::~Image() {
