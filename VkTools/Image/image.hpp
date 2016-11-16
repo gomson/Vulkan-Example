@@ -1,6 +1,6 @@
 #pragma once
 #include "vulkan/vkresource.hpp"
-#include "abstractallocator.hpp"
+#include "../Memory/abstractallocator.hpp"
 
 class ImageTransferer;
 class ImageView;

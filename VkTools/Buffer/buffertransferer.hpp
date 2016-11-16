@@ -1,7 +1,5 @@
 #pragma once
-#include "../System/commandbuffersubmitter.hpp"
-#include "image.hpp"
-#include "buffer.hpp"
+#include "../Command/commandbuffersubmitter.hpp"
 
 class BufferTransferer : public ObserverCommandBufferSubmitter
 {
@@ -18,10 +16,18 @@ public:
 
     void notify();
 
+    void clearTransferBuffer();
+
 private:
+    std::shared_ptr<AbstractAllocator> mAllocator;
     std::shared_ptr<CommandBufferSubmitter> mCommandBufferSubmitter;
     std::shared_ptr<std::vector<Buffer>> mTransfererBuffers = std::make_shared<std::vector<Buffer>>();
     std::shared_ptr<uint32_t> mSizeTransfererBuffers;
     std::shared_ptr<uint32_t> mIndex = std::make_shared<uint32_t>(0);
     std::shared_ptr<std::vector<vk::DeviceSize>> mSizeAlreadyUsed = std::make_shared<std::vector<vk::DeviceSize>>();
+
+    // These buffers are used when a reallocation happened for example
+    std::shared_ptr<std::vector<Buffer>> mTmpBuffers = std::make_shared<std::vector<Buffer>>();
+
+    void addTransferBuffer();
 };

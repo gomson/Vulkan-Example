@@ -1,6 +1,5 @@
 #pragma once
-#include "../System/commandbuffersubmitter.hpp"
-#include "image.hpp"
+#include "../Command/commandbuffersubmitter.hpp"
 
 class ImageTransferer
 {

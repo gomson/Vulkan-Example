@@ -1,7 +1,7 @@
 #pragma once
 #include "device.hpp"
-#include "imageview.hpp"
-#include "framebuffer.hpp"
+#include "../Image/imageview.hpp"
+#include "../Image/framebuffer.hpp"
 #include "../Pipeline/renderpass.hpp"
 #include "vulkan/vkresource.hpp"
 

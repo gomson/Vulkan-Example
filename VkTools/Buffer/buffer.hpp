@@ -1,6 +1,6 @@
 #pragma once
 #include "VkTools/System/device.hpp"
-#include "abstractallocator.hpp"
+#include "../Memory/abstractallocator.hpp"
 
 class Buffer : public VkResource, public vk::Buffer
 {

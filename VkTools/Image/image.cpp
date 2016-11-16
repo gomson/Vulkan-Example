@@ -1,7 +1,7 @@
 #include "image.hpp"
-#include "../System/imageview.hpp"
-#include "../Memory/imageloader.hpp"
-#include "../Memory/imagetransferer.hpp"
+#include "imageview.hpp"
+#include "imageloader.hpp"
+#include "imagetransferer.hpp"
 
 Image::Image(Device const &device, vk::ImageCreateInfo info, std::shared_ptr<AbstractAllocator> allocator) :
     VkResource(device),

@@ -1,5 +1,4 @@
 #include "buffer.hpp"
-#include "chunkallocator.hpp"
 
 Buffer::Buffer(const Device &device, vk::BufferUsageFlags usage, vk::DeviceSize size,
                std::shared_ptr<AbstractAllocator> allocator, bool shouldBeDeviceLocal) :

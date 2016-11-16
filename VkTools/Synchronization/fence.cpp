@@ -10,6 +10,13 @@ Fence::Fence(Device &device, bool signaled) :
     m_fence = device.createFence(info);
 }
 
+Fence &Fence::operator =(Fence fence) {
+    using std::swap;
+    swap(static_cast<VkResource&>(fence), static_cast<VkResource&>(*this));
+    swap(static_cast<vk::Fence&>(fence), static_cast<vk::Fence&>(*this));
+    return *this;
+}
+
 void Fence::wait() {
     mDevice->waitForFences({m_fence}, true, UINT64_MAX);
 }

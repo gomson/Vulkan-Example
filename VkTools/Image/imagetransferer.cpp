@@ -157,9 +157,9 @@ ImageTransferer::transitionImage(Image image,
     if(newLayout == vk::ImageLayout::eTransferSrcOptimal)
         dst = vk::AccessFlagBits::eTransferRead;
 
-    // If it will be transferDstOptimal, it should be ready at transferWrite
+    // If it will be transferDstOptimal
     else if(newLayout == vk::ImageLayout::eTransferDstOptimal)
-        dst = vk::AccessFlagBits::eTransferWrite;
+        dst = vk::AccessFlagBits::eTransferWrite; // Myst be useless since invalidate for a write
 
     // If it will be shaderReadOnlyOptimal, it should be ready at shaderRead
     else if(newLayout == vk::ImageLayout::eShaderReadOnlyOptimal)

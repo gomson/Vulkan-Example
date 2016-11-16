@@ -7,9 +7,9 @@
 #include "VkTools/System/device.hpp"
 #include "VkTools/System/swapchain.hpp"
 #include "VkTools/System/shadermodule.hpp"
-#include "VkTools/System/commandpool.hpp"
-#include "VkTools/System/semaphore.hpp"
-#include "VkTools/System/fence.hpp"
+#include "VkTools/Command/commandpool.hpp"
+#include "VkTools/Synchronization/semaphore.hpp"
+#include "VkTools/Synchronization/fence.hpp"
 #include "VkTools/System/descriptorpool.hpp"
 
 #include "VkTools/Pipeline/pipeline.hpp"
@@ -17,13 +17,13 @@
 #include "VkTools/Pipeline/pipelinelayout.hpp"
 #include "VkTools/Pipeline/renderpass.hpp"
 
-#include "VkTools/Memory/imagetransferer.hpp"
-#include "VkTools/Memory/buffertransferer.hpp"
+#include "VkTools/Image/imagetransferer.hpp"
+#include "VkTools/Buffer/buffertransferer.hpp"
 #include "VkTools/Memory/deviceallocator.hpp"
 
-#include "VkTools/Memory/image.hpp"
-#include "VkTools/Memory/imageloader.hpp"
-#include "VkTools/System/sampler.hpp"
+#include "VkTools/Image/image.hpp"
+#include "VkTools/Image/imageloader.hpp"
+#include "VkTools/Image/sampler.hpp"
 
 class PipelineLayoutTriangle : public PipelineLayout {
 public:
@@ -250,16 +250,18 @@ int main()
     DescriptorPool descriptorPool = createDescriptorPool(device);
 
     glm::vec2 quad[] = {glm::vec2(-1, -1), glm::vec2(1, -1), glm::vec2(-1, 1), glm::vec2(1, 1)};
-    CommandBufferSubmitter commandBufferSubmitter(device, 20);
+    CommandBufferSubmitter commandBufferSubmitter(device, 2);
     Image image; ImageView imageView;
     Buffer buffer(device, vk::BufferUsageFlagBits::eVertexBuffer | vk::BufferUsageFlagBits::eTransferDst | vk::BufferUsageFlagBits::eTransferSrc, 1, deviceAllocator, true);
     ImageTransferer imageTransfer(device, commandBufferSubmitter);
-    BufferTransferer bufferTransferer(device, 3, 1, deviceAllocator, commandBufferSubmitter);
+    BufferTransferer bufferTransferer(device, 0, 3, deviceAllocator, commandBufferSubmitter);
     bufferTransferer.transfer(buffer, 0 * sizeof(glm::vec2), sizeof(glm::vec2), quad);
     bufferTransferer.transfer(buffer, 1 * sizeof(glm::vec2), sizeof(glm::vec2), quad + 1);
     bufferTransferer.transfer(buffer, 2 * sizeof(glm::vec2), sizeof(glm::vec2), quad + 2);
     bufferTransferer.transfer(buffer, 3 * sizeof(glm::vec2), sizeof(glm::vec2), quad + 3);
+  //  bufferTransferer.transfer(buffer, 0, sizeof quad, quad);
 
+    commandBufferSubmitter.submit();
     Image::createImageFromPath("../texture.jpg", image, imageView, imageTransfer, deviceAllocator);
     Sampler sampler(device, image.getMipLevels());
     PipelineLayoutTriangle pipelineLayout = PipelineLayoutTriangle(device, descriptorPool, imageView, sampler);
@@ -327,7 +329,7 @@ int main()
         /* We ask for wait at the colorAttachmentOutput stage because
          * it is this stage that we write to frameBuffer, then we signal the
            imageRenderFinishedSemaphore */
-        vk::PipelineStageFlags sf[] = {vk::PipelineStageFlagBits::eColorAttachmentOutput};
+        vk::PipelineStageFlags sf[] = {vk::PipelineStageFlagBits::eTopOfPipe};
         vk::SubmitInfo si(1, &imageAvailableSemaphore, sf, 1, &primaryCommandBuffers[index],
                           1, &imageRenderFinishedSemaphore);
 
