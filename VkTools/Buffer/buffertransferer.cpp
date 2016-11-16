@@ -5,7 +5,6 @@ BufferTransferer::BufferTransferer(const Device &device, uint32_t numberBuffers,
     mAllocator(allocator),
     mCommandBufferSubmitter(std::make_shared<CommandBufferSubmitter>(commandBufferSubmitter)),
     mSizeTransfererBuffers(std::make_shared<uint32_t>(sizeTransfererBuffers)) {
-    mCommandBufferSubmitter->addObserver(this);
     for(uint32_t i = 0; i < numberBuffers; ++i)
         addTransferBuffer();
 }
@@ -19,7 +18,6 @@ void BufferTransferer::notify() {
     *mIndex = 0;
     for(auto &size : *mSizeAlreadyUsed)
         size = 0;
-    mTmpBuffers->clear();
 }
 
 void BufferTransferer::transfer(Buffer const &src, Buffer &dst, vk::BufferCopy bufferCopy) {
@@ -39,12 +37,12 @@ void BufferTransferer::transfer(Buffer const &src, Buffer &dst, vk::BufferCopy b
             transfer(dst, newBuffer, vk::BufferCopy(0, 0, bufferCopy.dstOffset));
 
         // Ensure dst buffer is not destroyed before prior transfer completed
-        mTmpBuffers->emplace_back(dst);
+        mCommandBufferSubmitter->cacheBuffer(dst);
         dst = newBuffer;
     }
 
     vk::CommandBufferBeginInfo begin(vk::CommandBufferUsageFlagBits::eOneTimeSubmit);
-    vk::CommandBuffer cmd = mCommandBufferSubmitter->createCommandBuffer();
+    vk::CommandBuffer cmd = mCommandBufferSubmitter->createCommandBuffer(this);
 
     cmd.begin(begin);
     cmd.copyBuffer(src, dst, bufferCopy);

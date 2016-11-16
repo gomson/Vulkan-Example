@@ -3,23 +3,54 @@
 CommandBufferSubmitter::CommandBufferSubmitter(Device &device, uint32_t numberCommandBuffers) :
     mDevice(std::make_shared<Device>(device)),
     mQueue(std::make_shared<vk::Queue>(device.getTransferQueue())),
-    mCommandPool(std::make_shared<CommandPool>(device, true, true, device.getIndexTransferQueue())) {
-    mFences->emplace_back(Fence(device, false));
-    mCommandBuffers->emplace_back(mCommandPool->allocate(vk::CommandBufferLevel::ePrimary, numberCommandBuffers));
+    mCommandPool(std::make_shared<CommandPool>(device, true, true, device.getIndexTransferQueue())),
+    mNumberCommandBufferToAllocate(std::make_shared<uint32_t>(numberCommandBuffers)) {
+    addSubmitIndex();
 }
 
-void CommandBufferSubmitter::addObserver(ObserverCommandBufferSubmitter *observer) {
-    mObservers->emplace_back(observer);
+void CommandBufferSubmitter::addSubmitIndex() {
+    mFences->emplace_back(Fence(*mDevice, false));
+    mCommandBuffers->resize(mCommandBuffers->size() + 1);
+    mTemporaryBuffers->resize(mTemporaryBuffers->size() + 1);
+    mTemporaryImages->resize(mTemporaryImages->size() + 1);
+    mObservers->resize(mObservers->size() + 1);
+    *mCommandBufferIndex = 0;
+    if(mFences->size() != 1)
+        ++*mSubmitIndex;
 }
 
-vk::CommandBuffer CommandBufferSubmitter::createCommandBuffer() {
+void CommandBufferSubmitter::destroySubmit(uint32_t i) {
+    if(*mSubmitIndex > 0) {
+        mDevice->freeCommandBuffers(*mCommandPool, (*mCommandBuffers)[i]);
+        mCommandBuffers->erase(mCommandBuffers->begin() + i);
+        mFences->erase(mFences->begin() + i);
+        mTemporaryBuffers->erase(mTemporaryBuffers->begin() + i);
+        mTemporaryImages->erase(mTemporaryImages->begin() + i);
+        mObservers->erase(mObservers->begin() + i);
+
+        if(i <= *mSubmitIndex)
+            --*mSubmitIndex;
+    }
+}
+
+void CommandBufferSubmitter::cacheBuffer(Buffer const &buffer) {
+    (*mTemporaryBuffers)[*mSubmitIndex].emplace_back(buffer);
+}
+
+void CommandBufferSubmitter::cacheImage(const Image &image) {
+    (*mTemporaryImages)[*mSubmitIndex].emplace_back(image);
+}
+
+vk::CommandBuffer CommandBufferSubmitter::createCommandBuffer(ObserverCommandBufferSubmitter *observer) {
     if(*mCommandBufferIndex >= (*mCommandBuffers)[*mSubmitIndex].size()) {
-        auto buffers = mCommandPool->allocate(vk::CommandBufferLevel::ePrimary, 10);
+        auto buffers = mCommandPool->allocate(vk::CommandBufferLevel::ePrimary, *mNumberCommandBufferToAllocate);
 
         for(auto &b : buffers)
             (*mCommandBuffers)[*mSubmitIndex].emplace_back(b);
     }
 
+    if(observer != nullptr)
+        (*mObservers)[*mSubmitIndex].insert(observer);
     return (*mCommandBuffers)[*mSubmitIndex][(*mCommandBufferIndex)++];
 }
 
@@ -27,10 +58,7 @@ void CommandBufferSubmitter::submit() {
     vk::SubmitInfo info;
     info.setCommandBufferCount(*mCommandBufferIndex).setPCommandBuffers((*mCommandBuffers)[*mSubmitIndex].data());
     mQueue->submit(info, (*mFences)[*mSubmitIndex]);
-    mFences->emplace_back(Fence(*mDevice, false));
-    mCommandBuffers->resize(mCommandBuffers->size() + 1);
-    *mCommandBufferIndex = 0;
-    ++*mSubmitIndex;
+    addSubmitIndex();
 }
 
 void CommandBufferSubmitter::submit(bool wait) {
@@ -43,17 +71,9 @@ void CommandBufferSubmitter::wait(unsigned i) {
     (*mFences)[i].wait();
     (*mFences)[i].reset();
 
-    for(auto &observer : *mObservers)
+    for(auto &observer : (*mObservers)[i])
         observer->notify();
-
-    if(*mSubmitIndex > 0) {
-        mDevice->freeCommandBuffers(*mCommandPool, (*mCommandBuffers)[i]);
-        mCommandBuffers->erase(mCommandBuffers->begin() + i);
-        mFences->erase(mFences->begin() + i);
-
-        if(i <= *mSubmitIndex)
-            --*mSubmitIndex;
-    }
+    destroySubmit(i);
 }
 
 void CommandBufferSubmitter::waitAll() {

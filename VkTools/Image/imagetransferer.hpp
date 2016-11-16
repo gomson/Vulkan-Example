@@ -1,7 +1,7 @@
 #pragma once
 #include "../Command/commandbuffersubmitter.hpp"
 
-class ImageTransferer
+class ImageTransferer : public ObserverCommandBufferSubmitter
 {
 public:
     ImageTransferer(Device &device, CommandBufferSubmitter commandBufferSubmitter);
@@ -23,6 +23,8 @@ public:
     void buildMipMap(Image &src);
 
     std::shared_ptr<CommandBufferSubmitter> getCommandBufferSubmitter();
+
+    void notify() {}
 
 private:
     std::shared_ptr<CommandBufferSubmitter> mCommandBufferSubmitter;

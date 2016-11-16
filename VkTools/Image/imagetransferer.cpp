@@ -25,7 +25,7 @@ void ImageTransferer::transfer(const Image &src, Image &dst,
     assert((dst.getUsage() & vk::ImageUsageFlagBits::eTransferDst) ==
                 vk::ImageUsageFlagBits::eTransferDst);
 
-    vk::CommandBuffer cmd = mCommandBufferSubmitter->createCommandBuffer();
+    vk::CommandBuffer cmd = mCommandBufferSubmitter->createCommandBuffer(this);
 
     vk::CommandBufferBeginInfo beginInfo(vk::CommandBufferUsageFlagBits::eOneTimeSubmit);
 
@@ -61,7 +61,7 @@ void ImageTransferer::transfer(const Image &src, Image &dst,
 }
 
 void ImageTransferer::buildMipMap(Image &src) {
-    vk::CommandBuffer cmd = mCommandBufferSubmitter->createCommandBuffer();
+    vk::CommandBuffer cmd = mCommandBufferSubmitter->createCommandBuffer(this);
     vk::CommandBufferBeginInfo beginInfo(vk::CommandBufferUsageFlagBits::eOneTimeSubmit);
 
     cmd.begin(beginInfo);
