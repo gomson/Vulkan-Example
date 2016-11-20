@@ -1,9 +1,9 @@
 #include "pipeline.hpp"
+#include "VkTools/System/shadermodule.hpp"
 
-Pipeline::Pipeline(Device &device, PipelineLayout pipelineLayout) :
+Pipeline::Pipeline(const Device &device, const PipelineLayout &pipelineLayout) :
     VkResource(device),
     mPipelineLayout(std::make_shared<PipelineLayout>(pipelineLayout)) {
-
 }
 
 PipelineLayout Pipeline::getLayout() {

@@ -28,6 +28,9 @@ public:
                   vk::Extent3D extent);
 
     void buildMipMap(Image &src);
+
+    std::shared_ptr<AbstractAllocator> getAllocator();
+
     void notify();
 
 private:

@@ -9,6 +9,10 @@ Transferer::Transferer(const Device &device, uint32_t numberBuffers, vk::DeviceS
         addTransferBuffer();
 }
 
+std::shared_ptr<AbstractAllocator> Transferer::getAllocator() {
+    return mAllocator;
+}
+
 void Transferer::addTransferBuffer() {
     mTransfererBuffers->emplace_back(Buffer(mAllocator->getDevice(), vk::BufferUsageFlagBits::eTransferSrc, *mSizeTransfererBuffers, mAllocator, false));
     mSizeAlreadyUsed->emplace_back(0);

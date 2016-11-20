@@ -26,6 +26,6 @@ void Fence::reset() {
 }
 
 Fence::~Fence() {
-    if(mCount != nullptr && --(*mCount) == 0)
+    if(mDevice != nullptr && mCount != nullptr && --(*mCount) == 0)
         mDevice->destroyFence(m_fence);
 }

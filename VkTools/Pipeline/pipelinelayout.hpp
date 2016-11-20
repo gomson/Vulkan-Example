@@ -4,8 +4,8 @@
 
 class PipelineLayout : public VkResource, public vk::PipelineLayout
 {
-protected:
-    PipelineLayout(Device &device);
+public:
+    PipelineLayout(Device const &device);
 
 public:
     PipelineLayout() = default;

@@ -1,6 +1,6 @@
 #include "pipelinelayout.hpp"
 
-PipelineLayout::PipelineLayout(Device &device) :
+PipelineLayout::PipelineLayout(const Device &device) :
     VkResource(device),
     mDescriptorSetLayouts(std::make_shared<std::vector<vk::DescriptorSetLayout>>()),
     mDescriptorSets(std::make_shared<std::vector<vk::DescriptorSet>>()) {

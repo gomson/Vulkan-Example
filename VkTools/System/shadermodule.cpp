@@ -14,7 +14,7 @@ static std::vector<char> readFile(const std::string &filename) {
     return buffer;
 }
 
-ShaderModule::ShaderModule(Device &device, const std::string &path) :
+ShaderModule::ShaderModule(const Device &device, const std::string &path) :
     VkResource(device) {
     auto code(readFile(path));
     vk::ShaderModuleCreateInfo ci(vk::ShaderModuleCreateFlags(),
@@ -24,6 +24,6 @@ ShaderModule::ShaderModule(Device &device, const std::string &path) :
 }
 
 ShaderModule::~ShaderModule() {
-    if(mDevice !=nullptr && mCount != nullptr && --(*mCount) == 0)
+    if(mDevice != nullptr && mCount != nullptr && --(*mCount) == 0)
         mDevice->destroyShaderModule(m_shaderModule);
 }
