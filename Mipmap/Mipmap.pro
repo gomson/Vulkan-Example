@@ -10,7 +10,6 @@ SOURCES += main.cpp \
     ../VkTools/Image/framebuffer.cpp \
     ../VkTools/Image/image.cpp \
     ../VkTools/Image/imageloader.cpp \
-    ../VkTools/Image/imagetransferer.cpp \
     ../VkTools/Image/imageview.cpp \
     ../VkTools/Image/sampler.cpp \
     ../VkTools/Memory/block.cpp \
@@ -31,15 +30,14 @@ SOURCES += main.cpp \
     ../vulkan/counter.cpp \
     ../vulkan/vkresource.cpp \
     ../VkTools/Buffer/buffer.cpp \
-    ../VkTools/Buffer/buffertransferer.cpp \
     ../VkTools/Command/commandbuffersubmitter.cpp \
-    ../VkTools/Command/commandpool.cpp
+    ../VkTools/Command/commandpool.cpp \
+    ../VkTools/Command/transferer.cpp
 
 HEADERS += \
     ../VkTools/Image/framebuffer.hpp \
     ../VkTools/Image/image.hpp \
     ../VkTools/Image/imageloader.hpp \
-    ../VkTools/Image/imagetransferer.hpp \
     ../VkTools/Image/imageview.hpp \
     ../VkTools/Image/sampler.hpp \
     ../VkTools/Memory/abstractallocator.hpp \
@@ -62,6 +60,6 @@ HEADERS += \
     ../vulkan/vkresource.hpp \
     ../vulkan/vulkan.hpp \
     ../VkTools/Buffer/buffer.hpp \
-    ../VkTools/Buffer/buffertransferer.hpp \
     ../VkTools/Command/commandbuffersubmitter.hpp \
-    ../VkTools/Command/commandpool.hpp
+    ../VkTools/Command/commandpool.hpp \
+    ../VkTools/Command/transferer.hpp

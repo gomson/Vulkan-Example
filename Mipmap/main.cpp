@@ -17,8 +17,7 @@
 #include "VkTools/Pipeline/pipelinelayout.hpp"
 #include "VkTools/Pipeline/renderpass.hpp"
 
-#include "VkTools/Image/imagetransferer.hpp"
-#include "VkTools/Buffer/buffertransferer.hpp"
+#include "VkTools/Command/transferer.hpp"
 #include "VkTools/Memory/deviceallocator.hpp"
 
 #include "VkTools/Image/image.hpp"
@@ -247,31 +246,29 @@ int main()
     RenderPassTriangle renderPass(device);
     SwapchainKHR swapchainKHR(device, instance.getSurfaceKHR(), renderPass);
 
-    DescriptorPool descriptorPool = createDescriptorPool(device);
-
-    glm::vec2 quad[] = {glm::vec2(-1, -1), glm::vec2(1, -1), glm::vec2(-1, 1), glm::vec2(1, 1)};
-    CommandBufferSubmitter commandBufferSubmitter(device, 2);
-    Image image; ImageView imageView;
-    Buffer buffer(device, vk::BufferUsageFlagBits::eVertexBuffer | vk::BufferUsageFlagBits::eTransferDst | vk::BufferUsageFlagBits::eTransferSrc, 1, deviceAllocator, true);
-    ImageTransferer imageTransfer(device, commandBufferSubmitter);
-    BufferTransferer bufferTransferer(device, 0, 3, deviceAllocator, commandBufferSubmitter);
-    bufferTransferer.transfer(buffer, 0 * sizeof(glm::vec2), sizeof(glm::vec2), quad);
-    bufferTransferer.transfer(buffer, 1 * sizeof(glm::vec2), sizeof(glm::vec2), quad + 1);
-    bufferTransferer.transfer(buffer, 2 * sizeof(glm::vec2), sizeof(glm::vec2), quad + 2);
-    bufferTransferer.transfer(buffer, 3 * sizeof(glm::vec2), sizeof(glm::vec2), quad + 3);
-  //  bufferTransferer.transfer(buffer, 0, sizeof quad, quad);
-
-    commandBufferSubmitter.submit();
-    Image::createImageFromPath("../texture.jpg", image, imageView, imageTransfer, deviceAllocator);
-    Sampler sampler(device, image.getMipLevels());
-    PipelineLayoutTriangle pipelineLayout = PipelineLayoutTriangle(device, descriptorPool, imageView, sampler);
-    PipelineTriangle pipeline(device, renderPass, pipelineLayout);
-
     /* 2 pools,
      * 	one for primaryBuffer which is a transient one : short lived commandBuffer
      * 	one for drawCall, which is recorded when we resize the window */
     CommandPool primaryBufferPool(device, true, true, device.getIndexFamillyQueue());
     CommandPool drawBufferPool(device, false, false, device.getIndexFamillyQueue());
+    DescriptorPool descriptorPool = createDescriptorPool(device);
+
+    glm::vec2 quad[] = {glm::vec2(-1, -1), glm::vec2(1, -1), glm::vec2(-1, 1), glm::vec2(1, 1)};
+    CommandBufferSubmitter commandBufferSubmitter(device, primaryBufferPool, 2);
+    Image image; ImageView imageView;
+    Buffer buffer(device, vk::BufferUsageFlagBits::eVertexBuffer | vk::BufferUsageFlagBits::eTransferDst | vk::BufferUsageFlagBits::eTransferSrc, 1, deviceAllocator, true);
+    Transferer transferer(device, 0, 3, deviceAllocator, commandBufferSubmitter);
+    transferer.transfer(buffer, 0 * sizeof(glm::vec2), sizeof(glm::vec2), quad);
+    transferer.transfer(buffer, 1 * sizeof(glm::vec2), sizeof(glm::vec2), quad + 1);
+    transferer.transfer(buffer, 2 * sizeof(glm::vec2), sizeof(glm::vec2), quad + 2);
+    transferer.transfer(buffer, 3 * sizeof(glm::vec2), sizeof(glm::vec2), quad + 3);
+  //  bufferTransferer.transfer(buffer, 0, sizeof quad, quad);
+
+    commandBufferSubmitter.submit();
+    Image::createImageFromPath("../texture.jpg", image, imageView, transferer, deviceAllocator);
+    Sampler sampler(device, image.getMipLevels());
+    PipelineLayoutTriangle pipelineLayout = PipelineLayoutTriangle(device, descriptorPool, imageView, sampler);
+    PipelineTriangle pipeline(device, renderPass, pipelineLayout);
 
     std::vector<vk::CommandBuffer> primaryCommandBuffers = primaryBufferPool.allocate(vk::CommandBufferLevel::ePrimary, swapchainKHR.getImageCount());
     std::vector<vk::CommandBuffer> drawBuffers = drawBufferPool.allocate(vk::CommandBufferLevel::eSecondary, swapchainKHR.getImageCount());
@@ -282,6 +279,9 @@ int main()
 
     for(int i = 0; i < swapchainKHR.getImageCount(); ++i)
         fences.push_back(Fence(device, true));
+
+    commandBufferSubmitter.submit();
+    commandBufferSubmitter.waitAll();
 
     while(!window.isClosed()) {
         glfwPollEvents();
@@ -326,7 +326,7 @@ int main()
                                    drawBuffers[index],
                                    index);
 
-        /* We ask for wait at the colorAttachmentOutput stage because
+        /* We ask for wait at the top_of_pipe stage because
          * it is this stage that we write to frameBuffer, then we signal the
            imageRenderFinishedSemaphore */
         vk::PipelineStageFlags sf[] = {vk::PipelineStageFlagBits::eTopOfPipe};

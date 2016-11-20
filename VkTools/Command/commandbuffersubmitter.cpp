@@ -1,9 +1,9 @@
 #include "commandbuffersubmitter.hpp"
 
-CommandBufferSubmitter::CommandBufferSubmitter(Device &device, uint32_t numberCommandBuffers) :
+CommandBufferSubmitter::CommandBufferSubmitter(Device &device, CommandPool &commandPool, uint32_t numberCommandBuffers) :
     mDevice(std::make_shared<Device>(device)),
     mQueue(std::make_shared<vk::Queue>(device.getTransferQueue())),
-    mCommandPool(std::make_shared<CommandPool>(device, true, true, device.getIndexTransferQueue())),
+    mCommandPool(std::make_shared<CommandPool>(commandPool)),
     mNumberCommandBufferToAllocate(std::make_shared<uint32_t>(numberCommandBuffers)) {
     addSubmitIndex();
 }
@@ -11,8 +11,7 @@ CommandBufferSubmitter::CommandBufferSubmitter(Device &device, uint32_t numberCo
 void CommandBufferSubmitter::addSubmitIndex() {
     mFences->emplace_back(Fence(*mDevice, false));
     mCommandBuffers->resize(mCommandBuffers->size() + 1);
-    mTemporaryBuffers->resize(mTemporaryBuffers->size() + 1);
-    mTemporaryImages->resize(mTemporaryImages->size() + 1);
+    mTemporaryResources->resize(mTemporaryResources->size() + 1);
     mObservers->resize(mObservers->size() + 1);
     *mCommandBufferIndex = 0;
     if(mFences->size() != 1)
@@ -24,8 +23,7 @@ void CommandBufferSubmitter::destroySubmit(uint32_t i) {
         mDevice->freeCommandBuffers(*mCommandPool, (*mCommandBuffers)[i]);
         mCommandBuffers->erase(mCommandBuffers->begin() + i);
         mFences->erase(mFences->begin() + i);
-        mTemporaryBuffers->erase(mTemporaryBuffers->begin() + i);
-        mTemporaryImages->erase(mTemporaryImages->begin() + i);
+        mTemporaryResources->erase(mTemporaryResources->begin() + i);
         mObservers->erase(mObservers->begin() + i);
 
         if(i <= *mSubmitIndex)
@@ -33,12 +31,8 @@ void CommandBufferSubmitter::destroySubmit(uint32_t i) {
     }
 }
 
-void CommandBufferSubmitter::cacheBuffer(Buffer const &buffer) {
-    (*mTemporaryBuffers)[*mSubmitIndex].emplace_back(buffer);
-}
-
-void CommandBufferSubmitter::cacheImage(const Image &image) {
-    (*mTemporaryImages)[*mSubmitIndex].emplace_back(image);
+void CommandBufferSubmitter::cacheResource(std::shared_ptr<VkResource> &resource) {
+    (*mTemporaryResources)[*mSubmitIndex].emplace_back(resource);
 }
 
 vk::CommandBuffer CommandBufferSubmitter::createCommandBuffer(ObserverCommandBufferSubmitter *observer) {

@@ -1,7 +1,7 @@
 #include "image.hpp"
 #include "imageview.hpp"
 #include "imageloader.hpp"
-#include "imagetransferer.hpp"
+#include "../Command/transferer.hpp"
 
 Image::Image(Device const &device, vk::ImageCreateInfo info, std::shared_ptr<AbstractAllocator> allocator) :
     VkResource(device),
@@ -127,7 +127,7 @@ vk::ImageViewCreateInfo Image::getImageViewCreateInfo(vk::ImageAspectFlags aspec
 }
 
 void Image::createImageFromPath(const std::string &path, Image &image, ImageView &imageView,
-                                ImageTransferer &imageTransferer,
+                                Transferer &transferer,
                                 std::shared_ptr<AbstractAllocator> allocator) {
     ImageLoader loader(path);
     Image imageCPU(allocator->getDevice(), loader.getImageCreateInfo(), allocator);
@@ -135,21 +135,21 @@ void Image::createImageFromPath(const std::string &path, Image &image, ImageView
 
     imageCPU.pushData(loader.getPixel(), loader.getRowPitch());
 
-    imageTransferer.transfer(imageCPU, image,
-                             vk::ImageLayout::ePreinitialized,
-                             vk::ImageLayout::eUndefined,
-                             vk::ImageLayout::eShaderReadOnlyOptimal,
-                             vk::ImageLayout::eTransferSrcOptimal,
-                             vk::ImageSubresourceRange(vk::ImageAspectFlagBits::eColor, 0, 1, 0, 1),
-                             vk::ImageSubresourceRange(vk::ImageAspectFlagBits::eColor, 0, 1, 0, 1),
-                             vk::ImageSubresourceLayers(vk::ImageAspectFlagBits::eColor, 0, 0, 1),
-                             vk::ImageSubresourceLayers(vk::ImageAspectFlagBits::eColor, 0, 0, 1),
-                             vk::Offset3D(0, 0, 0), vk::Offset3D(0, 0, 0),
-                             image.getSize());
+    transferer.transfer(imageCPU, image,
+                        vk::ImageLayout::ePreinitialized,
+                        vk::ImageLayout::eUndefined,
+                        vk::ImageLayout::eShaderReadOnlyOptimal,
+                        vk::ImageLayout::eTransferSrcOptimal,
+                        vk::ImageSubresourceRange(vk::ImageAspectFlagBits::eColor, 0, 1, 0, 1),
+                        vk::ImageSubresourceRange(vk::ImageAspectFlagBits::eColor, 0, 1, 0, 1),
+                        vk::ImageSubresourceLayers(vk::ImageAspectFlagBits::eColor, 0, 0, 1),
+                        vk::ImageSubresourceLayers(vk::ImageAspectFlagBits::eColor, 0, 0, 1),
+                        vk::Offset3D(0, 0, 0), vk::Offset3D(0, 0, 0),
+                        image.getSize());
 
     imageView = ImageView(allocator->getDevice(), image.getImageViewCreateInfo(vk::ImageAspectFlagBits::eColor, false, false));
-    imageTransferer.buildMipMap(image);
-    imageTransferer.getCommandBufferSubmitter()->submit(true);
+    transferer.buildMipMap(image);
+    transferer.cacheResource(std::make_shared<Image>(imageCPU));
 }
 
 Image::~Image() {

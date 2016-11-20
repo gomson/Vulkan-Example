@@ -15,12 +15,11 @@ public:
 class CommandBufferSubmitter
 {
 public:
-    CommandBufferSubmitter(Device &device, uint32_t numberCommandBuffers);
+    CommandBufferSubmitter(Device &device, CommandPool &commandPool, uint32_t numberCommandBuffers);
 
     vk::CommandBuffer createCommandBuffer(ObserverCommandBufferSubmitter *observer);
 
-    void cacheBuffer(Buffer const &buffer);
-    void cacheImage(Image const &image);
+    void cacheResource(std::shared_ptr<VkResource> &resource);
 
     void submit();
     void submit(bool wait);
@@ -38,8 +37,7 @@ protected:
     std::shared_ptr<uint32_t> mSubmitIndex = std::make_shared<uint32_t>(0);
 
     // If the buffer / image was only created for one transfer, it could be interesting to cache it
-    std::shared_ptr<std::deque<std::vector<Buffer>>> mTemporaryBuffers = std::make_shared<std::deque<std::vector<Buffer>>>();
-    std::shared_ptr<std::deque<std::vector<Image>>> mTemporaryImages = std::make_shared<std::deque<std::vector<Image>>>();
+    std::shared_ptr<std::deque<std::vector<std::shared_ptr<VkResource>>>> mTemporaryResources = std::make_shared<std::deque<std::vector<std::shared_ptr<VkResource>>>>();
 
     std::shared_ptr<std::deque<std::unordered_set<ObserverCommandBufferSubmitter*>>> mObservers = std::make_shared<std::deque<std::unordered_set<ObserverCommandBufferSubmitter*>>>();
 

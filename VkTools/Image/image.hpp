@@ -2,7 +2,7 @@
 #include "vulkan/vkresource.hpp"
 #include "../Memory/abstractallocator.hpp"
 
-class ImageTransferer;
+class Transferer;
 class ImageView;
 
 class Image : public VkResource, public vk::Image
@@ -26,7 +26,7 @@ public:
     vk::ImageViewCreateInfo getImageViewCreateInfo(vk::ImageAspectFlags aspect, bool arrayed, bool cube) const;
 
     static void createImageFromPath(std::string const &path, Image &image, ImageView &imageView,
-                                    ImageTransferer &bufferImageTransferer,
+                                    Transferer &bufferImageTransferer,
                                     std::shared_ptr<AbstractAllocator> allocator );
 
     ~Image();
