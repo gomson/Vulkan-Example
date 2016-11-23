@@ -1,11 +1,18 @@
-#ifndef GEOMETRYPIPELINE_HPP
-#define GEOMETRYPIPELINE_HPP
+#pragma once
+#include "VkTools/Pipeline/pipeline.hpp"
+#include "Renderer/RenderPass/geometryrenderpass.hpp"
 
-
-class GeometryPipeline
-{
-public:
-    GeometryPipeline();
+struct Vertex {
+    glm::vec3 position;
+    glm::vec2 textureCoordinate;
+    glm::vec3 normal;
+    glm::vec3 tangeant;
 };
 
-#endif // GEOMETRYPIPELINE_HPP
+class GeometryPipeline : public Pipeline
+{
+public:
+    GeometryPipeline(const Device &device, std::string shaderPrefix,
+                     GeometryRenderPass const &renderPass);
+
+};

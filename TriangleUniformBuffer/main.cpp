@@ -6,9 +6,9 @@
 #include "VkTools/System/device.hpp"
 #include "VkTools/System/swapchain.hpp"
 #include "VkTools/System/shadermodule.hpp"
-#include "VkTools/System/commandpool.hpp"
-#include "VkTools/System/semaphore.hpp"
-#include "VkTools/System/fence.hpp"
+#include "VkTools/Command/commandpool.hpp"
+#include "VkTools/Synchronization/semaphore.hpp"
+#include "VkTools/Synchronization/fence.hpp"
 #include "VkTools/System/descriptorpool.hpp"
 
 #include "VkTools/Pipeline/pipeline.hpp"
@@ -16,7 +16,7 @@
 #include "VkTools/Pipeline/pipelinelayout.hpp"
 #include "VkTools/Pipeline/renderpass.hpp"
 
-#include "VkTools/Memory/buffertransferer.hpp"
+#include "VkTools/Command/transferer.hpp"
 #include "VkTools/Memory/deviceallocator.hpp"
 
 struct UniformColor {
@@ -70,20 +70,20 @@ public:
     PipelineTriangle(Device &device, RenderPass &renderpass,
                      PipelineLayout pipelineLayout) :
         Pipeline(device, pipelineLayout) {
-        mShaders.emplace_back(std::make_unique<ShaderModule>(device, "../Shaders/shader_vert.spv"));
-        mShaders.emplace_back(std::make_unique<ShaderModule>(device, "../Shaders/shader_frag.spv"));
+        mShaderModules->emplace_back(device, "../Shaders/shader_vert.spv");
+        mShaderModules->emplace_back(device, "../Shaders/shader_frag.spv");
 
         std::vector<vk::PipelineShaderStageCreateInfo> stageShaderCreateInfo;
 
         // Shader to draw a triangle
         stageShaderCreateInfo.emplace_back(vk::PipelineShaderStageCreateFlags(),
                                            vk::ShaderStageFlagBits::eVertex,
-                                           *mShaders[0], "main",
+                                           (*mShaderModules)[0], "main",
                                            nullptr);
 
         stageShaderCreateInfo.emplace_back(vk::PipelineShaderStageCreateFlags(),
                                            vk::ShaderStageFlagBits::eFragment,
-                                           *mShaders[1], "main",
+                                           (*mShaderModules)[1], "main",
                                            nullptr);
 
         // Vertices are specified into the shaders
@@ -135,7 +135,6 @@ public:
 
 
 private:
-    std::vector<std::unique_ptr<ShaderModule>> mShaders;
 };
 
 // A renderPass for our triangle
@@ -224,7 +223,7 @@ void buildPrimaryCommandBuffers(RenderPass &renderPass,
 }
 
 Buffer createBuffers(Device &device,
-                     BufferTransferer bufferTransfer,
+                     Transferer bufferTransfer,
                      std::shared_ptr<AbstractAllocator> allocator) {
     glm::vec4 color = glm::vec4(1.0, 0.0, 1.0, 1.0);
     vk::BufferUsageFlags gpuUsage = vk::BufferUsageFlagBits::eUniformBuffer | vk::BufferUsageFlagBits::eTransferDst;
@@ -247,9 +246,10 @@ int main()
 
     vk::Queue queue(device.getGraphicQueue());
     // Custom allocator on heap device (host visible or device local)
+    CommandPool primaryBufferPool(device, true, true, device.getIndexFamillyQueue());
     std::shared_ptr<DeviceAllocator> deviceAllocator(std::make_shared<DeviceAllocator>(device, 1 << 24));
-    CommandBufferSubmitter commandBufferSubmitter(device, 1);
-    BufferTransferer bufferImageTransfer(device, 1, 1 << 20, deviceAllocator, commandBufferSubmitter);
+    CommandBufferSubmitter commandBufferSubmitter(device, primaryBufferPool, 1);
+    Transferer bufferImageTransfer(device, 1, 1 << 20, deviceAllocator, commandBufferSubmitter);
 
     RenderPassTriangle renderPass(device);
     SwapchainKHR swapchainKHR(device, instance.getSurfaceKHR(), renderPass);
@@ -257,17 +257,13 @@ int main()
     Buffer uniformBuffer = createBuffers(device, bufferImageTransfer,
                                          deviceAllocator);
     commandBufferSubmitter.submit();
-    commandBufferSubmitter.wait();
+    commandBufferSubmitter.waitAll();
 
     DescriptorPool descriptorPool = createDescriptorPool(device);
 
     PipelineLayoutTriangle pipelineLayout = PipelineLayoutTriangle(device, descriptorPool, uniformBuffer);
     PipelineTriangle pipeline(device, renderPass, pipelineLayout);
 
-    /* 2 pools,
-     * 	one for primaryBuffer which is a transient one : short lived commandBuffer
-     * 	one for drawCall, which is recorded when we resize the window */
-    CommandPool primaryBufferPool(device, true, true, device.getIndexFamillyQueue());
     CommandPool drawBufferPool(device, false, false, device.getIndexFamillyQueue());
 
     std::vector<vk::CommandBuffer> primaryCommandBuffers = primaryBufferPool.allocate(vk::CommandBufferLevel::ePrimary, swapchainKHR.getImageCount());

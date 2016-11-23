@@ -71,20 +71,20 @@ public:
     PipelineTriangle(Device &device, RenderPass &renderpass,
                      PipelineLayout pipelineLayout) :
         Pipeline(device, pipelineLayout) {
-        mShaders.emplace_back(std::make_unique<ShaderModule>(device, "../Shaders/shader_vert.spv"));
-        mShaders.emplace_back(std::make_unique<ShaderModule>(device, "../Shaders/shader_frag.spv"));
+        mShaderModules->emplace_back(device, "../Shaders/shader_vert.spv");
+        mShaderModules->emplace_back(device, "../Shaders/shader_frag.spv");
 
         std::vector<vk::PipelineShaderStageCreateInfo> stageShaderCreateInfo;
 
-        // Shader to draw a quad
+        // Shader to draw a triangle
         stageShaderCreateInfo.emplace_back(vk::PipelineShaderStageCreateFlags(),
                                            vk::ShaderStageFlagBits::eVertex,
-                                           *mShaders[0], "main",
+                                           (*mShaderModules)[0], "main",
                                            nullptr);
 
         stageShaderCreateInfo.emplace_back(vk::PipelineShaderStageCreateFlags(),
                                            vk::ShaderStageFlagBits::eFragment,
-                                           *mShaders[1], "main",
+                                           (*mShaderModules)[1], "main",
                                            nullptr);
 
         // Vertices are specified into the shaders
@@ -138,7 +138,6 @@ public:
 
 
 private:
-    std::vector<std::unique_ptr<ShaderModule>> mShaders;
 };
 
 // A renderPass for our triangle

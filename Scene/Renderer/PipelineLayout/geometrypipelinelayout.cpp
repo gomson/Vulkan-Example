@@ -1,6 +1,6 @@
 #include "geometrypipelinelayout.hpp"
 
-GeometryPipelineLayout::GeometryPipelineLayout()
-{
+GeometryPipelineLayout::GeometryPipelineLayout(const Device &device) :
+    PipelineLayout(device) {
 
 }

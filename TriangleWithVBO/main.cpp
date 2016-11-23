@@ -6,17 +6,17 @@
 #include "VkTools/System/device.hpp"
 #include "VkTools/System/swapchain.hpp"
 #include "VkTools/System/shadermodule.hpp"
-#include "VkTools/System/commandpool.hpp"
-#include "VkTools/System/semaphore.hpp"
-#include "VkTools/System/fence.hpp"
+#include "VkTools/Command/commandpool.hpp"
+#include "VkTools/Synchronization/semaphore.hpp"
+#include "VkTools/Synchronization/fence.hpp"
 
 #include "VkTools/Pipeline/pipeline.hpp"
 #include "VkTools/Pipeline/renderpass.hpp"
 #include "VkTools/Pipeline/pipelinelayout.hpp"
 #include "VkTools/Pipeline/renderpass.hpp"
 
-#include "VkTools/Memory/buffer.hpp"
-#include "VkTools/Memory/buffertransferer.hpp"
+#include "VkTools/Buffer/buffer.hpp"
+#include "VkTools/Command/transferer.hpp"
 #include "VkTools/Memory/deviceallocator.hpp"
 
 class PipelineLayoutTriangle : public PipelineLayout {
@@ -35,20 +35,20 @@ class PipelineTriangle : public Pipeline {
 public:
     PipelineTriangle(Device &device, RenderPass &renderpass, PipelineLayout &pipelineLayout) :
         Pipeline(device, pipelineLayout) {
-        mShaders.emplace_back(std::make_unique<ShaderModule>(device, "../Shaders/shader_vert.spv"));
-        mShaders.emplace_back(std::make_unique<ShaderModule>(device, "../Shaders/shader_frag.spv"));
+        mShaderModules->emplace_back(device, "../Shaders/shader_vert.spv");
+        mShaderModules->emplace_back(device, "../Shaders/shader_frag.spv");
 
         std::vector<vk::PipelineShaderStageCreateInfo> stageShaderCreateInfo;
 
         // Shader to draw a triangle
         stageShaderCreateInfo.emplace_back(vk::PipelineShaderStageCreateFlags(),
                                            vk::ShaderStageFlagBits::eVertex,
-                                           *mShaders[0], "main",
+                                           (*mShaderModules)[0], "main",
                                            nullptr);
 
         stageShaderCreateInfo.emplace_back(vk::PipelineShaderStageCreateFlags(),
                                            vk::ShaderStageFlagBits::eFragment,
-                                           *mShaders[1], "main",
+                                           (*mShaderModules)[1], "main",
                                            nullptr);
 
         // VertexShader with only one entry
@@ -104,7 +104,6 @@ public:
 
 
 private:
-    std::vector<std::unique_ptr<ShaderModule>> mShaders;
 };
 
 // A renderPass for our triangle
@@ -223,13 +222,13 @@ int main(int argc, char *argv[])
     std::vector<glm::vec2> triangle({glm::vec2(0.0, -0.5), glm::vec2(0.5, 0.5), glm::vec2(-0.5, 0.5)});
     vk::BufferUsageFlags gpuUsage = vk::BufferUsageFlagBits::eVertexBuffer | vk::BufferUsageFlagBits::eTransferDst;
 
-    CommandBufferSubmitter commandBufferSubmitter(device, 1);
-    BufferTransferer bufferTransfer(device, 1, 1 << 20, deviceAllocator, commandBufferSubmitter);
+    CommandBufferSubmitter commandBufferSubmitter(device, primaryBufferPool, 1);
+    Transferer bufferTransfer(device, 1, 1 << 20, deviceAllocator, commandBufferSubmitter);
     Buffer vbo(device, gpuUsage, triangle.size() * sizeof(glm::vec2), deviceAllocator, true);
 
     bufferTransfer.transfer(vbo, 0, sizeof(glm::vec2) * triangle.size(), triangle.data());
     commandBufferSubmitter.submit();
-    commandBufferSubmitter.wait();
+    commandBufferSubmitter.waitAll();
 
     std::vector<Fence> fences;
 

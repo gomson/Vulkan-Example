@@ -6,9 +6,9 @@
 #include "VkTools/System/device.hpp"
 #include "VkTools/System/swapchain.hpp"
 #include "VkTools/System/shadermodule.hpp"
-#include "VkTools/System/commandpool.hpp"
-#include "VkTools/System/semaphore.hpp"
-#include "VkTools/System/fence.hpp"
+#include "VkTools/Command/commandpool.hpp"
+#include "VkTools/Synchronization/semaphore.hpp"
+#include "VkTools/Synchronization/fence.hpp"
 #include "VkTools/System/descriptorpool.hpp"
 
 #include "VkTools/Pipeline/pipeline.hpp"
@@ -16,12 +16,12 @@
 #include "VkTools/Pipeline/pipelinelayout.hpp"
 #include "VkTools/Pipeline/renderpass.hpp"
 
-#include "VkTools/Memory/imagetransferer.hpp"
+#include "VkTools/Command/transferer.hpp"
 #include "VkTools/Memory/deviceallocator.hpp"
 
-#include "VkTools/Memory/image.hpp"
-#include "VkTools/Memory/imageloader.hpp"
-#include "VkTools/System/sampler.hpp"
+#include "VkTools/Image/image.hpp"
+#include "VkTools/Image/imageloader.hpp"
+#include "VkTools/Image/sampler.hpp"
 
 class PipelineLayoutTriangle : public PipelineLayout {
 public:
@@ -70,20 +70,20 @@ public:
     PipelineTriangle(Device &device, RenderPass &renderpass,
                      PipelineLayout pipelineLayout) :
         Pipeline(device, pipelineLayout) {
-        mShaders.emplace_back(std::make_unique<ShaderModule>(device, "../Shaders/shader_vert.spv"));
-        mShaders.emplace_back(std::make_unique<ShaderModule>(device, "../Shaders/shader_frag.spv"));
+        mShaderModules->emplace_back(device, "../Shaders/shader_vert.spv");
+        mShaderModules->emplace_back(device, "../Shaders/shader_frag.spv");
 
         std::vector<vk::PipelineShaderStageCreateInfo> stageShaderCreateInfo;
 
         // Shader to draw a triangle
         stageShaderCreateInfo.emplace_back(vk::PipelineShaderStageCreateFlags(),
                                            vk::ShaderStageFlagBits::eVertex,
-                                           *mShaders[0], "main",
+                                           (*mShaderModules)[0], "main",
                                            nullptr);
 
         stageShaderCreateInfo.emplace_back(vk::PipelineShaderStageCreateFlags(),
                                            vk::ShaderStageFlagBits::eFragment,
-                                           *mShaders[1], "main",
+                                           (*mShaderModules)[1], "main",
                                            nullptr);
 
         // Vertices are specified into the shaders
@@ -135,7 +135,6 @@ public:
 
 
 private:
-    std::vector<std::unique_ptr<ShaderModule>> mShaders;
 };
 
 // A renderPass for our triangle
@@ -237,9 +236,10 @@ int main()
 
     vk::Queue queue(device.getGraphicQueue());
     // Custom allocator on heap device (host visible or device local)
+    CommandPool primaryBufferPool(device, true, true, device.getIndexFamillyQueue());
     std::shared_ptr<DeviceAllocator> deviceAllocator(std::make_shared<DeviceAllocator>(device, 1 << 24));
-    CommandBufferSubmitter commandBufferSubmitter(device, 1);
-    ImageTransferer imageTransfer(device, commandBufferSubmitter);
+    CommandBufferSubmitter commandBufferSubmitter(device, primaryBufferPool, 1);
+    Transferer imageTransfer(device, 0, 1 << 21, deviceAllocator, commandBufferSubmitter);
 
     RenderPassTriangle renderPass(device);
     SwapchainKHR swapchainKHR(device, instance.getSurfaceKHR(), renderPass);
@@ -254,10 +254,6 @@ int main()
     PipelineLayoutTriangle pipelineLayout = PipelineLayoutTriangle(device, descriptorPool, imageView, sampler);
     PipelineTriangle pipeline(device, renderPass, pipelineLayout);
 
-    /* 2 pools,
-     * 	one for primaryBuffer which is a transient one : short lived commandBuffer
-     * 	one for drawCall, which is recorded when we resize the window */
-    CommandPool primaryBufferPool(device, true, true, device.getIndexFamillyQueue());
     CommandPool drawBufferPool(device, false, false, device.getIndexFamillyQueue());
 
     std::vector<vk::CommandBuffer> primaryCommandBuffers = primaryBufferPool.allocate(vk::CommandBufferLevel::ePrimary, swapchainKHR.getImageCount());
@@ -268,7 +264,7 @@ int main()
     std::vector<Fence> fences;
 
     commandBufferSubmitter.submit();
-    commandBufferSubmitter.wait();
+    commandBufferSubmitter.waitAll();
 
     for(int i = 0; i < swapchainKHR.getImageCount(); ++i)
         fences.push_back(Fence(device, true));
@@ -292,8 +288,6 @@ int main()
 
             for(auto i = 0u; i < swapchainKHR.getImageCount(); ++i)
                 buildDrawCommandBuffer(drawBuffers[i], pipeline, swapchainKHR, renderPass, i);
-            auto a = std::move(swapchainKHR);
-            swapchainKHR = std::move(a);
         }
 
         // We get the next index and ask for signaling the imageAvailableSemaphore

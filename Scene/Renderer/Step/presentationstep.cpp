@@ -10,7 +10,6 @@ PresentationStep::PresentationStep(const Device &device, vk::SurfaceKHR surfaceK
     glm::vec2 quad[] = {glm::vec2(-1 , -1), glm::vec2(1, -1), glm::vec2(-1, 1), glm::vec2(1, 1)};
     *mVbo = Buffer(device, vk::BufferUsageFlagBits::eTransferDst | vk::BufferUsageFlagBits::eVertexBuffer, sizeof quad, transferer.getAllocator(), true);
     transferer.transfer(*mVbo, 0, sizeof quad, quad);
-    rebuildSwapchainKHR(surfaceKHR);
 }
 
 void PresentationStep::destroySwapchainKHR() {

@@ -1,11 +1,9 @@
-#ifndef GEOMETRYPIPELINELAYOUT_HPP
-#define GEOMETRYPIPELINELAYOUT_HPP
+#pragma once
+#include "VkTools/Pipeline/pipelinelayout.hpp"
 
-
-class GeometryPipelineLayout
+class GeometryPipelineLayout : public PipelineLayout
 {
 public:
-    GeometryPipelineLayout();
+    GeometryPipelineLayout(const Device &device);
 };
 
-#endif // GEOMETRYPIPELINELAYOUT_HPP
