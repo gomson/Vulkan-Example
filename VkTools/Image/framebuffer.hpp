@@ -13,4 +13,7 @@ public:
     FrameBuffer &operator=(FrameBuffer frameBuffer);
 
     ~FrameBuffer();
+
+protected:
+    FrameBuffer(const Device &device);
 };

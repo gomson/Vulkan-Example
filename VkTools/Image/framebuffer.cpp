@@ -29,6 +29,11 @@ FrameBuffer::FrameBuffer(const Device &device, vk::FramebufferCreateInfo const &
 
 }
 
+FrameBuffer::FrameBuffer(const Device &device) :
+    VkResource(device) {
+
+}
+
 FrameBuffer::~FrameBuffer() {
     if(mDevice != nullptr && mCount != nullptr && --(*mCount) == 0)
         mDevice->destroyFramebuffer(m_framebuffer);
