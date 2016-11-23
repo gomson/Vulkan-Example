@@ -5,7 +5,7 @@
 class RenderPass : public VkResource, public vk::RenderPass
 {
 protected:
-    RenderPass(Device &device);
+    RenderPass(Device const &device);
 
 public:
     RenderPass(RenderPass &&renderPass) = default;

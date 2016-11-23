@@ -1,6 +1,7 @@
 #include "geometryrenderpass.hpp"
 
-GeometryRenderPass::GeometryRenderPass()
+GeometryRenderPass::GeometryRenderPass(const Device &device) :
+    RenderPass(device)
 {
 
 }

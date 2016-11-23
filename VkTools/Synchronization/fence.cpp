@@ -1,6 +1,6 @@
 #include "fence.hpp"
 
-Fence::Fence(Device &device, bool signaled) :
+Fence::Fence(const Device &device, bool signaled) :
     VkResource(device) {
     vk::FenceCreateInfo info;
 

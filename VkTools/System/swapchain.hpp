@@ -9,7 +9,7 @@ class SwapchainKHR : public VkResource, public vk::SwapchainKHR
 {
 public:
     SwapchainKHR() = default;
-    SwapchainKHR(Device &device, vk::SurfaceKHR surface, RenderPass &renderpass,
+    SwapchainKHR(Device const &device, vk::SurfaceKHR surface, RenderPass &renderpass,
                  vk::SwapchainKHR oldSwapchainKHR = VK_NULL_HANDLE);
 
     SwapchainKHR(SwapchainKHR &&swapchainKHR) = default;

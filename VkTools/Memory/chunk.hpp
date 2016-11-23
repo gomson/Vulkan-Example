@@ -3,7 +3,7 @@
 
 class Chunk : private NotCopyable {
 public:
-    Chunk(Device &device, vk::DeviceSize size, int memoryTypeIndex);
+    Chunk(Device const &device, vk::DeviceSize size, int memoryTypeIndex);
 
     bool allocate(vk::DeviceSize size, vk::DeviceSize alignment, Block &block);
     bool isIn(Block const &block) const;

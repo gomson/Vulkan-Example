@@ -1,7 +1,7 @@
 #include <iostream>
 #include "swapchain.hpp"
 
-SwapchainKHR::SwapchainKHR(Device &device, vk::SurfaceKHR surfaceKHR, RenderPass &renderPass,
+SwapchainKHR::SwapchainKHR(const Device &device, vk::SurfaceKHR surfaceKHR, RenderPass &renderPass,
                            vk::SwapchainKHR oldSwapchainKHR) :
     VkResource(device),
     mImages(std::make_shared<std::vector<vk::Image>>()),

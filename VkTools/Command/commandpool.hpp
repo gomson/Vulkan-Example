@@ -11,7 +11,7 @@ public:
      * @param resetableBuffer : Are command buffer invidually resetable
      * @param queueFamillyIndex
      */
-    CommandPool(Device &device, bool transient, bool resetableBuffer,
+    CommandPool(Device const &device, bool transient, bool resetableBuffer,
                 uint32_t queueFamillyIndex);
     
     CommandPool(CommandPool &&commandPool) = default;

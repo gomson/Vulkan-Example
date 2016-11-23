@@ -1,6 +1,6 @@
 #include "descriptorpool.hpp"
 
-DescriptorPool::DescriptorPool(Device &device, uint32_t maxSet,
+DescriptorPool::DescriptorPool(const Device &device, uint32_t maxSet,
                                const vk::ArrayProxy<vk::DescriptorPoolSize> &poolSizes) :
     VkResource(device)
 {

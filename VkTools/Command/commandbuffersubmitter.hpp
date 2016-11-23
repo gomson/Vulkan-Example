@@ -15,7 +15,7 @@ public:
 class CommandBufferSubmitter
 {
 public:
-    CommandBufferSubmitter(Device &device, CommandPool &commandPool, uint32_t numberCommandBuffers);
+    CommandBufferSubmitter(Device const &device, CommandPool &commandPool, uint32_t numberCommandBuffers);
 
     vk::CommandBuffer createCommandBuffer(ObserverCommandBufferSubmitter *observer);
 

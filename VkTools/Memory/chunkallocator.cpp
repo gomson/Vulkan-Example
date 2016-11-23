@@ -17,7 +17,7 @@ bool isPowerOfTwo(vk::DeviceSize size) {
     return !(size & mask);
 }
 
-ChunkAllocator::ChunkAllocator(Device &device, vk::DeviceSize size) :
+ChunkAllocator::ChunkAllocator(const Device &device, vk::DeviceSize size) :
     mDevice(device),
     mSize(size) {
     assert(isPowerOfTwo(size));

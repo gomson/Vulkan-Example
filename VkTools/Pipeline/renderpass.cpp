@@ -1,6 +1,6 @@
 #include "renderpass.hpp"
 
-RenderPass::RenderPass(Device &device) :
+RenderPass::RenderPass(const Device &device) :
     VkResource(device)
 {
 

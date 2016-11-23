@@ -29,15 +29,15 @@ Device::Device(Instance &instance) :
     m_device = mPhysicalDevice->createDevice(deviceCreateInfo);
 }
 
-vk::Queue Device::getGraphicQueue() {
+vk::Queue Device::getGraphicQueue() const {
     return getQueue(*mIndexFamillyQueue, 0);
 }
 
-vk::Queue Device::getTransferQueue() {
+vk::Queue Device::getTransferQueue() const {
     return getQueue(*mIndexFamillyQueue, 0);
 }
 
-vk::Queue Device::getComputeQueue() {
+vk::Queue Device::getComputeQueue() const {
     return getQueue(*mIndexFamillyQueue, 0);
 }
 

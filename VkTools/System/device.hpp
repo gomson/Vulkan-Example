@@ -18,9 +18,9 @@ public:
     uint32_t getIndexTransferQueue() const;
     uint32_t getIndexComputeQueue() const;
 
-    vk::Queue getGraphicQueue();
-    vk::Queue getComputeQueue();
-    vk::Queue getTransferQueue();
+    vk::Queue getGraphicQueue() const;
+    vk::Queue getComputeQueue() const;
+    vk::Queue getTransferQueue() const;
 
     ~Device();
 

@@ -1,6 +1,6 @@
 #include "deviceallocator.hpp"
 
-DeviceAllocator::DeviceAllocator(Device device, vk::DeviceSize size) :
+DeviceAllocator::DeviceAllocator(const Device &device, vk::DeviceSize size) :
     AbstractAllocator(device),
     mChunkAllocator(device, size) {
 

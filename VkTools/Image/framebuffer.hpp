@@ -6,7 +6,7 @@ class FrameBuffer : public VkResource, public vk::Framebuffer
 {
 public:
     FrameBuffer() = default;
-    FrameBuffer(Device &device, vk::FramebufferCreateInfo const &createInfo);
+    FrameBuffer(Device const &device, vk::FramebufferCreateInfo const &createInfo);
 
     FrameBuffer(FrameBuffer &&frameBuffer) = default;
     FrameBuffer(FrameBuffer const &frameBuffer) = default;

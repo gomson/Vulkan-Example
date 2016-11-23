@@ -11,7 +11,7 @@ public:
      * @param device
      * @param signaled : Is fence signaled at creation
      */
-    Fence(Device &device, bool signaled);
+    Fence(Device const &device, bool signaled);
 
     Fence(Fence &&fence) = default;
     Fence(Fence const &fence) = default;

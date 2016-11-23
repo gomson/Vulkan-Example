@@ -1,7 +1,7 @@
 #include "renderpasstopresent.hpp"
 
 // A renderPass to render into our swapchain
-RenderPassToPresent::RenderPassToPresent(Device &device) :
+RenderPassToPresent::RenderPassToPresent(const Device &device) :
     RenderPass(device) {
     /* 1 coolor buffer with B8G8R8A8 way
          * we clear at the beginning and we save at the end

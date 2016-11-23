@@ -1,11 +1,8 @@
-#ifndef GEOMETRYFRAMEBUFFER_HPP
-#define GEOMETRYFRAMEBUFFER_HPP
+#pragma once
+#include "VkTools/Image/framebuffer.hpp"
 
-
-class GeometryFrameBuffer
+class GeometryFrameBuffer : public FrameBuffer
 {
 public:
     GeometryFrameBuffer();
 };
-
-#endif // GEOMETRYFRAMEBUFFER_HPP

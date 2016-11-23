@@ -23,7 +23,7 @@ FrameBuffer &FrameBuffer::operator =(FrameBuffer frameBuffer) {
     return *this;
 }*/
 
-FrameBuffer::FrameBuffer(Device &device, vk::FramebufferCreateInfo const &createInfo) :
+FrameBuffer::FrameBuffer(const Device &device, vk::FramebufferCreateInfo const &createInfo) :
     VkResource(device) {
     m_framebuffer = device.createFramebuffer(createInfo);
 

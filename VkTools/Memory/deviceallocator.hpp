@@ -5,7 +5,7 @@
 class DeviceAllocator : public AbstractAllocator
 {
 public:
-    DeviceAllocator(Device device, vk::DeviceSize size);
+    DeviceAllocator(Device const &device, vk::DeviceSize size);
 
     Block allocate(vk::DeviceSize size, vk::DeviceSize alignment, int memoryTypeIndex);
     void deallocate(Block &block);

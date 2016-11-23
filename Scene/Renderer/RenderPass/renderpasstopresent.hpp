@@ -4,5 +4,5 @@
 // A renderPass to render into our swapchain
 class RenderPassToPresent : public RenderPass {
 public:
-    RenderPassToPresent(Device &device);
+    RenderPassToPresent(Device const &device);
 };

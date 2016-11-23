@@ -1,6 +1,6 @@
 #include "semaphore.hpp"
 
-Semaphore::Semaphore(Device &device) :
+Semaphore::Semaphore(const Device &device) :
     VkResource(device){
     vk::SemaphoreCreateInfo info;
     m_semaphore = device.createSemaphore(info);

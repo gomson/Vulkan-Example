@@ -1,6 +1,6 @@
 #include "commandpool.hpp"
 
-CommandPool::CommandPool(Device &device, bool transient, bool resetableBuffer,
+CommandPool::CommandPool(const Device &device, bool transient, bool resetableBuffer,
                          uint32_t queueFamillyIndex) :
     VkResource(device) {
     vk::CommandPoolCreateInfo info(vk::CommandPoolCreateFlags(), queueFamillyIndex);

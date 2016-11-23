@@ -1,11 +1,8 @@
-#ifndef GEOMETRYRENDERPASS_HPP
-#define GEOMETRYRENDERPASS_HPP
+#pragma once
+#include "VkTools/Pipeline/renderpass.hpp"
 
-
-class GeometryRenderPass
+class GeometryRenderPass : public RenderPass
 {
 public:
-    GeometryRenderPass();
+    GeometryRenderPass(Device const &device);
 };
-
-#endif // GEOMETRYRENDERPASS_HPP

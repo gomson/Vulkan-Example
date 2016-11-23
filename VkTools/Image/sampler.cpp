@@ -1,6 +1,6 @@
 #include "sampler.hpp"
 
-Sampler::Sampler(Device &device, float maxMipMap) :
+Sampler::Sampler(const Device &device, float maxMipMap) :
     VkResource(device) {
     vk::SamplerCreateInfo info(vk::SamplerCreateFlags(),
                                vk::Filter::eNearest,
@@ -16,7 +16,7 @@ Sampler::Sampler(Device &device, float maxMipMap) :
     m_sampler = device.createSampler(info);
 }
 
-Sampler::Sampler(Device &device, const vk::SamplerCreateInfo &info) :
+Sampler::Sampler(const Device &device, const vk::SamplerCreateInfo &info) :
     VkResource(device),
     vk::Sampler(device.createSampler(info)) {
 

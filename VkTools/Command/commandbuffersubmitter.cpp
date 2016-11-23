@@ -1,6 +1,6 @@
 #include "commandbuffersubmitter.hpp"
 
-CommandBufferSubmitter::CommandBufferSubmitter(Device &device, CommandPool &commandPool, uint32_t numberCommandBuffers) :
+CommandBufferSubmitter::CommandBufferSubmitter(const Device &device, CommandPool &commandPool, uint32_t numberCommandBuffers) :
     mDevice(std::make_shared<Device>(device)),
     mQueue(std::make_shared<vk::Queue>(device.getTransferQueue())),
     mCommandPool(std::make_shared<CommandPool>(commandPool)),

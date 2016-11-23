@@ -4,7 +4,7 @@
 class Semaphore : public VkResource, public vk::Semaphore
 {
 public:
-    Semaphore(Device &device);
+    Semaphore(Device const &device);
 
     Semaphore(Semaphore &&semaphore) = default;
     Semaphore(Semaphore const &semaphore) = default;

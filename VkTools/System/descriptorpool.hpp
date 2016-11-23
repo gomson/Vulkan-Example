@@ -4,7 +4,7 @@
 class DescriptorPool : public VkResource, public vk::DescriptorPool
 {
 public:
-    DescriptorPool(Device &device, uint32_t maxSet,
+    DescriptorPool(Device const &device, uint32_t maxSet,
                    const vk::ArrayProxy<vk::DescriptorPoolSize> &poolSizes);
 
     DescriptorPool(DescriptorPool &&descriptorPool) = default;
