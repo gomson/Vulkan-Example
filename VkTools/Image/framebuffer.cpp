@@ -30,6 +30,6 @@ FrameBuffer::FrameBuffer(Device &device, vk::FramebufferCreateInfo const &create
 }
 
 FrameBuffer::~FrameBuffer() {
-    if(mCount != nullptr && --(*mCount) == 0)
+    if(mDevice != nullptr && mCount != nullptr && --(*mCount) == 0)
         mDevice->destroyFramebuffer(m_framebuffer);
 }
