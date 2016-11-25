@@ -1,6 +1,7 @@
 #pragma once
 #include "../System/device.hpp"
 #include "vulkan/vkresource.hpp"
+#include "../Descriptor/descriptorsetlayout.hpp"
 
 class PipelineLayout : public VkResource, public vk::PipelineLayout
 {
@@ -13,12 +14,10 @@ public:
     PipelineLayout(PipelineLayout const &pipelineLayout) = default;
     PipelineLayout &operator=(PipelineLayout pipelineLayout);
 
-    std::vector<vk::DescriptorSetLayout> getDescriptorSetLayouts() const;
-    std::vector<vk::DescriptorSet> getDescriptorSets() const;
+    std::vector<DescriptorSetLayout> getDescriptorSetLayouts() const;
 
     ~PipelineLayout();
 
 protected:
-    std::shared_ptr<std::vector<vk::DescriptorSetLayout>> mDescriptorSetLayouts;
-    std::shared_ptr<std::vector<vk::DescriptorSet>> mDescriptorSets;
+    std::shared_ptr<std::vector<DescriptorSetLayout>> mDescriptorSetLayouts = std::make_shared<std::vector<DescriptorSetLayout>>();
 };

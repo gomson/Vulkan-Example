@@ -1,18 +1,22 @@
 #pragma once
 #include "VkTools/Image/image.hpp"
 #include "VkTools/Image/imageview.hpp"
-#include "VkTools/Image/framebuffer.hpp"
+#include "VkTools/Image/completeframebuffer.hpp"
 #include "Renderer/RenderPass/geometryrenderpass.hpp"
 
-class GeometryFrameBuffer : public FrameBuffer
+class GeometryFrameBuffer : public CompleteFrameBuffer
 {
 public:
+    GeometryFrameBuffer() = default;
     GeometryFrameBuffer(const Device &device, uint32_t width, uint32_t height,
                         const GeometryRenderPass &geometryRenderPass,
                         std::shared_ptr<AbstractAllocator> allocator);
 
+    GeometryFrameBuffer(const GeometryFrameBuffer &frameBuffer) = default;
+    GeometryFrameBuffer(GeometryFrameBuffer &&frameBuffer) = default;
+
+    GeometryFrameBuffer &operator=(GeometryFrameBuffer &&geometryFrameBuffer) = default;
+    GeometryFrameBuffer &operator=(GeometryFrameBuffer const &geometryFrameBuffer) = default;
+
 private:
-    std::shared_ptr<AbstractAllocator> mAllocator;
-    std::shared_ptr<std::vector<ImageView>> mImageViews = std::make_shared<std::vector<ImageView>>();
-    std::shared_ptr<std::vector<Image>> mImages = std::make_shared<std::vector<Image>>();
 };

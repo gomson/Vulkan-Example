@@ -27,8 +27,33 @@ void PresentationStep::rebuildSwapchainKHR(vk::SurfaceKHR surfaceKHR) {
     if(mPrimaryCommandBuffers->size() > 0)
         mDevice->freeCommandBuffers(*mTransientCommandPool, *mPrimaryCommandBuffers);
     *mPrimaryCommandBuffers = mTransientCommandPool->allocate(vk::CommandBufferLevel::ePrimary, mSwapchainKHR->getImageCount());
+
+    std::vector<vk::DescriptorPoolSize> poolSizes;
+    std::vector<vk::DescriptorSetLayout> descriptorSetLayouts;
+    for(auto i(0u); i < mSwapchainKHR->getImageCount(); ++i) {
+        descriptorSetLayouts.emplace_back(mPipeline->getLayout().getDescriptorSetLayouts()[0]);
+        poolSizes.emplace_back(vk::DescriptorType::eCombinedImageSampler, 1);
+    }
+
+    *mDescriptorPool = DescriptorPool(*mDevice, mSwapchainKHR->getImageCount(), poolSizes);
+    vk::DescriptorSetAllocateInfo info(*mDescriptorPool, mSwapchainKHR->getImageCount(), descriptorSetLayouts.data());
+    *mDescriptorSets = mDevice->allocateDescriptorSets(info);
+}
+
+void PresentationStep::updateImages(vk::ArrayProxy<vk::ArrayProxy<ImageView>> images) {
+    for(int i = 0; i < images.size(); ++i) {
+        vk::DescriptorImageInfo imageInfo(VK_NULL_HANDLE,
+                                          images.data()[i].data()[0],
+                                          vk::ImageLayout::eShaderReadOnlyOptimal);
+
+        vk::WriteDescriptorSet write((*mDescriptorSets)[i],
+                0, 0, 1, vk::DescriptorType::eCombinedImageSampler,
+                &imageInfo, nullptr, nullptr);
+        mDevice->updateDescriptorSets(write, nullptr);
+    }
     buildDrawCommandBuffers();
 }
+
 
 void PresentationStep::buildPrimaryCommandBuffer(int index) {
     vk::CommandBufferBeginInfo beginInfo(vk::CommandBufferUsageFlagBits::eOneTimeSubmit, nullptr);
@@ -70,6 +95,9 @@ void PresentationStep::buildDrawCommandBuffers() {
         cmd.setScissor(0, scissor);
         cmd.bindPipeline(vk::PipelineBindPoint::eGraphics, *mPipeline);
         cmd.bindVertexBuffers(0, *mVbo, vk::DeviceSize(0));
+        cmd.bindDescriptorSets(vk::PipelineBindPoint::eGraphics,
+                               mPipeline->getLayout(), 0,
+                               (*mDescriptorSets)[i], {});
         cmd.draw(4, 1, 0, 0);
         cmd.end();
     }
@@ -95,4 +123,8 @@ void PresentationStep::execute() {
 
     mQueue->submit(si, (*mFences)[index]);
     mQueue->presentKHR(present);
+}
+
+uint32_t PresentationStep::getNumberImages() const {
+    return mSwapchainKHR->getImageCount();
 }

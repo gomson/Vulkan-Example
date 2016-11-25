@@ -1,11 +1,11 @@
 #include "pipelinetopresent.hpp"
 #include "../PipelineLayout/pipelinelayouttopresent.hpp"
 
-PipelineToPresent::PipelineToPresent(const Device &device, RenderPass renderPass) :
-    Pipeline(device, PipelineLayoutToPresent(device))
+PipelineToPresent::PipelineToPresent(const Device &device, RenderPass renderPass, std::shared_ptr<Sampler> sampler) :
+    Pipeline(device, PipelineLayoutToPresent(device, sampler))
 {
-    mShaderModules->emplace_back(ShaderModule(device, "../Shaders/final_vert.spv"));
-    mShaderModules->emplace_back(ShaderModule(device, "../Shaders/final_frag.spv"));
+    mShaderModules->emplace_back(device, "../Shaders/final_vert.spv");
+    mShaderModules->emplace_back(device, "../Shaders/final_frag.spv");
     std::vector<vk::PipelineShaderStageCreateInfo> shaderStage;
     vk::PipelineShaderStageCreateInfo shaderStageInfo;
     shaderStageInfo.pName = "main";

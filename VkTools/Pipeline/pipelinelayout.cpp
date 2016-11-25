@@ -1,26 +1,16 @@
 #include "pipelinelayout.hpp"
 
 PipelineLayout::PipelineLayout(const Device &device) :
-    VkResource(device),
-    mDescriptorSetLayouts(std::make_shared<std::vector<vk::DescriptorSetLayout>>()),
-    mDescriptorSets(std::make_shared<std::vector<vk::DescriptorSet>>()) {
+    VkResource(device) {
 
 }
 
-std::vector<vk::DescriptorSetLayout>
+std::vector<DescriptorSetLayout>
 PipelineLayout::getDescriptorSetLayouts() const {
     return *mDescriptorSetLayouts;
 }
 
-std::vector<vk::DescriptorSet>
-PipelineLayout::getDescriptorSets() const {
-    return *mDescriptorSets;
-}
-
 PipelineLayout::~PipelineLayout() {
-    if(mCount != nullptr && --(*mCount) == 0) {
-        for(auto &descriptorSetLayout : *mDescriptorSetLayouts)
-            mDevice->destroyDescriptorSetLayout(descriptorSetLayout);
+    if(mDevice != nullptr && mCount != nullptr && --(*mCount) == 0)
         mDevice->destroyPipelineLayout(*this);
-    }
 }

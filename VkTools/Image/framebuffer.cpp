@@ -34,6 +34,14 @@ FrameBuffer::FrameBuffer(const Device &device) :
 
 }
 
+FrameBuffer &FrameBuffer::operator=(FrameBuffer framebuffer) {
+    using std::swap;
+    swap(static_cast<VkResource&>(framebuffer), static_cast<VkResource&>(*this));
+    swap(static_cast<vk::Framebuffer&>(framebuffer), static_cast<vk::Framebuffer&>(*this));
+
+    return *this;
+}
+
 FrameBuffer::~FrameBuffer() {
     if(mDevice != nullptr && mCount != nullptr && --(*mCount) == 0)
         mDevice->destroyFramebuffer(m_framebuffer);

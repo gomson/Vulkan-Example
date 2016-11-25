@@ -3,7 +3,7 @@
 Sampler::Sampler(const Device &device, float maxMipMap) :
     VkResource(device) {
     vk::SamplerCreateInfo info(vk::SamplerCreateFlags(),
-                               vk::Filter::eNearest,
+                               vk::Filter::eLinear,
                                vk::Filter::eLinear,
                                vk::SamplerMipmapMode::eLinear,
                                vk::SamplerAddressMode::eRepeat,
