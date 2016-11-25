@@ -7,7 +7,7 @@ public:
     AbstractRenderingStep(Device const &device) :
         mDevice(std::make_shared<Device>(device)){}
 
-    virtual void execute() = 0;
+    virtual void execute(uint32_t index) = 0;
 
     virtual ~AbstractRenderingStep() = default;
 

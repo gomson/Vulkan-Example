@@ -14,15 +14,16 @@
 class PresentationStep : public AbstractRenderingStep
 {
 public:
-    PresentationStep(Device const &device, vk::SurfaceKHR surfaceKHR, CommandPool transientCommandPool, CommandPool drawCommandPool, vk::Queue queue, Transferer &transferer);
+    PresentationStep(Device const &device, vk::SurfaceKHR surfaceKHR, CommandBufferSubmitter commandBufferSubmitter, CommandPool drawCommandPool, vk::Queue queue, Transferer &transferer);
 
+    uint32_t getCurrentIndex();
     void destroySwapchainKHR();
     void rebuildSwapchainKHR(vk::SurfaceKHR surfaceKHR);
     void updateImages(vk::ArrayProxy<vk::ArrayProxy<ImageView>> images);
 
     uint32_t getNumberImages() const;
 
-    void execute();
+    void execute(uint32_t index);
 
 private:
     std::shared_ptr<RenderPassToPresent> mRenderPass = std::make_shared<RenderPassToPresent>(*mDevice);
@@ -31,17 +32,15 @@ private:
     std::shared_ptr<SwapchainKHR> mSwapchainKHR = std::make_shared<SwapchainKHR>();
     std::shared_ptr<Semaphore> mImageAvailableSemaphore = std::make_shared<Semaphore>(*mDevice);
     std::shared_ptr<Semaphore> mImageRenderFinishedSemaphore = std::make_shared<Semaphore>(*mDevice);
-    std::shared_ptr<CommandPool> mTransientCommandPool;
+    std::shared_ptr<CommandBufferSubmitter> mCommandBufferSubmitter;
     std::shared_ptr<CommandPool> mDrawCommandPools;
-    std::shared_ptr<std::vector<vk::CommandBuffer>> mPrimaryCommandBuffers = std::make_shared<std::vector<vk::CommandBuffer>>();
     std::shared_ptr<std::vector<vk::CommandBuffer>> mDrawCommandBuffers = std::make_shared<std::vector<vk::CommandBuffer>>();
-    std::shared_ptr<std::vector<Fence>> mFences = std::make_shared<std::vector<Fence>>();
     std::shared_ptr<vk::Queue> mQueue;
 
     std::shared_ptr<Buffer> mVbo = std::make_shared<Buffer>();
     std::shared_ptr<DescriptorPool> mDescriptorPool = std::make_shared<DescriptorPool>();
     std::shared_ptr<std::vector<vk::DescriptorSet>> mDescriptorSets = std::make_shared<std::vector<vk::DescriptorSet>>();
 
-    void buildPrimaryCommandBuffer(int index);
+    vk::CommandBuffer buildPrimaryCommandBuffer(int index);
     void buildDrawCommandBuffers();
 };

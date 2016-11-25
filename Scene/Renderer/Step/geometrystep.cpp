@@ -1,19 +1,14 @@
 #include "geometrystep.hpp"
 #include "VkTools/Synchronization/fence.hpp"
 
-GeometryStep::GeometryStep(const Device &device, CommandPool commandPool) :
+GeometryStep::GeometryStep(const Device &device, CommandBufferSubmitter commandBufferSubmitter) :
     AbstractRenderingStep(device),
-    mQueue(std::make_shared<vk::Queue>(device.getGraphicQueue())),
-    mCommandPool(std::make_shared<CommandPool>(commandPool))
+    mCommandBufferSubmitter(std::make_shared<CommandBufferSubmitter>(commandBufferSubmitter))
 {
 
 }
 
 void GeometryStep::resize(uint32_t width, uint32_t height, std::shared_ptr<AbstractAllocator> allocator, uint32_t numberRoundRobin) {
-    if(mCommandBuffer->size() > 0)
-        mDevice->freeCommandBuffers(*mCommandPool, *mCommandBuffer);
-    vk::CommandBufferAllocateInfo info(*mCommandPool, vk::CommandBufferLevel::ePrimary, numberRoundRobin);
-    *mCommandBuffer = mDevice->allocateCommandBuffers(info);
     mFrameBuffers->resize(numberRoundRobin);
     for(auto &framebuffer : *mFrameBuffers)
         framebuffer = GeometryFrameBuffer(*mDevice, width, height, *mRenderPass,
@@ -28,7 +23,7 @@ vk::ArrayProxy<vk::ArrayProxy<ImageView>> GeometryStep::getImages() const {
     return imagesFromAllFramebuffers;
 }
 
-void GeometryStep::execute() {
+void GeometryStep::execute(uint32_t index) {
     vk::CommandBufferBeginInfo beginInfo(vk::CommandBufferUsageFlagBits::eOneTimeSubmit, nullptr);
 
     std::vector<vk::ClearValue> clears;
@@ -39,26 +34,17 @@ void GeometryStep::execute() {
     clears.emplace_back(vk::ClearDepthStencilValue(1.f, 0));
 
     vk::RenderPassBeginInfo renderPassBegin(*mRenderPass,
-                                           (*mFrameBuffers)[*mIndex],
+                                           (*mFrameBuffers)[index],
                                             vk::Rect2D({0, 0},
-                                                     {(*mFrameBuffers)[*mIndex].getWidth(),
-                                                      (*mFrameBuffers)[*mIndex].getHeight()}),
+                                                     {(*mFrameBuffers)[index].getWidth(),
+                                                      (*mFrameBuffers)[index].getHeight()}),
                                             clears.size(), clears.data());
 
-    vk::CommandBuffer cmd = (*mCommandBuffer)[*mIndex];
+    vk::CommandBuffer cmd = mCommandBufferSubmitter->createCommandBuffer(nullptr);
 
     cmd.begin(beginInfo);
     cmd.beginRenderPass(renderPassBegin, vk::SubpassContents::eSecondaryCommandBuffers);
 
     cmd.endRenderPass();
     cmd.end();
-    *mIndex = (*mIndex + 1) % mCommandBuffer->size();
-
-    vk::SubmitInfo submitInfo;
-    submitInfo.commandBufferCount = 1;
-    submitInfo.pCommandBuffers = &cmd;
-
-    Fence fence(*mDevice, false);
-    mQueue->submit({submitInfo}, {fence});
-    fence.wait();
 }
