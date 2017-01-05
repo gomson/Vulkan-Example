@@ -1,6 +1,6 @@
 #include "transferer.hpp"
 
-Transferer::Transferer(const Device &device, uint32_t numberBuffers, vk::DeviceSize sizeTransfererBuffers,
+Transferer::Transferer(uint32_t numberBuffers, vk::DeviceSize sizeTransfererBuffers,
                        std::shared_ptr<AbstractAllocator> allocator, CommandBufferSubmitter &commandBufferSubmitter) :
     mAllocator(allocator),
     mCommandBufferSubmitter(std::make_shared<CommandBufferSubmitter>(commandBufferSubmitter)),
@@ -38,7 +38,7 @@ void Transferer::transfer(Buffer const &src, Buffer &dst, vk::BufferCopy bufferC
     auto newSize = bufferCopy.dstOffset + bufferCopy.size;
     assert(src.getSize() >= bufferCopy.srcOffset + bufferCopy.size);
 
-    if(dst.getSize() < (newSize)) {
+    if(dst.getSize() < newSize) {
         Buffer newBuffer(dst.getDevice(), dst.getUsage(), std::max(dst.getSize() * 2, newSize), dst.getAllocator(), dst.isDeviceLocal());
 
         if(bufferCopy.dstOffset > 0)

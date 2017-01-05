@@ -1,6 +1,6 @@
-#include "geometryrenderpass.hpp"
+#include "renderingpass.hpp"
 
-GeometryRenderPass::GeometryRenderPass(const Device &device) :
+RenderingPass::RenderingPass(const Device &device) :
     RenderPass(device)
 {
     vk::AttachmentDescription diffuseAttachment(vk::AttachmentDescriptionFlags(),

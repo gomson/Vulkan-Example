@@ -1,7 +1,7 @@
 #include "geometrypipeline.hpp"
 #include "../PipelineLayout/geometrypipelinelayout.hpp"
 
-GeometryPipeline::GeometryPipeline(const Device &device, std::string shaderPrefix, const GeometryRenderPass &renderPass) :
+GeometryPipeline::GeometryPipeline(const Device &device, std::string shaderPrefix, const RenderingPass &renderPass) :
     Pipeline(device, GeometryPipelineLayout(device)) {
     mShaderModules->emplace_back(ShaderModule(device, shaderPrefix + "_vert.spv"));
     mShaderModules->emplace_back(ShaderModule(device, shaderPrefix + "_frag.spv"));

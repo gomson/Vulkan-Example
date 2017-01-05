@@ -4,7 +4,7 @@
 class Transferer : public ObserverCommandBufferSubmitter
 {
 public:
-    Transferer(Device const &device, uint32_t numberBuffers, vk::DeviceSize sizeTransfererBuffers,
+    Transferer(uint32_t numberBuffers, vk::DeviceSize sizeTransfererBuffers,
                std::shared_ptr<AbstractAllocator> allocator, CommandBufferSubmitter &commandBufferSubmitter);
 
     void cacheResource(std::shared_ptr<VkResource> resource);

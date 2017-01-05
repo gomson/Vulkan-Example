@@ -1,6 +1,6 @@
 #pragma once
 #include "VkTools/Pipeline/pipeline.hpp"
-#include "Renderer/RenderPass/geometryrenderpass.hpp"
+#include "Renderer/RenderPass/renderingpass.hpp"
 
 struct Vertex {
     glm::vec3 position;
@@ -13,6 +13,6 @@ class GeometryPipeline : public Pipeline
 {
 public:
     GeometryPipeline(const Device &device, std::string shaderPrefix,
-                     GeometryRenderPass const &renderPass);
+                     RenderingPass const &renderPass);
 
 };

@@ -6,8 +6,12 @@ CompleteFrameBuffer::CompleteFrameBuffer(const Device &device, uint32_t width, u
     *mHeight = height;
 }
 
-vk::ArrayProxy<ImageView> CompleteFrameBuffer::getImageViews() const {
+const std::vector<ImageView> CompleteFrameBuffer::getImageViews() const {
     return *mImageViews;
+}
+
+const std::vector<Image> CompleteFrameBuffer::getImages() const {
+    return *mImages;
 }
 
 uint32_t CompleteFrameBuffer::getWidth() const {

@@ -1,33 +1,29 @@
-#include "geometrystep.hpp"
+#include "renderingstep.hpp"
 #include "VkTools/Synchronization/fence.hpp"
 
-GeometryStep::GeometryStep(const Device &device, CommandBufferSubmitter commandBufferSubmitter) :
-    AbstractRenderingStep(device),
+RenderingStep::RenderingStep(const Device &device, CommandBufferSubmitter commandBufferSubmitter) :
+    mDevice(std::make_shared<Device>(device)),
     mCommandBufferSubmitter(std::make_shared<CommandBufferSubmitter>(commandBufferSubmitter))
 {
 
 }
 
-void GeometryStep::resize(uint32_t width, uint32_t height, std::shared_ptr<AbstractAllocator> allocator, uint32_t numberRoundRobin) {
+void RenderingStep::resize(uint32_t width, uint32_t height, std::shared_ptr<AbstractAllocator> allocator, uint32_t numberRoundRobin) {
     mFrameBuffers->resize(numberRoundRobin);
     for(auto &framebuffer : *mFrameBuffers)
         framebuffer = GeometryFrameBuffer(*mDevice, width, height, *mRenderPass,
                                           allocator);
 }
 
-vk::ArrayProxy<vk::ArrayProxy<ImageView>> GeometryStep::getImages() const {
-    static std::vector<vk::ArrayProxy<ImageView>> imagesFromAllFramebuffers;
-    imagesFromAllFramebuffers.resize(0, nullptr);
-    for(uint32_t i = 0; i < mFrameBuffers->size(); ++i)
-        imagesFromAllFramebuffers.emplace_back((*mFrameBuffers)[i].getImageViews());
-    return imagesFromAllFramebuffers;
+std::vector<CompleteFrameBuffer> RenderingStep::getFramebuffer() const {
+    return std::vector<CompleteFrameBuffer>(mFrameBuffers->begin(), mFrameBuffers->end());
 }
 
-void GeometryStep::execute(uint32_t index) {
+void RenderingStep::execute(uint32_t index) {
     vk::CommandBufferBeginInfo beginInfo(vk::CommandBufferUsageFlagBits::eOneTimeSubmit, nullptr);
 
     std::vector<vk::ClearValue> clears;
-    std::array<float, 4> values = {1.f, 0.f, 1.f, 1.f};
+    std::array<float, 4> values = {1.f, 0.f, 0.f, 1.f};
     clears.emplace_back(vk::ClearColorValue(values));
     clears.emplace_back(vk::ClearColorValue(values));
     clears.emplace_back(vk::ClearColorValue(values));

@@ -5,7 +5,7 @@
 
 class CompleteFrameBuffer : public FrameBuffer
 {
-protected:
+public:
     CompleteFrameBuffer() = default;
     CompleteFrameBuffer(const Device &device, uint32_t width, uint32_t height);
     CompleteFrameBuffer(const CompleteFrameBuffer &frameBuffer) = default;
@@ -14,8 +14,8 @@ protected:
     CompleteFrameBuffer &operator=(CompleteFrameBuffer &&frameBuffer) = default;
     CompleteFrameBuffer &operator=(const CompleteFrameBuffer &frameBuffer) = default;
 
-public:
-    vk::ArrayProxy<ImageView> getImageViews() const;
+    std::vector<ImageView> const getImageViews() const;
+    std::vector<Image> const getImages() const;
     uint32_t getWidth() const;
     uint32_t getHeight() const;
 

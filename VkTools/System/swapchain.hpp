@@ -17,6 +17,7 @@ public:
     SwapchainKHR &operator=(SwapchainKHR swapchainKHR);
 
     FrameBuffer const &getFrameBuffers(uint32_t index) const;
+    vk::Image const &getImage(uint32_t index) const;
     unsigned getWidth() const;
     unsigned getHeight() const;
     unsigned getImageCount() const;

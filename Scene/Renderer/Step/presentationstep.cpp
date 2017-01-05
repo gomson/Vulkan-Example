@@ -1,8 +1,8 @@
 #include "presentationstep.hpp"
 
-PresentationStep::PresentationStep(const Device &device, vk::SurfaceKHR surfaceKHR, CommandBufferSubmitter commandBufferSubmitter,
+PresentationStep::PresentationStep(const Device &device, CommandBufferSubmitter commandBufferSubmitter,
                                    CommandPool drawCommandPool, vk::Queue queue, Transferer &transferer) :
-    AbstractRenderingStep(device),
+    mDevice(std::make_shared<Device>(device)),
     mCommandBufferSubmitter(std::make_shared<CommandBufferSubmitter>(commandBufferSubmitter)),
     mDrawCommandPools(std::make_shared<CommandPool>(drawCommandPool)),
     mQueue(std::make_shared<vk::Queue>(queue))
@@ -32,10 +32,10 @@ void PresentationStep::rebuildSwapchainKHR(vk::SurfaceKHR surfaceKHR) {
     *mDescriptorSets = mDevice->allocateDescriptorSets(info);
 }
 
-void PresentationStep::updateImages(vk::ArrayProxy<vk::ArrayProxy<ImageView>> images) {
-    for(int i = 0; i < images.size(); ++i) {
+void PresentationStep::updateImages(std::vector<CompleteFrameBuffer> framebuffer, uint32_t indexBackTexture) {
+    for(auto i = 0u; i < framebuffer.size(); ++i) {
         vk::DescriptorImageInfo imageInfo(VK_NULL_HANDLE,
-                                          images.data()[i].data()[0],
+                                          framebuffer[i].getImageViews()[indexBackTexture],
                                           vk::ImageLayout::eShaderReadOnlyOptimal);
 
         vk::WriteDescriptorSet write((*mDescriptorSets)[i],
@@ -81,7 +81,7 @@ void PresentationStep::buildDrawCommandBuffers() {
         mDevice->freeCommandBuffers(*mDrawCommandPools, *mDrawCommandBuffers);
     *mDrawCommandBuffers = mDrawCommandPools->allocate(vk::CommandBufferLevel::eSecondary, mSwapchainKHR->getImageCount());
 
-    for(int i = 0; i < mDrawCommandBuffers->size(); ++i) {
+    for(auto i = 0u; i < mDrawCommandBuffers->size(); ++i) {
         vk::CommandBuffer cmd = (*mDrawCommandBuffers)[i];
         vk::CommandBufferInheritanceInfo inheritance(*mRenderPass, 0,
                                                      mSwapchainKHR->getFrameBuffers(i));
