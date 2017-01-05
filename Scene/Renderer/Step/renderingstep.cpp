@@ -11,8 +11,8 @@ RenderingStep::RenderingStep(const Device &device, CommandBufferSubmitter comman
 void RenderingStep::resize(uint32_t width, uint32_t height, std::shared_ptr<AbstractAllocator> allocator, uint32_t numberRoundRobin) {
     mFrameBuffers->resize(numberRoundRobin);
     for(auto &framebuffer : *mFrameBuffers)
-        framebuffer = GeometryFrameBuffer(*mDevice, width, height, *mRenderPass,
-                                          allocator);
+        framebuffer = RenderingFrameBuffer(*mDevice, width, height, *mRenderPass,
+                                           allocator);
 }
 
 std::vector<CompleteFrameBuffer> RenderingStep::getFramebuffer() const {

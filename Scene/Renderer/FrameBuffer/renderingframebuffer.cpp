@@ -1,6 +1,6 @@
-#include "geometryframebuffer.hpp"
+#include "renderingframebuffer.hpp"
 
-GeometryFrameBuffer::GeometryFrameBuffer(const Device &device, uint32_t width, uint32_t height,
+RenderingFrameBuffer::RenderingFrameBuffer(const Device &device, uint32_t width, uint32_t height,
                                          const RenderingPass &geometryRenderPass, std::shared_ptr<AbstractAllocator> allocator) :
     CompleteFrameBuffer(device, width, height) {
     vk::ImageCreateInfo diffuseInfo(vk::ImageCreateFlags(),
