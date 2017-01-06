@@ -1,6 +1,6 @@
-#include "geometrypipelinelayout.hpp"
+#include "staticgeometrypipelinelayout.hpp"
 
-GeometryPipelineLayout::GeometryPipelineLayout(const Device &device) :
+StaticGeometryPipelineLayout::StaticGeometryPipelineLayout(const Device &device) :
     PipelineLayout(device) {
     vk::DescriptorSetLayoutBinding uboBinding(0, vk::DescriptorType::eUniformBuffer,
                                               1, vk::ShaderStageFlagBits::eVertex);

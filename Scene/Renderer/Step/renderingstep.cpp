@@ -1,9 +1,10 @@
 #include "renderingstep.hpp"
 #include "VkTools/Synchronization/fence.hpp"
 
-RenderingStep::RenderingStep(const Device &device, CommandBufferSubmitter commandBufferSubmitter) :
+RenderingStep::RenderingStep(const Device &device, CommandBufferSubmitter commandBufferSubmitter, Transferer transferer) :
     mDevice(std::make_shared<Device>(device)),
-    mCommandBufferSubmitter(std::make_shared<CommandBufferSubmitter>(commandBufferSubmitter))
+    mCommandBufferSubmitter(std::make_shared<CommandBufferSubmitter>(commandBufferSubmitter)),
+    mTransferer(std::make_shared<Transferer>(transferer))
 {
 
 }
@@ -24,8 +25,6 @@ void RenderingStep::execute(uint32_t index) {
 
     std::vector<vk::ClearValue> clears;
     std::array<float, 4> values = {1.f, 0.f, 0.f, 1.f};
-    clears.emplace_back(vk::ClearColorValue(values));
-    clears.emplace_back(vk::ClearColorValue(values));
     clears.emplace_back(vk::ClearColorValue(values));
     clears.emplace_back(vk::ClearDepthStencilValue(1.f, 0));
 

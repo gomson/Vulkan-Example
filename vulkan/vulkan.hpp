@@ -29,6 +29,13 @@
 #include <glm/vec4.hpp>
 #include <glm/glm.hpp>
 
+struct Vertex {
+    glm::vec3 position;
+    glm::vec2 textureCoordinate;
+    glm::vec3 normal;
+    glm::vec3 tangeant;
+};
+
 struct NotCopyable {
 public:
     NotCopyable() = default;
