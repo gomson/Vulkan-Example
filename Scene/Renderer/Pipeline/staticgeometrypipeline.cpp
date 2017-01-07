@@ -40,16 +40,15 @@ StaticGeometryPipeline::StaticGeometryPipeline(const Device &device, std::string
                                                          true, true, vk::CompareOp::eLess);
 
     vk::PipelineMultisampleStateCreateInfo multisample;
-    vk::PipelineColorBlendAttachmentState colorBlendAttachment[3];
-    colorBlendAttachment[0].colorWriteMask = vk::ColorComponentFlagBits::eA |
+    vk::PipelineColorBlendAttachmentState colorBlendAttachment;
+    colorBlendAttachment.colorWriteMask = vk::ColorComponentFlagBits::eA |
                                              vk::ColorComponentFlagBits::eB |
                                              vk::ColorComponentFlagBits::eG |
                                              vk::ColorComponentFlagBits::eR;
-    colorBlendAttachment[2] = colorBlendAttachment[1] = colorBlendAttachment[0];
 
     vk::PipelineColorBlendStateCreateInfo colorBlend(vk::PipelineColorBlendStateCreateFlags(),
                                                      false, vk::LogicOp(),
-                                                     3, colorBlendAttachment);
+                                                     1, &colorBlendAttachment);
 
     vk::DynamicState dynamics[] = {vk::DynamicState::eViewport, vk::DynamicState::eScissor};
     vk::PipelineDynamicStateCreateInfo dynamic(vk::PipelineDynamicStateCreateFlags(),

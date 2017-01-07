@@ -75,7 +75,7 @@ void Transferer::transfer(Buffer const &src, Buffer &dst, vk::BufferCopy bufferC
     cmd.end();
 }
 
-void Transferer::transfer(Buffer &buffer, vk::DeviceSize offset, vk::DeviceSize size, void *data) {
+void Transferer::transfer(Buffer &buffer, vk::DeviceSize offset, vk::DeviceSize size, void const *data) {
     if(*mIndex == mTransfererBuffers->size())
         addTransferBuffer();
 

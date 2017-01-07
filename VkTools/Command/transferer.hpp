@@ -11,7 +11,7 @@ public:
 
     void transfer(const Buffer &src, Buffer &dst, vk::BufferCopy bufferCopy);
 
-    void transfer(Buffer &buffer, vk::DeviceSize offset, vk::DeviceSize size, void *data);
+    void transfer(Buffer &buffer, vk::DeviceSize offset, vk::DeviceSize size, void const *data);
 
     void transfer(Buffer &buffer, Image &image, vk::ImageLayout initialLayout,
                   vk::ImageLayout finalLayout, vk::BufferImageCopy bufferImageCopy);
