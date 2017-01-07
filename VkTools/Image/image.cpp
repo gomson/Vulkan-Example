@@ -127,11 +127,10 @@ vk::ImageViewCreateInfo Image::getImageViewCreateInfo(vk::ImageAspectFlags aspec
 }
 
 void Image::createImageFromPath(const std::string &path, Image &image, ImageView &imageView,
-                                Transferer &transferer,
-                                std::shared_ptr<AbstractAllocator> allocator) {
+                                Transferer &transferer) {
     ImageLoader loader(path);
-    Image imageCPU(allocator->getDevice(), loader.getImageCreateInfo(), allocator);
-    image = Image(allocator->getDevice(), loader.getImageGPUCreateInfo(), allocator);
+    Image imageCPU(transferer.getAllocator()->getDevice(), loader.getImageCreateInfo(), transferer.getAllocator());
+    image = Image(transferer.getAllocator()->getDevice(), loader.getImageGPUCreateInfo(), transferer.getAllocator());
 
     imageCPU.pushData(loader.getPixel(), loader.getRowPitch());
 
@@ -147,7 +146,7 @@ void Image::createImageFromPath(const std::string &path, Image &image, ImageView
                         vk::Offset3D(0, 0, 0), vk::Offset3D(0, 0, 0),
                         image.getSize());
 
-    imageView = ImageView(allocator->getDevice(), image.getImageViewCreateInfo(vk::ImageAspectFlagBits::eColor, false, false));
+    imageView = ImageView(transferer.getAllocator()->getDevice(), image.getImageViewCreateInfo(vk::ImageAspectFlagBits::eColor, false, false));
     transferer.buildMipMap(image);
     transferer.cacheResource(std::make_shared<Image>(imageCPU));
 }

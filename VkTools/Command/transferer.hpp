@@ -9,9 +9,9 @@ public:
 
     void cacheResource(std::shared_ptr<VkResource> resource);
 
-    void transfer(const Buffer &src, Buffer &dst, vk::BufferCopy bufferCopy);
+    void transfer(const Buffer &src, Buffer &dst, vk::BufferCopy bufferCopy, vk::PipelineStageFlags beforeSrc, vk::PipelineStageFlags afterDst);
 
-    void transfer(Buffer &buffer, vk::DeviceSize offset, vk::DeviceSize size, void const *data);
+    void transfer(Buffer &buffer, vk::DeviceSize offset, vk::DeviceSize size, void const *data, vk::PipelineStageFlags usedIn);
 
     void transfer(Buffer &buffer, Image &image, vk::ImageLayout initialLayout,
                   vk::ImageLayout finalLayout, vk::BufferImageCopy bufferImageCopy);

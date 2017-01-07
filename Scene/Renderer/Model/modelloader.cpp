@@ -5,8 +5,8 @@ MeshLoader_t::MeshLoader_t(Buffer &vbo, Buffer &ibo, uint32_t &firstIndex, uint3
     indexCount(mesh.numberIndices),
     firstIndex(firstIndex),
     vertexOffset(vertexOffset) {
-    transferer.transfer(vbo, vertexOffset * sizeof(Vertex), mesh.numberVertices * sizeof(Vertex), mesh.vertices.data());
-    transferer.transfer(ibo, firstIndex * sizeof(uint32_t), mesh.numberIndices * sizeof(uint32_t), mesh.indices.data());
+    transferer.transfer(vbo, vertexOffset * sizeof(Vertex), mesh.numberVertices * sizeof(Vertex), mesh.vertices.data(), vk::PipelineStageFlagBits::eTransfer | vk::PipelineStageFlagBits::eVertexInput);
+    transferer.transfer(ibo, firstIndex * sizeof(uint32_t), mesh.numberIndices * sizeof(uint32_t), mesh.indices.data(), vk::PipelineStageFlagBits::eTransfer | vk::PipelineStageFlagBits::eVertexInput);
 
     firstIndex += mesh.numberIndices;
     vertexOffset += mesh.numberVertices;

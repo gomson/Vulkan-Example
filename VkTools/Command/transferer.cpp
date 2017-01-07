@@ -28,7 +28,8 @@ void Transferer::notify() {
         size = 0;
 }
 
-void Transferer::transfer(Buffer const &src, Buffer &dst, vk::BufferCopy bufferCopy) {
+void Transferer::transfer(Buffer const &src, Buffer &dst, vk::BufferCopy bufferCopy,
+                          vk::PipelineStageFlags beforeSrc, vk::PipelineStageFlags afterDst) {
     // Check if size and usage are legals
     assert((src.getUsage() & vk::BufferUsageFlagBits::eTransferSrc) ==
                 vk::BufferUsageFlagBits::eTransferSrc);
@@ -42,29 +43,31 @@ void Transferer::transfer(Buffer const &src, Buffer &dst, vk::BufferCopy bufferC
         Buffer newBuffer(dst.getDevice(), dst.getUsage(), std::max(dst.getSize() * 2, newSize), dst.getAllocator(), dst.isDeviceLocal());
 
         if(bufferCopy.dstOffset > 0)
-            transfer(dst, newBuffer, vk::BufferCopy(0, 0, bufferCopy.dstOffset));
+            transfer(dst, newBuffer, vk::BufferCopy(0, 0, bufferCopy.dstOffset), beforeSrc, vk::PipelineStageFlagBits::eTransfer);
 
         // Ensure dst buffer is not destroyed before prior transfer completed
         cacheResource(std::make_shared<Buffer>(dst));
         dst = newBuffer;
+        beforeSrc = vk::PipelineStageFlags();
     }
 
     vk::CommandBufferBeginInfo begin(vk::CommandBufferUsageFlagBits::eOneTimeSubmit);
     vk::CommandBuffer cmd = mCommandBufferSubmitter->createCommandBuffer(this);
 
     cmd.begin(begin);
-    cmd.pipelineBarrier(vk::PipelineStageFlagBits::eAllCommands,
-                        vk::PipelineStageFlagBits::eTransfer,
-                        vk::DependencyFlags(),
-                        nullptr,
-                        vk::BufferMemoryBarrier(vk::AccessFlagBits::eMemoryWrite,
-                                                vk::AccessFlagBits::eTransferRead,
-                                                VK_QUEUE_FAMILY_IGNORED, VK_QUEUE_FAMILY_IGNORED,
-                                                src, bufferCopy.srcOffset, bufferCopy.size),
-                        nullptr);
+    if(beforeSrc != vk::PipelineStageFlags())
+        cmd.pipelineBarrier(beforeSrc,
+                            vk::PipelineStageFlagBits::eTransfer,
+                            vk::DependencyFlags(),
+                            nullptr,
+                            vk::BufferMemoryBarrier(vk::AccessFlagBits::eMemoryWrite,
+                                                    vk::AccessFlagBits::eTransferRead,
+                                                    VK_QUEUE_FAMILY_IGNORED, VK_QUEUE_FAMILY_IGNORED,
+                                                    src, bufferCopy.srcOffset, bufferCopy.size),
+                            nullptr);
     cmd.copyBuffer(src, dst, bufferCopy);
     cmd.pipelineBarrier(vk::PipelineStageFlagBits::eTransfer,
-                        vk::PipelineStageFlagBits::eAllCommands,
+                        afterDst,
                         vk::DependencyFlags(),
                         nullptr,
                         vk::BufferMemoryBarrier(vk::AccessFlagBits::eTransferWrite,
@@ -75,7 +78,7 @@ void Transferer::transfer(Buffer const &src, Buffer &dst, vk::BufferCopy bufferC
     cmd.end();
 }
 
-void Transferer::transfer(Buffer &buffer, vk::DeviceSize offset, vk::DeviceSize size, void const *data) {
+void Transferer::transfer(Buffer &buffer, vk::DeviceSize offset, vk::DeviceSize size, void const *data, vk::PipelineStageFlags usedIn) {
     if(*mIndex == mTransfererBuffers->size())
         addTransferBuffer();
 
@@ -84,7 +87,7 @@ void Transferer::transfer(Buffer &buffer, vk::DeviceSize offset, vk::DeviceSize 
     // We reduce the size to transfer by the availableSize in the current transferBuffer
     while(size > (availableSize = *mSizeTransfererBuffers - (*mSizeAlreadyUsed)[*mIndex])) {
         // Only one level of recursion
-        transfer(buffer, offset, availableSize, data); // transfer the buffer
+        transfer(buffer, offset, availableSize, data, usedIn); // transfer the buffer
         // Update new values
         offset += availableSize;
         size -= availableSize;
@@ -98,7 +101,7 @@ void Transferer::transfer(Buffer &buffer, vk::DeviceSize offset, vk::DeviceSize 
     
     // CPU to HOST_VISIBLE
     memcpy((char*)(*mTransfererBuffers)[*mIndex].getPtr() + (*mSizeAlreadyUsed)[*mIndex], data, size);
-    transfer((*mTransfererBuffers)[*mIndex], buffer, vk::BufferCopy((*mSizeAlreadyUsed)[*mIndex], offset, size));
+    transfer((*mTransfererBuffers)[*mIndex], buffer, vk::BufferCopy((*mSizeAlreadyUsed)[*mIndex], offset, size), vk::PipelineStageFlags(), usedIn);
     (*mSizeAlreadyUsed)[*mIndex] += size;
 }
 

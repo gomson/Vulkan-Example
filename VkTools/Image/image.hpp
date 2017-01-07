@@ -26,8 +26,7 @@ public:
     vk::ImageViewCreateInfo getImageViewCreateInfo(vk::ImageAspectFlags aspect, bool arrayed, bool cube) const;
 
     static void createImageFromPath(std::string const &path, Image &image, ImageView &imageView,
-                                    Transferer &bufferImageTransferer,
-                                    std::shared_ptr<AbstractAllocator> allocator );
+                                    Transferer &transferer);
 
     ~Image();
 
