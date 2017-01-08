@@ -1,4 +1,4 @@
-#include "materialdescriptorsetpool.hpp"
+#include "materialdescriptorsetmanager.hpp"
 
 #define SET_BY_POOL 32
 #define MATERIAL_BY_BUFFER 32

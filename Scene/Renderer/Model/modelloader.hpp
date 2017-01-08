@@ -4,7 +4,7 @@
 #include "material.hpp"
 #include "VkTools/Buffer/buffer.hpp"
 #include "VkTools/Command/transferer.hpp"
-#include "Renderer/Material/materialdescriptorsetpool.hpp"
+#include "Renderer/Material/materialdescriptorsetmanager.hpp"
 
 struct MeshLoader_t {
     MeshLoader_t(Buffer &vbo, Buffer &ibo, uint32_t &firstIndex, uint32_t &vertexOffset, Mesh const &mesh, Transferer &transferer);

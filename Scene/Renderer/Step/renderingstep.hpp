@@ -6,7 +6,7 @@
 #include "VkTools/Command/commandbuffersubmitter.hpp"
 #include "VkTools/Command/transferer.hpp"
 
-#include "Renderer/Material/materialdescriptorsetpool.hpp"
+#include "Renderer/Material/materialdescriptorsetmanager.hpp"
 #include "staticgeometrystep.hpp"
 
 class RenderingStep

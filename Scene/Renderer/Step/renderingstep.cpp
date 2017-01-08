@@ -24,7 +24,7 @@ void RenderingStep::execute(uint32_t index) {
     vk::CommandBufferBeginInfo beginInfo(vk::CommandBufferUsageFlagBits::eOneTimeSubmit, nullptr);
 
     std::vector<vk::ClearValue> clears;
-    std::array<float, 4> values{0.f, 0.f, 0.f, 1.f};
+    std::array<float, 4> values{{0.f, 0.f, 0.f, 1.f}};
     clears.emplace_back(vk::ClearColorValue(values));
     clears.emplace_back(vk::ClearDepthStencilValue(1.f, 0));
 
