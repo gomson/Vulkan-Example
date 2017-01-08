@@ -5,8 +5,8 @@
 
 static std::vector<vk::DescriptorPoolSize> materialPoolSize(uint32_t number) {
     return std::vector<vk::DescriptorPoolSize>{
+        vk::DescriptorPoolSize(vk::DescriptorType::eUniformBuffer, number),
         vk::DescriptorPoolSize(vk::DescriptorType::eCombinedImageSampler, number),
-        vk::DescriptorPoolSize(vk::DescriptorType::eUniformBuffer, number)
     };
 }
 
@@ -34,8 +34,8 @@ MaterialDescriptorSetManager::MaterialDescriptorSetManager(Device &device, Trans
     mPools(std::make_shared<std::vector<MaterialDescriptorSetPool>>()),
     mMaterialUniformBuffers(std::make_shared<std::vector<std::pair<uint32_t, Buffer>>>()){
     std::vector<vk::DescriptorSetLayoutBinding> bindings = {
-        vk::DescriptorSetLayoutBinding(0, vk::DescriptorType::eCombinedImageSampler, 1, vk::ShaderStageFlagBits::eFragment, nullptr),
-        vk::DescriptorSetLayoutBinding(1, vk::DescriptorType::eUniformBuffer, 1, vk::ShaderStageFlagBits::eFragment, nullptr)
+        vk::DescriptorSetLayoutBinding(0, vk::DescriptorType::eUniformBuffer, 1, vk::ShaderStageFlagBits::eFragment, nullptr),
+        vk::DescriptorSetLayoutBinding(1, vk::DescriptorType::eCombinedImageSampler, 1, vk::ShaderStageFlagBits::eFragment, nullptr),
     };
 
     vk::DescriptorSetLayoutCreateInfo layoutInfo(vk::DescriptorSetLayoutCreateFlags(), bindings.size(),

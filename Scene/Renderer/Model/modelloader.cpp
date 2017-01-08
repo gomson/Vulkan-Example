@@ -23,12 +23,12 @@ MaterialLoader_t::MaterialLoader_t(Device &device, MaterialDescriptorSetManager 
     auto buffer = manager.addMaterialToBuffer(materialUniform);
 
     vk::DescriptorBufferInfo bufferInfo(buffer.first, buffer.second, sizeof(materialUniform));
-    vk::WriteDescriptorSet write(descriptorSet, 1, 0, 1, vk::DescriptorType::eUniformBuffer, nullptr, &bufferInfo, nullptr);
+    vk::WriteDescriptorSet write(descriptorSet, 0, 0, 1, vk::DescriptorType::eUniformBuffer, nullptr, &bufferInfo, nullptr);
     device.updateDescriptorSets(write, nullptr);
 
     if(material.useTexture == true) {
         vk::DescriptorImageInfo imageInfo(material.diffuseTexture.sampler, material.diffuseTexture.imageView, vk::ImageLayout::eShaderReadOnlyOptimal);
-        vk::WriteDescriptorSet write(descriptorSet, 0, 0, 1, vk::DescriptorType::eCombinedImageSampler, &imageInfo, nullptr, nullptr);
+        vk::WriteDescriptorSet write(descriptorSet, 1, 0, 1, vk::DescriptorType::eCombinedImageSampler, &imageInfo, nullptr, nullptr);
 
         device.updateDescriptorSets(write, nullptr);
     }
