@@ -26,8 +26,8 @@ int main()
 
     ModelLoader modelLoader;
 
-    ModelLoader_t sponza = modelLoader.open("../Models/Sponza/sponza.obj", renderingStep.getRefStaticVbo(), renderingStep.getRefStaticIbo(), renderingStep.getRefNumberStaticIndices(), renderingStep.getRefNumberStaticVertices(), transferer, renderingStep.getRefMaterialDescriptorSetManager());
-    ModelLoader_t cube = modelLoader.open("../Models/cube.obj", renderingStep.getRefStaticVbo(), renderingStep.getRefStaticIbo(), renderingStep.getRefNumberStaticIndices(), renderingStep.getRefNumberStaticVertices(), transferer, renderingStep.getRefMaterialDescriptorSetManager());
+    ModelLoader_t sponza = modelLoader.open("../../Models/Sponza/sponza.obj", renderingStep.getRefStaticVbo(), renderingStep.getRefStaticIbo(), renderingStep.getRefNumberStaticIndices(), renderingStep.getRefNumberStaticVertices(), transferer, renderingStep.getRefMaterialDescriptorSetManager());
+    ModelLoader_t cube = modelLoader.open("../../Models/cube.obj", renderingStep.getRefStaticVbo(), renderingStep.getRefStaticIbo(), renderingStep.getRefNumberStaticIndices(), renderingStep.getRefNumberStaticVertices(), transferer, renderingStep.getRefMaterialDescriptorSetManager());
 
     std::shared_ptr<Node> rootNode = std::make_shared<StaticNode>(sponza);
     std::shared_ptr<Node> cubeNode = std::make_shared<StaticNode>(cube);
