@@ -1,17 +1,25 @@
 #pragma once
-#include "vulkan/vkresource.hpp"
+#include "VkTools/Descriptor/descriptorsetlayout.hpp"
 
 class DescriptorPool : public VkResource, public vk::DescriptorPool
 {
 public:
     DescriptorPool() = default;
-    DescriptorPool(Device const &device, uint32_t maxSet,
-                   std::vector<vk::DescriptorPoolSize> poolSizes);
+    DescriptorPool(Device const &device, uint32_t number,
+                   std::vector<vk::DescriptorType> types,
+                   DescriptorSetLayout descriptorSetLayout);
 
     DescriptorPool(DescriptorPool &&descriptorPool) = default;
     DescriptorPool(DescriptorPool const &descriptorPool) = default;
     DescriptorPool &operator=(DescriptorPool descriptorPool);
 
+    vk::DescriptorSet allocate();
+    bool isOneSetAvailable() const;
+    void reset();
+
     ~DescriptorPool();
 private:
+    std::shared_ptr<DescriptorSetLayout> mDescriptorSetLayout;
+    std::shared_ptr<std::vector<vk::DescriptorSet>> mDescriptorSets;
+    std::shared_ptr<uint32_t> mNumberDescriptorSetAllocated;
 };

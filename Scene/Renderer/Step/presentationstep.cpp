@@ -27,9 +27,10 @@ void PresentationStep::rebuildSwapchainKHR(vk::SurfaceKHR surfaceKHR) {
         poolSizes.emplace_back(vk::DescriptorType::eCombinedImageSampler, 1);
     }
 
-    *mDescriptorPool = DescriptorPool(*mDevice, mSwapchainKHR->getImageCount(), poolSizes);
-    vk::DescriptorSetAllocateInfo info(*mDescriptorPool, mSwapchainKHR->getImageCount(), descriptorSetLayouts.data());
-    *mDescriptorSets = mDevice->allocateDescriptorSets(info);
+    *mDescriptorPool = DescriptorPool(*mDevice, mSwapchainKHR->getImageCount(), {vk::DescriptorType::eCombinedImageSampler}, mPipeline->getLayout().getDescriptorSetLayouts()[0]);
+    mDescriptorSets->resize(0);
+    for(auto i(0u); i < mSwapchainKHR->getImageCount(); ++i)
+        mDescriptorSets->emplace_back(mDescriptorPool->allocate());
 }
 
 void PresentationStep::updateImages(std::vector<CompleteFrameBuffer> framebuffer, uint32_t indexBackTexture) {
