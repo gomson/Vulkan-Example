@@ -42,7 +42,7 @@ const unsigned char *ImageLoader::getPixel() const {
 }
 
 vk::ImageCreateInfo ImageLoader::getImageGPUCreateInfo() const {
-    uint32_t mipLevels = floor(log2(std::max(getWidth(), getHeight()))) + 1;
+    uint32_t mipLevels = std::floor(std::log2(std::max(getWidth(), getHeight()))) + 1;
 
     vk::ImageCreateInfo info(vk::ImageCreateFlags(),
                              vk::ImageType::e2D, getFormat(),

@@ -1,4 +1,5 @@
 #include "material.hpp"
+#include <iostream>
 
 Material::Material(aiMaterial *mtl, std::string const &globalPath, Transferer &transferer) {
     aiString texPath;

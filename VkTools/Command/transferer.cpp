@@ -209,11 +209,12 @@ void Transferer::buildMipMap(Image &src) {
         blit.dstSubresource.mipLevel = i;
 
         // each mipmap is the size divided by two
-        blit.srcOffsets[1] = vk::Offset3D(src.getSize().width >> (i - 1),
-                                          src.getSize().height >> (i - 1),
+        blit.srcOffsets[1] = vk::Offset3D(std::max(1u, src.getSize().width >> (i - 1)),
+                                          std::max(1u, src.getSize().height >> (i - 1)),
                                           1);
-        blit.dstOffsets[1] = vk::Offset3D(src.getSize().width >> i,
-                                          src.getSize().height >> i,
+
+        blit.dstOffsets[1] = vk::Offset3D(std::max(1u, src.getSize().width >> i),
+                                          std::max(1u, src.getSize().height >> i),
                                           1);
 
         vk::ImageSubresourceRange range(vk::ImageAspectFlagBits::eColor, i, 1, 0, 1);
