@@ -15,7 +15,7 @@ public:
     virtual Block allocate(vk::DeviceSize size, vk::DeviceSize alignment, int memoryTypeIndex) = 0;
     virtual void deallocate(Block &block) = 0;
 
-    Device getDevice() const {
+    Device &getDevice() const {
         return *mDevice;
     }
 

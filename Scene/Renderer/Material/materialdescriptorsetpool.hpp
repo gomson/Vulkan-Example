@@ -21,6 +21,7 @@ class MaterialDescriptorSetManager {
 public:
     MaterialDescriptorSetManager(Device &device);
     vk::DescriptorSet allocate();
+    DescriptorSetLayout getDescriptorSetLayout() {return *mDescriptorSetLayout;}
 private:
     std::shared_ptr<Device> mDevice;
     std::shared_ptr<DescriptorSetLayout> mDescriptorSetLayout;

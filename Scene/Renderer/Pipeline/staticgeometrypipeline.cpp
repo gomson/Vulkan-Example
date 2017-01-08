@@ -1,8 +1,8 @@
 #include "staticgeometrypipeline.hpp"
 #include "../PipelineLayout/staticgeometrypipelinelayout.hpp"
 
-StaticGeometryPipeline::StaticGeometryPipeline(const Device &device, std::string shaderPrefix, RenderingPass &renderPass) :
-    Pipeline(device, StaticGeometryPipelineLayout(device)) {
+StaticGeometryPipeline::StaticGeometryPipeline(Device &device, std::string shaderPrefix, RenderingPass &renderPass, DescriptorSetLayout materialLayout) :
+    Pipeline(device, StaticGeometryPipelineLayout(device, materialLayout)) {
     mShaderModules->emplace_back(ShaderModule(device, shaderPrefix + "_vert.spv"));
     mShaderModules->emplace_back(ShaderModule(device, shaderPrefix + "_frag.spv"));
     std::vector<vk::PipelineShaderStageCreateInfo> shaderStage;
@@ -25,7 +25,7 @@ StaticGeometryPipeline::StaticGeometryPipeline(const Device &device, std::string
                                                        1, &binding, attributes.size(), attributes.data());
 
     vk::PipelineInputAssemblyStateCreateInfo inputAssembly(vk::PipelineInputAssemblyStateCreateFlags(),
-                                                           vk::PrimitiveTopology::eTriangleStrip);
+                                                           vk::PrimitiveTopology::eTriangleList);
 
     vk::PipelineViewportStateCreateInfo viewport(vk::PipelineViewportStateCreateFlags(),
                                                  1, nullptr, 1, nullptr);

@@ -10,13 +10,28 @@ MeshLoader_t::MeshLoader_t(Buffer &vbo, Buffer &ibo, uint32_t &firstIndex, uint3
 
     firstIndex += mesh.numberIndices;
     vertexOffset += mesh.numberVertices;
+    materialIndex = mesh.materialIndex;
 }
 
-ModelLoader_t::ModelLoader_t(std::string const &path, Buffer &vbo, Buffer &ibo, uint32_t &firstIndex, uint32_t &vertexOffset, Transferer &transferer) {
-    ModelImporter modelImporter(path);
+MaterialLoader_t::MaterialLoader_t(Device &device, MaterialDescriptorSetManager &manager, const Material &material) : material(material) {
+    descriptorSet = manager.allocate();
+
+    if(material.useTexture == true) {
+        vk::DescriptorImageInfo imageInfo(material.diffuseTexture.sampler, material.diffuseTexture.imageView, vk::ImageLayout::eShaderReadOnlyOptimal);
+        vk::WriteDescriptorSet write(descriptorSet, 0, 0, 1, vk::DescriptorType::eCombinedImageSampler, &imageInfo, nullptr, nullptr);
+
+        device.updateDescriptorSets(write, nullptr);
+    }
+}
+
+ModelLoader_t::ModelLoader_t(std::string const &path, Buffer &vbo, Buffer &ibo, uint32_t &firstIndex, uint32_t &vertexOffset, Transferer &transferer, MaterialDescriptorSetManager &materialManager) {
+    ModelImporter modelImporter(path, transferer);
 
     for(auto m : modelImporter.mMeshes)
         mesheLoaders.emplace_back(vbo, ibo, firstIndex, vertexOffset, m, transferer);
+
+    for(auto m : modelImporter.mMaterials)
+        materialLoaders.emplace_back(transferer.getAllocator()->getDevice(), materialManager, m);
 }
 
 ModelLoader_t ModelLoader::open(std::string const &path) {
@@ -26,8 +41,8 @@ ModelLoader_t ModelLoader::open(std::string const &path) {
     return it->second;
 }
 
-ModelLoader_t ModelLoader::open(std::string const &path, Buffer &vbo, Buffer &ibo, uint32_t &firstIndex, uint32_t &vertexOffset, Transferer &transferer) {
+ModelLoader_t ModelLoader::open(std::string const &path, Buffer &vbo, Buffer &ibo, uint32_t &firstIndex, uint32_t &vertexOffset, Transferer &transferer, MaterialDescriptorSetManager &materialManager) {
     if(mModelLoaders.find(path) == mModelLoaders.end())
-        mModelLoaders[path] = ModelLoader_t(path, vbo, ibo, firstIndex, vertexOffset, transferer);
+        mModelLoaders[path] = ModelLoader_t(path, vbo, ibo, firstIndex, vertexOffset, transferer, materialManager);
     return mModelLoaders[path];
 }

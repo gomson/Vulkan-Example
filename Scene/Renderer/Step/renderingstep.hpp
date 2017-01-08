@@ -25,6 +25,8 @@ public:
     Buffer &getRefStaticVbo() {return mStaticGeometryStep->getRefVbo();}
     Buffer &getRefStaticIbo() {return mStaticGeometryStep->getRefIbo();}
 
+    MaterialDescriptorSetManager &getRefMaterialDescriptorSetManager(){return *mMaterialDescriptorSetManager;}
+
     void setRootNode(std::shared_ptr<Node> node) {mStaticGeometryStep->setRootNode(node);}
 
 private:
@@ -36,5 +38,5 @@ private:
 
     std::shared_ptr<MaterialDescriptorSetManager> mMaterialDescriptorSetManager = std::make_shared<MaterialDescriptorSetManager>(*mDevice);
 
-    std::shared_ptr<StaticGeometryStep> mStaticGeometryStep = std::make_shared<StaticGeometryStep>(*mDevice, *mRenderPass, *mTransferer);
+    std::shared_ptr<StaticGeometryStep> mStaticGeometryStep = std::make_shared<StaticGeometryStep>(*mDevice, *mRenderPass, *mTransferer, mMaterialDescriptorSetManager->getDescriptorSetLayout());
 };

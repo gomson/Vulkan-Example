@@ -9,8 +9,15 @@ void StaticNode::draw(vk::CommandBuffer commandBuffer, vk::PipelineLayout pipeli
 
     commandBuffer.pushConstants<glm::mat4>(pipelineLayout, stageFlags, 0, mat);
 
-    for(auto const &m: mModel.mesheLoaders)
+    for(auto const &m: mModel.mesheLoaders) {
+        commandBuffer.bindDescriptorSets(vk::PipelineBindPoint::eGraphics, pipelineLayout, 0, mModel.materialLoaders[m.materialIndex].descriptorSet, nullptr);
         commandBuffer.drawIndexed(m.indexCount, 1, m.firstIndex, m.vertexOffset, 0);
+    }
+    /*
+    for(auto i(0u); i < mModel.mesheLoaders.size(); ++i) {
+        commandBuffer.bindDescriptorSets(vk::PipelineBindPoint::eGraphics, pipelineLayout, 0, mModel.materialLoaders[m.materialIndex].descriptorSet, nullptr);
+        commandBuffer.drawIndexed(m.indexCount, 1, m.firstIndex, m.vertexOffset, 0);
+    }*/
 
     for(auto child : mChildren)
         child->draw(commandBuffer, pipelineLayout, stageFlags, mat);

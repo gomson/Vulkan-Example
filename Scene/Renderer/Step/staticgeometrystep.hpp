@@ -10,7 +10,7 @@
 class StaticGeometryStep
 {
 public:
-    StaticGeometryStep(Device const &device, RenderingPass &renderpass, Transferer &transferer);
+    StaticGeometryStep(Device &device, RenderingPass &renderpass, Transferer &transferer, DescriptorSetLayout materialLayout);
 
     void compileScene(std::vector<CompleteFrameBuffer> framebuffer);
 
@@ -28,7 +28,7 @@ private:
     std::shared_ptr<Device> mDevice;
     std::shared_ptr<RenderingPass> mRenderingPass;
     std::shared_ptr<Transferer> mTransferer;
-    std::shared_ptr<StaticGeometryPipeline> mPipeline = std::make_shared<StaticGeometryPipeline>(*mDevice, "../Shaders/geometry_static", *mRenderingPass);
+    std::shared_ptr<StaticGeometryPipeline> mPipeline;
     std::shared_ptr<CommandPool> mCommandPool = std::make_shared<CommandPool>(*mDevice, false, false, mDevice->getIndexFamillyQueue());
 
     std::shared_ptr<Buffer> mVbo = std::make_shared<Buffer>(*mDevice, vk::BufferUsageFlagBits::eVertexBuffer | vk::BufferUsageFlagBits::eTransferDst | vk::BufferUsageFlagBits::eTransferSrc, 1 << 16, mTransferer->getAllocator(), true);

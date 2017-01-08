@@ -22,6 +22,13 @@ Sampler::Sampler(const Device &device, const vk::SamplerCreateInfo &info) :
 
 }
 
+Sampler &Sampler::operator=(Sampler sampler) {
+    using std::swap;
+    swap(static_cast<VkResource&>(sampler), static_cast<VkResource&>(*this));
+    swap(static_cast<vk::Sampler&>(sampler), static_cast<vk::Sampler&>(*this));
+    return *this;
+}
+
 Sampler::~Sampler() {
     if(mDevice != nullptr && mCount != nullptr && --(*mCount) == 0)
         mDevice->destroySampler(m_sampler);

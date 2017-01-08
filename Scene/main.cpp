@@ -26,7 +26,7 @@ int main()
 
     ModelLoader modelLoader;
 
-    ModelLoader_t cube = modelLoader.open("../Models/cube.obj", renderingStep.getRefStaticVbo(), renderingStep.getRefStaticIbo(), renderingStep.getRefNumberStaticIndices(), renderingStep.getRefNumberStaticVertices(), transferer);
+    ModelLoader_t cube = modelLoader.open("../Models/Sponza/sponza.obj", renderingStep.getRefStaticVbo(), renderingStep.getRefStaticIbo(), renderingStep.getRefNumberStaticIndices(), renderingStep.getRefNumberStaticVertices(), transferer, renderingStep.getRefMaterialDescriptorSetManager());
 
     renderingStep.setRootNode(std::make_shared<StaticNode>(cube));
 

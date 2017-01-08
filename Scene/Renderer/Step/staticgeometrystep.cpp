@@ -1,18 +1,20 @@
 #include "staticgeometrystep.hpp"
 
-StaticGeometryStep::StaticGeometryStep(Device const &device, RenderingPass &renderpass, Transferer &transferer) :
+StaticGeometryStep::StaticGeometryStep(Device &device, RenderingPass &renderpass, Transferer &transferer, DescriptorSetLayout materialLayout) :
     mDevice(std::make_shared<Device>(device)),
     mRenderingPass(std::make_shared<RenderingPass>(renderpass)),
-    mTransferer(std::make_shared<Transferer>(transferer)){
+    mTransferer(std::make_shared<Transferer>(transferer)),
+    mPipeline(std::make_shared<StaticGeometryPipeline>(device, "../Shaders/geometry_static", renderpass, materialLayout))
+{
 }
 
 void StaticGeometryStep::compileScene(std::vector<CompleteFrameBuffer> framebuffers) {
     mCommandPool->reset(true);
     mCommandBuffer = std::make_shared<std::vector<vk::CommandBuffer>>(mCommandPool->allocate(vk::CommandBufferLevel::eSecondary, framebuffers.size()));
 
-    glm::mat4 perspective = glm::perspective(glm::radians(45.f), (float)framebuffers[0].getWidth() / framebuffers[0].getHeight(), 1.f, 1000.f);
+    glm::mat4 perspective = glm::perspective(glm::radians(70.f), (float)framebuffers[0].getWidth() / framebuffers[0].getHeight(), 1.f, 20000.f);
     perspective[1][1] *= -1;
-    perspective *= glm::lookAt(glm::vec3(3, 4, 2), glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
+    perspective *= glm::lookAt(glm::vec3(300, 500, 0), glm::vec3(0, 400, 0), glm::vec3(0, 1, 0));
 
     for(auto i(0u); i < mCommandBuffer->size(); ++i) {
         vk::CommandBufferInheritanceInfo inheritance(*mRenderingPass, 0, framebuffers[i]);

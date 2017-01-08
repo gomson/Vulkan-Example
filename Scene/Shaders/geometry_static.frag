@@ -6,6 +6,8 @@ layout(location = 2) in vec3 tangeant;
 
 layout(location = 0) out vec4 outColor;
 
+layout(set = 0, binding = 0) uniform sampler2D diffuseTexture;
+
 void main() {
-    outColor = vec4(0.5, 0.5, 0.5, 1);
+    outColor = texture(diffuseTexture, texCoords);
 }

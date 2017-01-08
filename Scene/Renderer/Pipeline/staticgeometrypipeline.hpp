@@ -5,7 +5,7 @@
 class StaticGeometryPipeline : public Pipeline
 {
 public:
-    StaticGeometryPipeline(const Device &device, std::string shaderPrefix,
-                           RenderingPass &renderPass);
+    StaticGeometryPipeline(Device &device, std::string shaderPrefix,
+                           RenderingPass &renderPass, DescriptorSetLayout materialLayout);
 
 };

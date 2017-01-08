@@ -4,6 +4,6 @@
 class StaticGeometryPipelineLayout : public PipelineLayout
 {
 public:
-    StaticGeometryPipelineLayout(const Device &device);
+    StaticGeometryPipelineLayout(Device &device, DescriptorSetLayout layout);
 };
 

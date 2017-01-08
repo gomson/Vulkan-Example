@@ -3,7 +3,7 @@
 #include <assimp/postprocess.h>
 #include "modelimporter.hpp"
 
-ModelImporter::ModelImporter(const std::string &path) {
+ModelImporter::ModelImporter(const std::string &path, Transferer &transferer) {
     Assimp::Importer imp;
 
     std::string globalPath;
@@ -25,4 +25,7 @@ ModelImporter::ModelImporter(const std::string &path) {
 
     for(unsigned i = 0; i < scene->mNumMeshes; ++i)
         mMeshes.emplace_back(scene->mMeshes[i]);
+
+    for(unsigned i = 0; i < scene->mNumMaterials; ++i)
+        mMaterials.emplace_back(scene->mMaterials[i], globalPath, transferer);
 }

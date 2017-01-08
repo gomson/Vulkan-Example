@@ -2,7 +2,6 @@
 
 static std::vector<vk::DescriptorPoolSize> materialPoolSize(uint32_t number) {
     return std::vector<vk::DescriptorPoolSize>{
-        vk::DescriptorPoolSize(vk::DescriptorType::eUniformBufferDynamic, number),
         vk::DescriptorPoolSize(vk::DescriptorType::eCombinedImageSampler, number)
     };
 }
@@ -11,7 +10,7 @@ MaterialDescriptorSetPool::MaterialDescriptorSetPool(Device &device, uint32_t nu
     DescriptorPool(device, number, materialPoolSize(number)),
     mDescriptorSetLayout(layout),
     mDescriptorSets(std::make_shared<std::vector<vk::DescriptorSet>>(number)),
-    mNumberDescriptorSetAllocated(std::make_shared<uint32_t>(number)) {
+    mNumberDescriptorSetAllocated(std::make_shared<uint32_t>(0)) {
 
     std::vector<vk::DescriptorSetLayout> layouts(number, *mDescriptorSetLayout);
     vk::DescriptorSetAllocateInfo info(*this, number, layouts.data());
@@ -26,10 +25,10 @@ vk::DescriptorSet MaterialDescriptorSetPool::allocate() {
 
 
 MaterialDescriptorSetManager::MaterialDescriptorSetManager(Device &device) :
-    mDevice(std::make_shared<Device>(device)) {
+    mDevice(std::make_shared<Device>(device)),
+    mPools(std::make_shared<std::vector<MaterialDescriptorSetPool>>()){
     std::vector<vk::DescriptorSetLayoutBinding> bindings = {
-        vk::DescriptorSetLayoutBinding(0, vk::DescriptorType::eUniformBufferDynamic, 1, vk::ShaderStageFlagBits::eFragment, nullptr),
-        vk::DescriptorSetLayoutBinding(1, vk::DescriptorType::eCombinedImageSampler, 1, vk::ShaderStageFlagBits::eFragment, nullptr)
+        vk::DescriptorSetLayoutBinding(0, vk::DescriptorType::eCombinedImageSampler, 1, vk::ShaderStageFlagBits::eFragment, nullptr)
     };
 
     vk::DescriptorSetLayoutCreateInfo layoutInfo(vk::DescriptorSetLayoutCreateFlags(), bindings.size(),

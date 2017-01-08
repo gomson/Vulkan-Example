@@ -4,6 +4,7 @@
 class Sampler : public VkResource, public vk::Sampler
 {
 public:
+    Sampler() = default;
     Sampler(Device const &device, float maxMipMap);
     Sampler(Device const &device, vk::SamplerCreateInfo const &info);
     Sampler(Sampler &&sampler) = default;
