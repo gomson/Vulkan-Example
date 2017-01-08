@@ -48,7 +48,8 @@ SOURCES += main.cpp \
     Renderer/Model/mesh.cpp \
     Renderer/Model/modelimporter.cpp \
     Renderer/Model/modelloader.cpp \
-    Renderer/Scene/staticnode.cpp
+    Renderer/Scene/staticnode.cpp \
+    Renderer/Material/materialdescriptorsetpool.cpp
 
 HEADERS += \
     ../VkTools/Image/framebuffer.hpp \
@@ -96,4 +97,5 @@ HEADERS += \
     Renderer/Model/modelimporter.hpp \
     Renderer/Model/modelloader.hpp \
     Renderer/Scene/staticnode.hpp \
-    Renderer/Scene/node.hpp
+    Renderer/Scene/node.hpp \
+    Renderer/Material/materialdescriptorsetpool.hpp

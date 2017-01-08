@@ -1,7 +1,7 @@
 #include "descriptorpool.hpp"
 
 DescriptorPool::DescriptorPool(const Device &device, uint32_t maxSet,
-                               vk::ArrayProxy<vk::DescriptorPoolSize> poolSizes) :
+                               std::vector<vk::DescriptorPoolSize> poolSizes) :
     VkResource(device)
 {
     vk::DescriptorPoolCreateInfo createInfo(
