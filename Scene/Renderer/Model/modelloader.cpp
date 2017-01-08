@@ -16,6 +16,16 @@ MeshLoader_t::MeshLoader_t(Buffer &vbo, Buffer &ibo, uint32_t &firstIndex, uint3
 MaterialLoader_t::MaterialLoader_t(Device &device, MaterialDescriptorSetManager &manager, const Material &material) : material(material) {
     descriptorSet = manager.allocate();
 
+    MaterialUniform materialUniform;
+    materialUniform.color = glm::vec4(material.color, 1.0f);
+    materialUniform.hasDiffuseTexture = material.useTexture;
+
+    auto buffer = manager.addMaterialToBuffer(materialUniform);
+
+    vk::DescriptorBufferInfo bufferInfo(buffer.first, buffer.second, sizeof(materialUniform));
+    vk::WriteDescriptorSet write(descriptorSet, 1, 0, 1, vk::DescriptorType::eUniformBuffer, nullptr, &bufferInfo, nullptr);
+    device.updateDescriptorSets(write, nullptr);
+
     if(material.useTexture == true) {
         vk::DescriptorImageInfo imageInfo(material.diffuseTexture.sampler, material.diffuseTexture.imageView, vk::ImageLayout::eShaderReadOnlyOptimal);
         vk::WriteDescriptorSet write(descriptorSet, 0, 0, 1, vk::DescriptorType::eCombinedImageSampler, &imageInfo, nullptr, nullptr);

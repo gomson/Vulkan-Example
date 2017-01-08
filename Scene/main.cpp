@@ -26,9 +26,15 @@ int main()
 
     ModelLoader modelLoader;
 
-    ModelLoader_t cube = modelLoader.open("../Models/Sponza/sponza.obj", renderingStep.getRefStaticVbo(), renderingStep.getRefStaticIbo(), renderingStep.getRefNumberStaticIndices(), renderingStep.getRefNumberStaticVertices(), transferer, renderingStep.getRefMaterialDescriptorSetManager());
+    ModelLoader_t sponza = modelLoader.open("../Models/Sponza/sponza.obj", renderingStep.getRefStaticVbo(), renderingStep.getRefStaticIbo(), renderingStep.getRefNumberStaticIndices(), renderingStep.getRefNumberStaticVertices(), transferer, renderingStep.getRefMaterialDescriptorSetManager());
+    ModelLoader_t cube = modelLoader.open("../Models/cube.obj", renderingStep.getRefStaticVbo(), renderingStep.getRefStaticIbo(), renderingStep.getRefNumberStaticIndices(), renderingStep.getRefNumberStaticVertices(), transferer, renderingStep.getRefMaterialDescriptorSetManager());
 
-    renderingStep.setRootNode(std::make_shared<StaticNode>(cube));
+    std::shared_ptr<Node> rootNode = std::make_shared<StaticNode>(sponza);
+    std::shared_ptr<Node> cubeNode = std::make_shared<StaticNode>(cube);
+    rootNode->addChild(cubeNode);
+    cubeNode->scale(glm::vec3(1, 1, 1) * 500.f);
+
+    renderingStep.setRootNode(rootNode);
 
     while(!window.isClosed()) {
         glfwPollEvents();

@@ -36,7 +36,7 @@ private:
     std::shared_ptr<CommandBufferSubmitter> mCommandBufferSubmitter;
     std::shared_ptr<Transferer> mTransferer;
 
-    std::shared_ptr<MaterialDescriptorSetManager> mMaterialDescriptorSetManager = std::make_shared<MaterialDescriptorSetManager>(*mDevice);
+    std::shared_ptr<MaterialDescriptorSetManager> mMaterialDescriptorSetManager = std::make_shared<MaterialDescriptorSetManager>(*mDevice, *mTransferer);
 
     std::shared_ptr<StaticGeometryStep> mStaticGeometryStep = std::make_shared<StaticGeometryStep>(*mDevice, *mRenderPass, *mTransferer, mMaterialDescriptorSetManager->getDescriptorSetLayout());
 };
