@@ -6,7 +6,7 @@ class DescriptorPool : public VkResource, public vk::DescriptorPool
 public:
     DescriptorPool() = default;
     DescriptorPool(Device const &device, uint32_t number,
-                   std::vector<vk::DescriptorType> types,
+                   std::vector<vk::DescriptorPoolSize> poolSizes,
                    DescriptorSetLayout descriptorSetLayout);
 
     DescriptorPool(DescriptorPool &&descriptorPool) = default;
