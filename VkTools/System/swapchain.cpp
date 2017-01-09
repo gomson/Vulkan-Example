@@ -100,7 +100,13 @@ vk::SwapchainCreateInfoKHR SwapchainKHR::buildCreateInfos(vk::SurfaceKHR surface
     *mWidth = extent.width;
     *mHeight = extent.height;
 
-    auto minImageCount = std::min(capabilities.minImageCount + 1, capabilities.maxImageCount);
+    uint32_t minImageCount;
+
+    if(capabilities.maxImageCount == 0)
+        minImageCount = capabilities.minImageCount + 1;
+
+    else
+        minImageCount = std::min(capabilities.maxImageCount, capabilities.minImageCount + 1);
 
     vk::SwapchainCreateInfoKHR info(vk::SwapchainCreateFlagsKHR(), surfaceKHR, minImageCount,
                                     mFormat->format, mFormat->colorSpace, extent, 1,
