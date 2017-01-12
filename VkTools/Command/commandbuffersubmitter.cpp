@@ -53,10 +53,21 @@ void CommandBufferSubmitter::submit(uint32_t waitSemaphoreCount, const vk::Semap
     *mCommandBufferIndex = 0;
 }
 
+void CommandBufferSubmitter::submitWithFullSynchro() {
+    vk::SubmitInfo info;
+
+    info.commandBufferCount = *mCommandBufferIndex;
+    info.pCommandBuffers = (*mCommandBuffers)[*mCurrentBatch].data();
+    mQueue->submit(info, vk::Fence());
+    *mCommandBufferIndex = 0;
+    mDevice->waitIdle();
+}
+
 void CommandBufferSubmitter::wait() {
     (*mFences)[*mCurrentBatch].wait();
     (*mFences)[*mCurrentBatch].reset();
 
     for(auto &observer : (*mObservers)[*mCurrentBatch])
         observer->notify();
+    (*mTemporaryResources)[*mCurrentBatch].clear();
 }

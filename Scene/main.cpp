@@ -14,7 +14,7 @@ int main()
     CommandPool transientCommandBufferPool(context.device, true, true, context.device.getIndexFamillyQueue());
     CommandPool drawCommandBufferPool(context.device, false, false, context.device.getIndexFamillyQueue());
     CommandBufferSubmitter commandBufferSubmitter(context.device, transientCommandBufferPool, 100);
-    auto deviceAllocator(std::make_shared<DeviceAllocator>(context.device, 1 << 25));
+    auto deviceAllocator(std::make_shared<DeviceAllocator>(context.device, 1 << 20));
     Transferer transferer(1, 1 << 20, deviceAllocator, commandBufferSubmitter);
     PresentationStep presentationStep(context.device,
                                       commandBufferSubmitter,
@@ -40,6 +40,7 @@ int main()
         glfwPollEvents();
 
         if(window.isResized()) {
+            context.device.waitIdle();// big synchro
             if(window.isSurfaceKHROutOfDate()) {
                 presentationStep.destroySwapchainKHR();
                 context.instance->createSurfaceKHR();
@@ -48,9 +49,7 @@ int main()
             commandBufferSubmitter.setNumberBatch(presentationStep.getNumberImages());
             renderingStep.resize(window.getWidth(), window.getHeight(), deviceAllocator, presentationStep.getNumberImages());
             presentationStep.updateImages(renderingStep.getFramebuffer(), 0);
-            commandBufferSubmitter.wait();
-            commandBufferSubmitter.submit();
-            context.device.waitIdle();// big synchro
+            commandBufferSubmitter.submitWithFullSynchro();
         }
 
         try {

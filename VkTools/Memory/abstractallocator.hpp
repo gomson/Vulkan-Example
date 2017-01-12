@@ -19,12 +19,8 @@ public:
         return *mDevice;
     }
 
-    virtual ~AbstractAllocator() = 0;
+    virtual ~AbstractAllocator() = default;
 
 protected:
     std::shared_ptr<Device> mDevice;
 };
-
-inline AbstractAllocator::~AbstractAllocator() {
-
-}

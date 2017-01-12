@@ -6,6 +6,8 @@ CONFIG -= qt
 INCLUDEPATH += ../
 LIBS += -lglfw -lvulkan -lSDL2_image -lSDL2
 
+
+
 SOURCES += main.cpp \
     ../VkTools/Image/framebuffer.cpp \
     ../VkTools/Image/image.cpp \
@@ -21,7 +23,6 @@ SOURCES += main.cpp \
     ../VkTools/Pipeline/renderpass.cpp \
     ../VkTools/Synchronization/fence.cpp \
     ../VkTools/Synchronization/semaphore.cpp \
-    ../VkTools/System/descriptorpool.cpp \
     ../VkTools/System/device.cpp \
     ../VkTools/System/instance.cpp \
     ../VkTools/System/shadermodule.cpp \
@@ -33,6 +34,9 @@ SOURCES += main.cpp \
     ../VkTools/Command/commandbuffersubmitter.cpp \
     ../VkTools/Command/commandpool.cpp \
     ../VkTools/Command/transferer.cpp \
+    ../VkTools/Descriptor/descriptorsetlayout.cpp \
+    ../VkTools/Image/completeframebuffer.cpp \
+    ../VkTools/Descriptor/descriptorpool.cpp \
 
 HEADERS += \
     ../VkTools/Image/framebuffer.hpp \
@@ -50,7 +54,6 @@ HEADERS += \
     ../VkTools/Pipeline/renderpass.hpp \
     ../VkTools/Synchronization/fence.hpp \
     ../VkTools/Synchronization/semaphore.hpp \
-    ../VkTools/System/descriptorpool.hpp \
     ../VkTools/System/device.hpp \
     ../VkTools/System/instance.hpp \
     ../VkTools/System/shadermodule.hpp \
@@ -63,3 +66,7 @@ HEADERS += \
     ../VkTools/Command/commandbuffersubmitter.hpp \
     ../VkTools/Command/commandpool.hpp \
     ../VkTools/Command/transferer.hpp \
+    ../VkTools/Descriptor/descriptorsetlayout.hpp \
+    ../VkTools/Image/completeframebuffer.hpp \
+    ../VkTools/Descriptor/descriptorpool.hpp \
+    ../VkTools/Image/texture.hpp \

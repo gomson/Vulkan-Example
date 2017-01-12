@@ -111,12 +111,8 @@ vk::ImageMemoryBarrier Transferer::transitionImage(Image image,
                                                    vk::ImageSubresourceRange imageSubResourceRange) {
     vk::AccessFlags src, dst;
 
-    if(oldLayout == vk::ImageLayout::eUndefined)
+    if(oldLayout == vk::ImageLayout::eUndefined || oldLayout == vk::ImageLayout::ePreinitialized)
         src = vk::AccessFlags();
-
-    // If it was preinitialized: the host write on it and the memory barrier is implicit
-    else if(oldLayout == vk::ImageLayout::ePreinitialized)
-        src = vk::AccessFlagBits::eHostWrite; // Must be useless since the barrier is already performed : it is only for layer
 
     // If it was in transferDst, we wait for transferWrite
     else if(oldLayout == vk::ImageLayout::eTransferDstOptimal)
@@ -191,7 +187,7 @@ void Transferer::transfer(const Image &src, Image &dst, vk::ImageLayout oldSrcLa
 }
 
 void Transferer::buildMipMap(Image &src) {
-    vk::CommandBuffer cmd = mCommandBufferSubmitter->createCommandBuffer(this);
+    vk::CommandBuffer cmd = mCommandBufferSubmitter->createCommandBuffer(nullptr);
     vk::CommandBufferBeginInfo beginInfo(vk::CommandBufferUsageFlagBits::eOneTimeSubmit);
 
     cmd.begin(beginInfo);

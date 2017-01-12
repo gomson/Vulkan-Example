@@ -32,13 +32,13 @@ SOURCES += main.cpp \
     ../VkTools/Command/commandbuffersubmitter.cpp \
     ../VkTools/Command/commandpool.cpp \
     ../VkTools/Command/transferer.cpp \
+    ../VkTools/Descriptor/descriptorsetlayout.cpp \
+    ../VkTools/Image/completeframebuffer.cpp \
+    ../VkTools/Descriptor/descriptorpool.cpp \
     Renderer/Step/presentationstep.cpp \
     Renderer/RenderPass/renderpasstopresent.cpp \
     Renderer/Pipeline/pipelinetopresent.cpp \
     Renderer/PipelineLayout/pipelinelayouttopresent.cpp \
-    ../VkTools/Descriptor/descriptorsetlayout.cpp \
-    ../VkTools/Image/completeframebuffer.cpp \
-    ../VkTools/Descriptor/descriptorpool.cpp \
     Renderer/Step/renderingstep.cpp \
     Renderer/RenderPass/renderingpass.cpp \
     Renderer/FrameBuffer/renderingframebuffer.cpp \
@@ -80,14 +80,15 @@ HEADERS += \
     ../VkTools/Command/commandbuffersubmitter.hpp \
     ../VkTools/Command/commandpool.hpp \
     ../VkTools/Command/transferer.hpp \
+    ../VkTools/Descriptor/descriptorsetlayout.hpp \
+    ../VkTools/Image/completeframebuffer.hpp \
+    ../VkTools/Descriptor/descriptorpool.hpp \
+    ../VkTools/Image/texture.hpp \
     Renderer/context.hpp \
     Renderer/Step/presentationstep.hpp \
     Renderer/RenderPass/renderpasstopresent.hpp \
     Renderer/Pipeline/pipelinetopresent.hpp \
     Renderer/PipelineLayout/pipelinelayouttopresent.hpp \
-    ../VkTools/Descriptor/descriptorsetlayout.hpp \
-    ../VkTools/Image/completeframebuffer.hpp \
-    ../VkTools/Descriptor/descriptorpool.hpp \
     Renderer/Step/renderingstep.hpp \
     Renderer/RenderPass/renderingpass.hpp \
     Renderer/FrameBuffer/renderingframebuffer.hpp \
@@ -100,5 +101,4 @@ HEADERS += \
     Renderer/Scene/staticnode.hpp \
     Renderer/Scene/node.hpp \
     Renderer/Model/material.hpp \
-    ../VkTools/Image/texture.hpp \
     Renderer/Material/materialdescriptorsetmanager.hpp

@@ -25,6 +25,8 @@ public:
                 uint32_t signalSemaphoreCount = 0,
                 const vk::Semaphore *signalSemaphores = nullptr);
 
+    void submitWithFullSynchro();
+
     void setNumberBatch(uint32_t numberBatch);
     void setCurrentBatch(uint32_t i);
 

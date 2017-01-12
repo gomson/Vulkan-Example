@@ -9,7 +9,7 @@
 #include "VkTools/Command/commandpool.hpp"
 #include "VkTools/Synchronization/semaphore.hpp"
 #include "VkTools/Synchronization/fence.hpp"
-#include "VkTools/System/descriptorpool.hpp"
+#include "VkTools/Descriptor/descriptorpool.hpp"
 
 #include "VkTools/Pipeline/pipeline.hpp"
 #include "VkTools/Pipeline/renderpass.hpp"
@@ -25,7 +25,7 @@
 
 class PipelineLayoutTriangle : public PipelineLayout {
 public:
-    PipelineLayoutTriangle(Device &device, DescriptorPool descriptorPool,
+    PipelineLayoutTriangle(Device &device, DescriptorPool &descriptorPool, vk::DescriptorSet &descriptorSet,
                            ImageView image, Sampler sampler) :
         PipelineLayout(device) {
         // One binding : an uniform buffer
@@ -46,15 +46,13 @@ public:
 
         m_pipelineLayout = device.createPipelineLayout(ci);
 
-        vk::DescriptorSetAllocateInfo allocateInfo(descriptorPool,
-                                                   mDescriptorSetLayouts->size(),
-                                                   mDescriptorSetLayouts->data());
+        descriptorPool = DescriptorPool(device, 1, {vk::DescriptorPoolSize(vk::DescriptorType::eCombinedImageSampler, 1)}, mDescriptorSetLayouts->front());
 
-        *mDescriptorSets = device.allocateDescriptorSets(allocateInfo);
+        descriptorSet = descriptorPool.allocate();
 
         vk::DescriptorImageInfo imageInfo(sampler, image, vk::ImageLayout::eShaderReadOnlyOptimal);
         vk::WriteDescriptorSet descriptorWrite(
-                    (*mDescriptorSets)[0], 0, 0, 1,
+                    descriptorSet, 0, 0, 1,
                     vk::DescriptorType::eCombinedImageSampler,
                     &imageInfo, nullptr, nullptr);
 
@@ -175,6 +173,7 @@ void buildDrawCommandBuffer(vk::CommandBuffer &drawBuffer,
                             Pipeline &pipeline,
                             SwapchainKHR swapchainKHR,
                             RenderPass &renderPass,
+                            vk::DescriptorSet descriptorSet,
                             uint32_t imageIndex) {
     // subpass 0 at that frameBuffer
     vk::CommandBufferInheritanceInfo inheritanceInfo(renderPass,
@@ -189,7 +188,7 @@ void buildDrawCommandBuffer(vk::CommandBuffer &drawBuffer,
     drawBuffer.bindPipeline(vk::PipelineBindPoint::eGraphics, pipeline);
     drawBuffer.bindDescriptorSets(vk::PipelineBindPoint::eGraphics,
                                   pipeline.getLayout(),
-                                  0, pipeline.getLayout().getDescriptorSets(), {});
+                                  0, descriptorSet, {});
     drawBuffer.setScissor(0, {scissor});
     drawBuffer.setViewport(0, {viewPort});
     drawBuffer.draw(4, 1, 0, 0); // One triangle
@@ -222,12 +221,6 @@ void buildPrimaryCommandBuffers(RenderPass &renderPass,
     primaryBuffer.end();
 }
 
-auto createDescriptorPool(Device &device) {
-    vk::DescriptorPoolSize size(vk::DescriptorType::eCombinedImageSampler, 1);
-
-    return DescriptorPool(device, 1, vk::ArrayProxy<vk::DescriptorPoolSize>(size));
-}
-
 int main()
 {
     Window window(1024, 768);
@@ -239,19 +232,21 @@ int main()
     CommandPool primaryBufferPool(device, true, true, device.getIndexFamillyQueue());
     std::shared_ptr<DeviceAllocator> deviceAllocator(std::make_shared<DeviceAllocator>(device, 1 << 24));
     CommandBufferSubmitter commandBufferSubmitter(device, primaryBufferPool, 1);
-    Transferer imageTransfer(device, 0, 1 << 21, deviceAllocator, commandBufferSubmitter);
+    Transferer imageTransfer(0, 1 << 21, deviceAllocator, commandBufferSubmitter);
 
     RenderPassTriangle renderPass(device);
     SwapchainKHR swapchainKHR(device, instance.getSurfaceKHR(), renderPass);
 
-    DescriptorPool descriptorPool = createDescriptorPool(device);
+    DescriptorPool descriptorPool;
 
     Sampler sampler(device, 1.0);
     Image image; ImageView imageView;
 
-    Image::createImageFromPath("../texture.jpg", image, imageView, imageTransfer, deviceAllocator);
+    Image::createImageFromPath("../texture.jpg", image, imageView, imageTransfer);
 
-    PipelineLayoutTriangle pipelineLayout = PipelineLayoutTriangle(device, descriptorPool, imageView, sampler);
+    vk::DescriptorSet descriptorSet;
+
+    PipelineLayoutTriangle pipelineLayout = PipelineLayoutTriangle(device, descriptorPool, descriptorSet, imageView, sampler);
     PipelineTriangle pipeline(device, renderPass, pipelineLayout);
 
     CommandPool drawBufferPool(device, false, false, device.getIndexFamillyQueue());
@@ -264,7 +259,6 @@ int main()
     std::vector<Fence> fences;
 
     commandBufferSubmitter.submit();
-    commandBufferSubmitter.waitAll();
 
     for(int i = 0; i < swapchainKHR.getImageCount(); ++i)
         fences.push_back(Fence(device, true));
@@ -287,7 +281,7 @@ int main()
             drawBufferPool.reset(false);
 
             for(auto i = 0u; i < swapchainKHR.getImageCount(); ++i)
-                buildDrawCommandBuffer(drawBuffers[i], pipeline, swapchainKHR, renderPass, i);
+                buildDrawCommandBuffer(drawBuffers[i], pipeline, swapchainKHR, renderPass, descriptorSet, i);
         }
 
         // We get the next index and ask for signaling the imageAvailableSemaphore
