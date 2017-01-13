@@ -1,8 +1,17 @@
 #include "descriptorsetlayout.hpp"
 
 DescriptorSetLayout::DescriptorSetLayout(const Device &device, vk::DescriptorSetLayoutCreateInfo info) :
-    VkResource(device) {
+    VkResource(device),
+    mDescriptorTypes(std::make_shared<std::unordered_map<vk::DescriptorType, unsigned, DescriptorTypeHash>>())
+{
     m_descriptorSetLayout = device.createDescriptorSetLayout(info);
+
+    for(auto i(0u); i < info.bindingCount; ++i)
+        (*mDescriptorTypes)[info.pBindings[i].descriptorType] += info.pBindings[i].descriptorCount;
+}
+
+std::unordered_map<vk::DescriptorType, unsigned, DescriptorTypeHash> DescriptorSetLayout::getDescriptorTypes() const {
+    return *mDescriptorTypes;
 }
 
 DescriptorSetLayout::~DescriptorSetLayout() {

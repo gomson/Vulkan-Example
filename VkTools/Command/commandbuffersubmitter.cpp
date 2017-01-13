@@ -1,4 +1,5 @@
 #include "commandbuffersubmitter.hpp"
+#include <iterator>
 
 CommandBufferSubmitter::CommandBufferSubmitter(const Device &device, CommandPool &commandPool, uint32_t numberCommandBuffers) :
     mDevice(std::make_shared<Device>(device)),
@@ -33,8 +34,7 @@ vk::CommandBuffer CommandBufferSubmitter::createCommandBuffer(ObserverCommandBuf
     if(*mCommandBufferIndex >= (*mCommandBuffers)[*mCurrentBatch].size()) {
         auto buffers = mCommandPool->allocate(vk::CommandBufferLevel::ePrimary, *mNumberCommandBufferToAllocate);
 
-        for(auto &b : buffers)
-            (*mCommandBuffers)[*mCurrentBatch].emplace_back(b);
+        std::copy(buffers.begin(), buffers.end(), std::back_inserter((*mCommandBuffers)[*mCurrentBatch]));
     }
 
     if(observer != nullptr)

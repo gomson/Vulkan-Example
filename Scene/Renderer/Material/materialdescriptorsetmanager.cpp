@@ -3,13 +3,6 @@
 #define SET_BY_POOL 32
 #define MATERIAL_BY_BUFFER 32
 
-static std::vector<vk::DescriptorPoolSize> materialDescriptorPoolSizes() {
-    return std::vector<vk::DescriptorPoolSize>{
-        vk::DescriptorPoolSize(vk::DescriptorType::eUniformBuffer, 1),
-        vk::DescriptorPoolSize(vk::DescriptorType::eCombinedImageSampler, 1)
-    };
-}
-
 MaterialDescriptorSetManager::MaterialDescriptorSetManager(Device &device, Transferer &transferer) :
     mDevice(std::make_shared<Device>(device)),
     mTransferer(std::make_shared<Transferer>(transferer)),
@@ -31,7 +24,7 @@ vk::DescriptorSet MaterialDescriptorSetManager::allocate() {
         if(pool.isOneSetAvailable())
             return pool.allocate();
 
-    mPools->emplace_back(*mDevice, SET_BY_POOL, materialDescriptorPoolSizes(), *mDescriptorSetLayout);
+    mPools->emplace_back(*mDevice, SET_BY_POOL, *mDescriptorSetLayout);
     return allocate();
 }
 
