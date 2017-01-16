@@ -13,7 +13,7 @@ void RenderingStep::resize(uint32_t width, uint32_t height, std::shared_ptr<Abst
     for(auto &framebuffer : *mFrameBuffers)
         framebuffer = RenderingFrameBuffer(*mDevice, width, height, *mRenderPass,
                                            allocator);
-    mStaticGeometryStep->compileScene(*mFrameBuffers);
+//    mStaticGeometryStep->compileScene(*mFrameBuffers);
 }
 
 std::vector<CompleteFrameBuffer> RenderingStep::getFramebuffer() const {
@@ -21,10 +21,11 @@ std::vector<CompleteFrameBuffer> RenderingStep::getFramebuffer() const {
 }
 
 void RenderingStep::execute(uint32_t index) {
+    mStaticGeometryStep->compileScene(*mFrameBuffers, index);
     vk::CommandBufferBeginInfo beginInfo(vk::CommandBufferUsageFlagBits::eOneTimeSubmit, nullptr);
 
     std::vector<vk::ClearValue> clears;
-    std::array<float, 4> values{{0.f, 0.f, 0.f, 1.f}};
+    std::array<float, 4> values{{0.f, 0.f, 1.f, 1.f}};
     clears.emplace_back(vk::ClearColorValue(values));
     clears.emplace_back(vk::ClearDepthStencilValue(1.f, 0));
 

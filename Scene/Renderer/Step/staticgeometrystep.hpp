@@ -12,7 +12,7 @@ class StaticGeometryStep
 public:
     StaticGeometryStep(Device &device, RenderingPass &renderpass, Transferer &transferer, DescriptorSetLayout materialLayout);
 
-    void compileScene(std::vector<CompleteFrameBuffer> framebuffer);
+    void compileScene(std::vector<CompleteFrameBuffer> const &framebuffer, uint32_t index);
 
     vk::CommandBuffer getCommandBuffer(uint32_t index) const;
 
@@ -29,7 +29,7 @@ private:
     std::shared_ptr<RenderingPass> mRenderingPass;
     std::shared_ptr<Transferer> mTransferer;
     std::shared_ptr<StaticGeometryPipeline> mPipeline;
-    std::shared_ptr<CommandPool> mCommandPool = std::make_shared<CommandPool>(*mDevice, false, false, mDevice->getIndexFamillyQueue());
+    std::shared_ptr<CommandPool> mCommandPool = std::make_shared<CommandPool>(*mDevice, true, true, mDevice->getIndexFamillyQueue());
 
     std::shared_ptr<Buffer> mVbo = std::make_shared<Buffer>(*mDevice, vk::BufferUsageFlagBits::eVertexBuffer | vk::BufferUsageFlagBits::eTransferDst | vk::BufferUsageFlagBits::eTransferSrc, 1 << 16, mTransferer->getAllocator(), true);
     std::shared_ptr<Buffer> mIbo = std::make_shared<Buffer>(*mDevice, vk::BufferUsageFlagBits::eIndexBuffer | vk::BufferUsageFlagBits::eTransferDst | vk::BufferUsageFlagBits::eTransferSrc, 1 << 16, mTransferer->getAllocator(), true);
@@ -37,7 +37,7 @@ private:
     uint32_t mNumberIndices = 0;
     uint32_t mNumberVertices = 0;
 
-    std::shared_ptr<std::vector<vk::CommandBuffer>> mCommandBuffer;
+    std::shared_ptr<std::vector<vk::CommandBuffer>> mCommandBuffer = std::make_shared<std::vector<vk::CommandBuffer>>();
 
     std::shared_ptr<Node> mRootNode;
 };
