@@ -15,10 +15,9 @@ DescriptorPool::DescriptorPool(const Device &device, uint32_t number,
                 number, poolSizes.size(), poolSizes.data());
 
     m_descriptorPool = device.createDescriptorPool(createInfo);
-
-    std::vector<vk::DescriptorSetLayout> layouts(number, descriptorSetLayout);
+    std::vector<vk::DescriptorSetLayout> layouts(number, *mDescriptorSetLayout);
     vk::DescriptorSetAllocateInfo allocateInfo(*this, number, layouts.data());
-    *mDescriptorSets = device.allocateDescriptorSets(allocateInfo);
+    *mDescriptorSets = mDevice->allocateDescriptorSets(allocateInfo);
 }
 
 DescriptorPool &DescriptorPool::operator=(DescriptorPool descriptorPool) {
@@ -42,6 +41,7 @@ bool DescriptorPool::isOneSetAvailable() const {
 
 void DescriptorPool::reset() {
     mDevice->resetDescriptorPool(m_descriptorPool);
+    *mNumberDescriptorSetAllocated = 0;
 }
 
 DescriptorPool::~DescriptorPool() {

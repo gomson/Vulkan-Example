@@ -10,6 +10,15 @@ DescriptorSetLayout::DescriptorSetLayout(const Device &device, vk::DescriptorSet
         (*mDescriptorTypes)[info.pBindings[i].descriptorType] += info.pBindings[i].descriptorCount;
 }
 
+DescriptorSetLayout &DescriptorSetLayout::operator =(DescriptorSetLayout descriptorSetLayout) {
+    using std::swap;
+    swap(static_cast<VkResource&>(descriptorSetLayout), static_cast<VkResource&>(*this));
+    swap(static_cast<vk::DescriptorSetLayout&>(descriptorSetLayout), static_cast<vk::DescriptorSetLayout&>(*this));
+    swap(descriptorSetLayout.mDescriptorTypes, mDescriptorTypes);
+    return *this;
+}
+
+
 std::unordered_map<vk::DescriptorType, unsigned, DescriptorTypeHash> DescriptorSetLayout::getDescriptorTypes() const {
     return *mDescriptorTypes;
 }
